@@ -1,0 +1,115 @@
+---
+title: "Analysing the effects of climate change and forest disturbance on vegetation dynamics in the boreal forest"
+author: "Theresa Meier, 25.04.2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+***
+
+## Exploratory Analysis: FPCA for PFT *other Conifers* with disturbances between 2015 and 2040
+
+***
+Patches which face a disturbance between the years **2015** and **2040** are the basis for this analysis. As a first step in the exploratory analysis, the data is represented as functions by means of a b-spline basis equivalently as for PFT *Tundra*, i.e. b-splines of order 6, penalizing the third derivative with a penalization parameter $\lambda = 1$.
+
+### Basis Representation - other Conifers
+
+Figure 1 shows the chosen basis representation for *other Conifers*.
+
+![**Figure 1:**  Smoothed basis representation for PFT other Conifers and all four scenarios.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/PCA_otherC_1.png)
+
+***
+
+<!-- As a second step, data registration is considered. Unfortunately, the function `landmarkreg` (package `fda`) is not available, so no landmark registration is possible without self implementation. Thus, the curves are being registered with function `register.fd` which is not based on landmarks but on aligning with the mean function. As stated by Ramsay et al. (2009), this type of registration should usually be conducted after landmark registration. Figure 2 shows the registered curves for *other Conifers*. -->
+
+<!-- ![**Figure 2:**  Smoothed basis representation for other Conifers and all four scenarios with registration  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/PCA_otherC_1_registered.png) -->
+
+<!-- *** -->
+
+<!-- The smoothed fit is almost only affected at the boarders of the study period, where a weird and unexplainable scattering is detectable. -->
+
+<!-- *** -->
+
+### Principal Component Analysis - other Conifers
+To further analyze the data, a FPCA is run for each of the four scenarios and each of the five PFTs separately. Again, let's take a look at the two principal components for each scenario of PFT *other Conifers*. Figure 2 shows the principal components.
+
+![](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/otherC/PCA_control_126_otherC_1_unrotated.png)
+
+![**Figure 2:**  First two principal components for each scenario for PFT *other Conifers* ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/otherC/PCA_370_585_otherC_1_unrotated.png)
+
+***
+
+For Tundra, we could see huge differences between the Control scenario and the climate scenario. Here however, the first principal components for all four scenarios are pretty similar and all reflect the same patterns: high values in the first PC stand for much higher values of above ground carbon than the mean after the 10 first years of the considered time span and vice versa for low values. The second principal component mainly reflects lower values as the mean for higher PC2 scores until a break point and then higher values than the mean, vice versa for lower values of PC2. Note that the time point of the change differs among the scenarios and that this effect is reversed for the control scenario! 
+
+*** 
+
+<!-- #### With registration -->
+
+<!-- Figure 4 shows the two principal components for each scenario for the registered curves. -->
+
+<!-- ![](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/registered/otherC/PCA_control_126_otherC_1_registered.png) -->
+
+<!-- ![**Figure 4:**  First two principal components for each scenario for PFT *other Conifers* for registered B-spline respresentation. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/registered/otherC/PCA_370_585_otherC_1_registered.png) -->
+
+<!-- *** -->
+
+<!-- The first principal component is hardly affected by the registration, only at the end of the study period the interpretation changes its sign. The second principal component is now driven by two cutting points, which change the interpretation completely. A similar pattern is present in the PFT *Needleleaf Evergreen* and *Pioneering Needleleaf*. Note that now, the positive and negative effects are all the same for all four scenarios, i.e. the signs have changed for the control. -->
+
+<!-- *** -->
+
+#### With VARIMAX rotation
+
+For a better understanding and an easier interpretation of the principal components, a VARIMAX rotation is applied. This rotation algorithm may reveal more meaningful components of variation in the data (Ramsay et al. (2009)).
+
+Figure 3 shows the VARIMAX rotated first and second principal components for each scenario.
+
+![](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/varimax/otherC/PCA_control_126_otherC_1_varimax.png)
+
+![**Figure 3:**  First two principal components for each scenario for PFT *other Conifers* with VARIMAX rotation. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/varimax/otherC/PCA_370_585_otherC_1_varimax.png)
+
+
+***
+
+Here, an interesting development is present: for the control and the SSP1-RSP2.6 scenario the first component nearly stays unchanged with only small changes at the end of the time span. For the two more drastic scenarios however, the first principal component covers now a shift with high PC2 values indicating a higher share than the mean until the year 2060 and a smaller share in the remaining time (and vice versa for lower PC2 values). For the second principal component, mainly the crossing point changes in comparison to the unrotated one.
+
+***
+
+### Cluster detection: PC1 vs. PC2 - other Conifers
+
+In order to detect possible clusters in the data, i.e. the share of above ground carbon may behave in similar ways for several grid points, the two first principal components are plotted against each other for all considered cases: unrotated (Figure 4) and VARIMAX rotated (Figure 5). The color reflects a rough classifying into regions, here continents.
+
+![**Figure 4:**  First principal component vs. second principal component for each scenario for PFT *other Conifers*. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/otherC/PC1_vs_PC2_otherC_1_unrotated.png)
+
+***
+
+In Figure 4, no clear clustering pattern is visible. In total, the scores are rather similar among all scenarios.
+
+<!-- *** -->
+<!-- ![**Figure 7:**   First registered principal component vs. second registered principal component for each scenario for PFT *other Conifers*. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/registered/otherC/PC1_vs_PC2_otherC_1_registered.png) -->
+
+<!-- *** -->
+
+<!-- For *other Conifers*, the registration has no effect in terms of cluster formation. -->
+
+***
+
+![**Figure 5:**  First VARIMAX rotated component vs. second VARIMAX rotated component for each scenario for PFT *other Conifers* ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/varimax/otherC/PC1_vs_PC2_otherC_1_varimax.png)
+
+***
+
+Rotation does not lead to a substantial difference in PC scores for *other Conifers*. This was already indicated in Figure 3 as the PCs hardly change in comparison to the unrotated ones.
+
+
+## Spatial Distribution visualized in world maps
+
+In order to get a better understanding of the spatial component of the data, Figure 6 shows how the portion of above ground carbon from year 0 to 100 after disturbance develop in each grid cell (patch 1). 
+
+![**Figure 6:** Spatial distribution of the portion of above ground carbon after distrubance for each scenario for PFT *Other Conifers*. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/Maps/gif_otherC.gif)
+
+
+***
+
+We can clearly see smaller differences between the scenarios and the considered regions. The more drastic the warming scenario, the less other Conifers is present. 
