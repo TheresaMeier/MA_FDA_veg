@@ -1,0 +1,318 @@
+---
+title: "Analysing the effects of climate change and forest disturbance on vegetation dynamics in the boreal forest"
+author: "Theresa Meier, 02.05.2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+***
+
+## Exploratory Analysis: Clustering of the PCA scores
+
+***
+
+In order to find similar behavior and patterns in the data, the principal component scores derived from univariate FPCAs for each scenario and each PFT are clustered with a 4-means algorithm. The data used to cluster consists of 10 PC scores - the first two components for each of the five PFTs. The resulting four clusters are rather unbalanced as the table above indicates:
+
+```{r echo=FALSE, results='asis'}
+setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
+source("Scripts/MA_FDA_veg/01_Description/utils.R")
+library(knitr)
+scenarios = c("picontrol", "ssp126", "ssp370", "ssp585")
+
+df = as.data.frame(rbind("Cluster 1" = c(99,99,147,64), "Cluster 2" = c(161,95,203,244), "Cluster 3" = c(90,87,35,115), "Cluster 4" = c(84,161,77,42)))
+colnames(df) = long_names_scenarios(scenarios)
+kable(df, caption = "Number of curves in each cluster")
+```
+
+***
+
+Interestingly, the two most drastic scenarios are dominated by two large clusters, while the scenarios *Control* and *SSP1-RCP2.6* are more balanced with only one dominating cluster.
+
+
+In the following, for each PFT the four clusters are portrayed.
+
+***
+
+### **Clusters -  PFT *Tundra***
+
+At first, let's take a look at PFT *Tundra*. Figure 1 shows the first two principal components plotted against each other for each scenario, colors are indicating the cluster.
+
+***
+
+![**Figure 1:** PC 1 vs. PC 2 for *Tundra* and all four scenarios.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/Tundra/PC1_vs_PC2_Tundra_1_clustered.png)
+
+***
+
+The clustering is slightly detectable but the visual clusters are not met entirely.
+
+Figure 2 shows the clustered curves for scenario *Control* for each cluster. The color indicates the cluster and the dark curves represent the mean functions.
+
+***
+
+![**Figure 2:**  Clustered curves for scenario *Control* and PFT *Tundra*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/Tundra/Cluster_4-means_picontrol_Tundra_1.png)
+
+***
+
+We can see clearly some grouping structure here: cluster 4 represent all the grid cells with a high share of Tundra throughout the whole time period while cluster 2 represents those curves with a rather high peak. The differences between the other two clusters are less pronounced.
+
+Figure 3 shows the equivalent plot for scenario *SSP1-RCP2.6*:
+
+***
+
+![**Figure 3:**  Clustered curves for scenario *SSP1-RCP2.6* and PFT *Tundra*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/Tundra/Cluster_4-means_ssp126_Tundra_1.png)
+
+***
+
+Here, cluster 2 reflects (among others) grid cells with a lower peak in share of above ground carbon than the other three clusters. Besides that, no clear patterns are visible. For scenario *SSP3-RCP7.0* in Figure 4, another pattern is present in the clusters: cluster 3 represents those grid cells with a sharp decrease in portion, while cluster 1 represents the opposite. The two other clusters mainly focus on the height of the peak.
+
+***
+
+![**Figure 4:**  Clustered curves for scenario *SSP3-RCP7.0* and PFT *Tundra*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/Tundra/Cluster_4-means_ssp370_Tundra_1.png)
+
+
+***
+
+Finally, Figure 5 shows the clustering for scenario *SSP5-RCP8.5*. The patterns are pretty similar with cluster 4 representing the sharpest decreases. Note that only clusters 1 and 4 represent the grid cells with lower peak.
+
+***
+
+![**Figure 5:**  Clustered curves for scenario *SSP5-RCP8.5* and PFT *Tundra*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/Tundra/Cluster_4-means_ssp585_Tundra_1.png)
+
+***
+
+In total, for Tundra, there is a light grouping detectable in the data.
+
+***
+
+### **Clusters - *Needleleaf Evergreen***
+
+Now, let's take a look at PFT *Needleleaf Evergreen*. Figure 6 shows the first two principal components plotted against each other:
+
+***
+
+![**Figure 6:** PC 1 vs. PC 2 for *Needleleaf Evergreen* and all four scenarios.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/BNE/PC1_vs_PC2_BNE_1_clustered.png)
+
+***
+
+In contrast to *Tundra*, now the clustering is clearly visible. The more drastic the warming scenario, the less overlap exist among the clusters.
+
+Figure 7 shows the clustering for the *Control* scenario. Here, the clustering is clearly present: Cluster 2 represents grid cells with a rather high share of *Needleleaf Evergreen*, while cluster 1 represents grid cells with low shares. The third and forth cluster cover the functions in between.
+
+***
+
+![**Figure 7:** Clustered curves for scenario *Control* and PFT *Needleleaf Evergreen*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/BNE/Cluster_4-means_picontrol_BNE_1.png)
+
+***
+
+Figure 8 shows the equivalent plot for scenario *SSP1-RCP2.6*. Here, the grouping structure is even more apparent: the dominating cluster 4 represents curves with a high share of *Needleleaf Evergreen*, while clusters 1, 2 and 3 represent grid cells with a low to mediate share.
+
+***
+
+![**Figure 8:** Clustered curves for scenario *SSP1-RCP2.6* and PFT *Needleleaf Evergreen*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/BNE/Cluster_4-means_ssp126_BNE_1.png)
+
+***
+
+In Figure 9, the same pattern in visible for scenario *SSP3-RCP7.0*, with clusters 2, 3 and 4 representing low shares and cluster 1 those with high shares.
+
+***
+
+![**Figure 9:** Clustered curves for scenario *SSP3-RCP7.0* and PFT *Needleleaf Evergreen*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/BNE/Cluster_4-means_ssp370_BNE_1.png)
+
+***
+
+Finally, Figure 10 shows the equivalent plot for scenario *SSP5-RCP8.5*. Again, the one of the dominating clusters (cluster 3) represent high shares of above ground carbon while cluster 1, 2 and 4 represent low shares.
+
+***
+
+![**Figure 10:** Clustered curves for scenario *SSP5-RCP8.5* and PFT *Needleleaf Evergreen*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/BNE/Cluster_4-means_ssp585_BNE_1.png)
+
+***
+
+In summary, the clusters a highly driven by the share of *Needleleaf Evergreen*. See the summary at the end of this document for a detailed description.
+
+***
+  
+### **Clusters - *Pioneering Broadleaf***
+  
+Figure 11 shows a plot of the first two principal components for each scenario. Again, a clear grouping is present in the data.
+
+***
+
+![**Figure 11:** PC 1 vs. PC 2 for *Pioneering Broadleaf* and all four scenarios.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/IBS/PC1_vs_PC2_IBS_1_clustered.png)
+
+***
+
+Figure 12 shows the clustered curves for scenario *Control*. Cluster 1 is driven by grid cells with a (very) high share of *Pioneering Broadleaf*. Cluster 2 and 4 cover all grid cells with rather low shares, the mean functions hardly vary from zero. Cluster 3 represents all functions in between. 
+
+***
+
+![**Figure 12:** Clustered curves for scenario *Control* and PFT *Pioneering Broadleaf*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/IBS/Cluster_4-means_picontrol_IBS_1.png)
+
+***
+
+Figure 13 shows the equivalent plot for scenario *SSP1-RCP2.6*. Here, two clusters represent high shares (cluster 1 and 4), while cluster 2 reflects mediate shares of above ground carbon. The dominating cluster 4 covers all grid cells with a very low share of *Pioneering Broadleaf*.
+
+***
+  
+  ![**Figure 13:** Clustered curves for scenario *SSP1-RCP2.6* and PFT *Pioneering Broadleaf*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/IBS/Cluster_4-means_ssp126_IBS_1.png)
+
+***
+  
+For scenario *SSP3-RCP7.0* depicted in Figure 14, cluster 2 and 4 represent grid cells with a high share of above ground carbon, but at other time points: cluster 4 covers those with a less steep increase. Cluster 1 reflects curves which are near zero for most of the time span and cluster 3 covers thise with a mediate peak in the beginning and a fast decrease afterwards.
+
+***
+  
+  ![**Figure 14:** Clustered curves for scenario *SSP3-RCP7.0* and PFT *Pioneering Broadleaf*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/IBS/Cluster_4-means_ssp370_IBS_1.png)
+
+***
+  
+  
+Also for the most drastic scenario *SSP5-RCP8.5* depicted in Figure 15, the same pattern is present: now, clusters 1 and 2 represent high shares while clusters 3 and 4 reflect lower shares. Similar to above, cluster 4 covers the curves with a peak in ethe beginning of the study period, while cluster three covers those with a peak in the later years.
+
+***
+
+  ![**Figure 15:** Clustered curves for scenario *SSP5-RCP8.5* and PFT *Pioneering Broadleaf*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/IBS/Cluster_4-means_ssp585_IBS_1.png)
+
+***
+
+In total, the clusters are very much affected by PFT *Pioneering Broadleaf*.
+
+***
+  
+### **Clusters - *other Conifers***
+  
+As for the other PFTs, Figure 16 shows the first two principal components plotted against each other for each scenario. Similar to *Tundra*, the grouping structure is less clear, but still visible.
+
+***
+
+  ![**Figure 16:** PC 1 vs. PC 2 for *other Conifers* and all four scenarios.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/otherC/PC1_vs_PC2_otherC_1_clustered.png)
+
+***
+
+Figure 17 shows the clustered curves for scenario *Control*. Cluster 3 represents the grid cells with a high share of above ground carbon, while the other three clusters - looking at the mean functions - mainly differ in terms of the peak.
+
+***
+
+![**Figure 17:** Clustered curves for scenario *Control* and PFT *other Conifers*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/otherC/Cluster_4-means_picontrol_otherC_1.png)
+
+***
+
+For scenario *SSP1-RCP2.7* depicted in Figure 18 another pattern is apparent: cluster 4 reflects higher shares of *other Conifers*, while cluster 1 and 3 cover those grid cells with a small peak in the beginning of the time span.
+
+***
+  
+  ![**Figure 18:** Clustered curves for scenario *SSP1-RCP2.6* and PFT *other Conifers*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/otherC/Cluster_4-means_ssp126_otherC_1.png)
+
+***
+  
+Figure 19 shows the equivalent plot for scenario *SSP3-RCP7.0*. Again, one cluster represents higher shares (cluster 1), while clusters 2 and 3 represent those curves with a peak in the beginning.
+
+***
+
+  ![**Figure 19:** Clustered curves for scenario *SSP3-RCP7.0* and PFT *other Conifers*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/otherC/Cluster_4-means_ssp370_otherC_1.png)
+
+***
+  
+And the same holds true for the most drastic scenario *SSP5-RCP8.5* visualized in Figure 20, now with clusters 2 and 4 representing the functions with a peak in the beginning and cluster 3 covering the highest shares of above ground carbon.
+
+In total, the share of *other Conifers* is moderately affecting the clustering.
+
+***
+
+  ![**Figure 20:** Clustered curves for scenario *SSP5-RCP8.5* and PFT *other Conifers*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/otherC/Cluster_4-means_ssp585_otherC_1.png)
+  
+***
+
+### **Clusters - *Temperate Broadleaf***
+  
+For the fifth and last PFT *Temperate Broadleaf*, let's again take a look at the first principal components depicted in Figure 21.
+
+***
+
+  ![**Figure 21:** PC 1 vs. PC 2 for *Temperate Broadleaf* and all four scenarios.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/TeBS/PC1_vs_PC2_TeBS_1_clustered.png)
+
+***
+
+Despite the lack of data (especially in the *Control* scenario), some grouping becomes apparent.
+
+Figure 22 shows the clustering for *Control*. Since only a few curves are unequal to zero in each cluster, no valid interpretation is possible.
+
+***
+
+![**Figure 22:** Clustered curves for scenario *Control* and PFT *Temperate Broadleaf*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/TeBS/Cluster_4-means_picontrol_TeBS_1.png)
+
+***
+
+
+In comparison to Figure 22, the two warming scenarios, depicted in Figure 23 (*SSP1-RCP2.6*) and Figure 24 (*SSP3-RCP7.0*) are both dominated by one cluster covering most of the non-zero curves, namely cluster 2 and cluster 3, respectively.
+  
+  ![**Figure 23:** Clustered curves for scenario *SSP1-RCP2.6* and PFT *Temperate Broadleaf*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/TeBS/Cluster_4-means_ssp126_TeBS_1.png)
+
+***
+  
+  ![**Figure 24:** Clustered curves for scenario *SSP3-RCP7.0* and PFT *Temperate Broadleaf*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/TeBS/Cluster_4-means_ssp370_TeBS_1.png)
+
+***
+  
+Figure 25 shows the clusters for scenario *SSP5-RCP8.5*. Here, the data situation is better, since there is a higher share of *Temperate Broadleaf* in general. We can see that cluster 4 reflects the grid cells with a higher share of above ground carbon. Note that cluster 4 is the smallest of all clusters.
+
+***
+
+  ![**Figure 25:** Clustered curves for scenario *SSP5-RCP8.5* and PFT *Temperate Broadleaf*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/unrotated/Clustering/PCs/TeBS/Cluster_4-means_ssp585_TeBS_1.png)
+  
+***
+  
+In summary, the PFT *Temperate Broadleaf* marginally affects the clustering.
+
+***
+
+## Summary
+
+To conclude and bring together all the results, here, the effects of the PFTs on the clusters are summarized for each scenario.
+
+**Control:**
+
+- **Cluster 1:** is driven by high shares of *Pioneering Broadleaf*, moderate shares of *other Conifers* and low shares of *Tundra*, and *Needleleaf Evergreen*.
+
+- **Cluster 2:** is driven by high shares of high shares of *Needleleaf Evergreen*, moderate shares of *Tundra* and *other Conifers* and of near-zero shares of **Pioneering Broadleaf*
+
+- **Cluster 3:** is driven by high shares of *other Conifers* and by moderate shares of *Tundra*, *Needleleaf Evergreen* and *Pioneering Broadleaf*.
+
+- **Cluster 4:** is driven by high shares of *Tundra*, moderate shares of *Needleleaf Evergreen* and low shares of *Pioneering Broadleaf* and *other Conifers*.
+
+**SSP1-RCP2.6:**
+
+- **Cluster 1:** is driven by high shares of *Pioneering Broadleaf* and low shares of *Needleleaf Evergreen* and *other Conifers*.
+
+- **Cluster 2:** is driven by high shares of *Temperate Broadleaf* and moderate shares of *Needleleaf Evergreen*, *other Conifers* and *Pioneering Broadleaf*
+
+- **Cluster 3:** is driven by high shares of *Pioneering Broadleaf* and low shares of *Needleleaf Evergreen* and *other Conifers*.
+
+- **Cluster 4:** is driven by high shares of *Needleleaf Evergreen* and *other Conifers* and near-zero shares of *Pioneering Broadleaf*.
+
+**SSP3-RCP7.0:**
+
+- **Cluster 1:** is driven by high shares of *Needleleaf Evergreen* and *other Conifers* and low shares of *Pioneering Broadleaf*
+
+- **Cluster 2:** is driven by high shares of *Pioneering Broadleaf* and low shares of *Needleleaf Evergreen* and *other Conifers*.
+
+- **Cluster 3:** is driven high shares of *Temperate Broadleaf*, by moderate shares of *Pioneering Broadleaf* and *other Conifers* and low shares of *Needleleaf Evergreen* and *Tundra*
+
+- **Cluster 4:** is driven by high shares of *other Conifers* and moderate shares of *Needleleaf Evergreen* and *Pioneering Broadleaf*
+
+**SSP5-RCP8.5:**
+
+- **Cluster 1:** is driven by moderate shares of *Needleleaf Evergreen*, *Pioneering Broadleaf* and *other Conifers*.
+
+- **Cluster 2:** is driven by high shares of *Pioneering Broadleaf*, moderate shares of *Needleleaf Evergreen* and low shares of *other Conifers*.
+
+- **Cluster 3:** is driven by high shares of *Needleleaf Evergreen* and *other Conifers* and low shares of *Pioneering Broadleaf*
+
+- **Cluster 4:** is driven by high shares of *Temperate Broadleaf*, moderate shares of *Pioneering Broadleaf* and low shares of *Needleleaf Evergreen* and *other Conifers*.
+
+In total, the clusters are especially influenced by PFTs *Needleleaf Evergreen*, *Pioneering Broadleaf* and *other Conifers*.
+
+***
