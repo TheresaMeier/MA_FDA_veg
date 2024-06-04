@@ -757,11 +757,12 @@ calcMFPCA <- function(N, p, Bchol, M, type, weights, npc, argvals, uniBasis, fit
               functions = multiFunData(eFunctions),
               scores = scores,
               vectors = vectors,
-              normFactors = normFactors)
+              normFactors = normFactors,
+              uniBasis = uniBasis)
 
   # calculate truncated Karhunen-Loeve representation (no mean here)
   if(fit)
-    res$fit <- multivExpansion(multiFuns = res$functions, scores = scores)
+    res$fit <- multivExpansion(multiFuns = res$functions, scores = scores, argvals = res$functions$argvals)
 
   return(res)
 }

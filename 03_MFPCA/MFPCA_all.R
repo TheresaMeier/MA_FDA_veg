@@ -56,6 +56,7 @@ palette_450 <- unique(all_colors[1:470])
 pal <- colorRampPalette(palette_450)
 
 #######################
+# Create funData object 
 if(createFunData){
   for (scen in scenarios){
     print(paste("Start with scenario", long_names_scenarios(scen)))
@@ -75,12 +76,18 @@ if(createFunData){
   funData_tmp = funData(argvals = list(1:126, 1:5), X = d_all)
   
   funData_all = multiFunData(funData_tmp)
-  saveRDS(funData_all, "Scripts/FPCA/FdObjects/funData_all_1803.rds")
+  saveRDS(funData_all, "Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_all_1803.rds")
+  saveRDS(funData_tmp, "Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_tmp_1803.rds")
+  
   
   print("... all done.")
 }
 
+# Run MFPCA
 if (runMFPCA){
+  funData_all = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_all_1803.rds")
+  funData_tmp = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_tmp_1803.rds")
+  
   for (iYear in c(5,seq(10,120,by=10),126)){
     funData_iYear = funData_all
     funData_iYear@.Data[[1]]@argvals[[1]] = c(1:iYear)
@@ -90,22 +97,23 @@ if (runMFPCA){
     funData_tmp_iYear@argvals[[1]] = c(1:iYear)
     funData_tmp_iYear@X = funData_tmp_iYear@X[,c(1:iYear),]
     
-    MFPCA_iYear = MFPCA2(funData_iYear, M=M, uniExpansions = list(list(type = "given", funData_tmp_iYear, ortho = TRUE)), fit = FALSE, approx.eigen = FALSE)
-    saveRDS(MFPCA_iYear, paste0("Scripts/FPCA/FdObjects/MFPCA_all_1803_noApprox_allEVs_", iYear,".rds"))
+    MFPCA_iYear = MFPCA2(funData_iYear, M=M, uniExpansions = list(list(type = "given", funData_tmp_iYear, ortho = TRUE)), fit = TRUE, approx.eigen = FALSE)
+    saveRDS(MFPCA_iYear, paste0("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/MFPCA_all_1803_noApprox_allEVs_", iYear,".rds"))
+    assign(paste0("MFPCA_", iYear), MFPCA_iYear)
     print(paste("... year", iYear, "done."))
   }
   
 }
 
 # Get multiFunData objects
-funData_all = readRDS("Scripts/MA_FDA_veg/FPCA/FdObjects/funData_all_1803.rds")
+funData_all = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_all_1803.rds")
 
 # Get MFPCA results
 # MFPCA_all = readRDS("Scripts/FPCA/FdObjects/MFPCA_all_1803.rds")
-MFPCA_all = readRDS("Scripts/MA_FDA_veg/FPCA/FdObjects/MFPCA_all_1803_noApprox_allEVs_126.rds")
+MFPCA_all = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/MFPCA_all_1803_noApprox_allEVs_126.rds")
 
 for (iYear in c(5,seq(10,120,by=10),126)){
-  assign(paste0("MFPCA_", iYear), readRDS(paste0("Scripts/MA_FDA_veg/FPCA/FdObjects/MFPCA_all_1803_noApprox_allEVs_", iYear, ".rds")))
+  assign(paste0("MFPCA_", iYear), readRDS(paste0("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/MFPCA_all_1803_noApprox_allEVs_", iYear, ".rds")))
 }
 
 # Compute WCSS for different values of k
@@ -114,7 +122,7 @@ wcss <- sapply(1:10, function(k) {
 })
 
 # Save elbow plot as pdf
-pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/pdf/clusters/elbow_plot_", pid, ".pdf"), width = 12, height = 8)
+pdf(paste0("Scripts/Plots/MFPCA/Clustrers/pdf/elbow_plot_", pid, ".pdf"), width = 12, height = 8)
 par(mfrow = c(1,1))
 # Plot the elbow curve
 plot(1:10, wcss, type = "b", pch = 19, frame = TRUE, 
@@ -129,7 +137,7 @@ abline(v = 1:10, lty = 3, col = "gray")
 dev.off()
 
 # Save it as png
-png(paste0("Scripts/Plots/FPCA/PCs_", start_year, "_", end_year, "/MFPCA/mfpca_all/png/clusters/elbow_plot_", pid, ".png"), width = 1200, height = 800)
+png(paste0("Scripts/Plots/MFPCA/Clustrers/pdf/elbow_plot_", pid, ".png"), width = 1200, height = 800)
 par(mfrow = c(1, 1))
 
 # Plot the elbow curve
@@ -160,7 +168,9 @@ plot_data_all = as.data.frame(scores) %>%
 right_order_all = c(4,2,1,3)
 plot_data_all$Cluster = right_order_all[plot_data_all$Cluster]
 
-write.table(plot_data_all, "Scripts/MA_FDA_veg/FPCA/plot_data/plot_data_all.txt", row.names = TRUE, col.names = TRUE)
+write.table(plot_data_all, "Scripts/Plots/MFPCA/plot_data/plot_data_all.txt", row.names = TRUE, col.names = TRUE)
+
+############################## Temporal Clustering #############################
 
 for (iYear in c(5,seq(10,120,by=10),126)){
   set.seed(1)
@@ -180,7 +190,7 @@ for (iYear in c(5,seq(10,120,by=10),126)){
            # scenario = c(rep("Control", dim(d_picontrol)[1]),rep("SSP1-RCP2.6", dim(d_ssp126)[1]),rep("SSP3-RCP7.0", dim(d_ssp370)[1]),rep("SSP5-RCP8.5", dim(d_ssp585)[1])))
             scenario = c(rep("Control", 434),rep("SSP1-RCP2.6", 442),rep("SSP3-RCP7.0", 462),rep("SSP5-RCP8.5", 465)))
 
-  assign(paste0("plot_data_", iYear), plot_data_iYear)
+  assign(paste0("plot_data_", iYear), plot_data_iYear)  
 }
 
 # Resort clusters if needed
@@ -252,8 +262,47 @@ for (scen in scenarios){
 
 plot_grid(sankey_plot_picontrol_sorted, sankey_plot_ssp126_sorted, sankey_plot_ssp370_sorted, sankey_plot_ssp585_sorted, nrow = 2)
 
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/pdf/clusters/clusters_with_years_",pid,".pdf"), width = 15, height = 10)
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/png/clusters/clusters_with_years_",pid,".png"), width = 15, height = 10)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/clusters_with_years_",pid,".pdf"), width = 15, height = 10)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/clusters_with_years_",pid,".png"), width = 15, height = 10)
+
+
+# Check Adjusted Rand Index (ARI) for Cluster consistency:
+library(mclust)
+adjusted_rand_for_consecutive_columns <- function(df) {
+  n <- ncol(df)
+  results <- numeric(n - 1)  # to store results
+  for (i in 1:(n - 1)) {
+    results[i] <- adjustedRandIndex(df[[i]], df[[i + 1]])
+  }
+  return(results)
+}
+
+ari_values <- data.frame(
+  Year = rep(c(5, seq(10, 120, by=10), 126)[-1], 4),  # Exclude the first year as ARI is calculated between consecutive years
+  ARI = c(
+    round(adjusted_rand_for_consecutive_columns(sankey_data_picontrol), 2),
+    round(adjusted_rand_for_consecutive_columns(sankey_data_ssp126), 2),
+    round(adjusted_rand_for_consecutive_columns(sankey_data_ssp370), 2),
+    round(adjusted_rand_for_consecutive_columns(sankey_data_ssp585), 2)
+  ),
+  Scenario = rep(c("picontrol", "ssp126", "ssp370", "ssp585"), each = 13)
+)
+
+ari_values$Scenario = long_names_scenarios(ari_values$Scenario)
+
+ggplot(ari_values, aes(x = Year, y = ARI, color = Scenario)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  geom_hline(yintercept = 1, color = "darkgrey", size = 0.5) +
+  labs(title = "Adjusted Rand Index (ARI) Over Time for Different Scenarios",
+       x = "Years after disturbance",
+       y = "Adjusted Rand Index (ARI)",
+       color = "Scenario") +
+  theme_bw() + theme(text = element_text(size = 10),plot.title = element_text(size = 10, face = "bold",hjust = 0.5)) +
+  scale_x_continuous(breaks = c(5, seq(10, 120, by=10), 126)[-1])
+
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/ARI_clusters_with_years_",pid,".pdf"), width = 15, height = 10)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/ARI_clusters_with_years_",pid,".png"), width = 15, height = 10)
 
 
 ####################### Get temporal cluster description #######################
@@ -306,8 +355,8 @@ ggplot(d_pft) +
   theme_bw() + theme(plot.title = element_text(hjust = .5)) +
   ggtitle("Cluster-wise mean share of above ground carbon over time")
 
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/pdf/clusters/cluster_means_with_years_",pid,".pdf"), width = 15, height = 10)
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/png/clusters/cluster_means_with_years_",pid,".png"), width = 15, height = 10)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/cluster_means_with_years_",pid,".pdf"), width = 15, height = 10)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/cluster_means_with_years_",pid,".png"), width = 15, height = 10)
 
 
 ################## Cluster description for the whole time span ##################
@@ -343,8 +392,8 @@ ggplot(d_plot) +
   theme_bw() + theme(plot.title = element_text(hjust = .5)) +
   ggtitle("Cluster-wise mean share of above ground carbon over time")
 
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/pdf/clusters/cluster_means_per_cluster_",pid,".pdf"), width = 15, height = 10)
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/png/clusters/cluster_means_per_cluster_",pid,".png"), width = 15, height = 10)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/cluster_means_per_cluster_",pid,".pdf"), width = 15, height = 10)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/cluster_means_per_cluster_",pid,".png"), width = 15, height = 10)
 
 
 
@@ -363,8 +412,8 @@ ggplot(d_plot) +
   ggtitle("PFT-wise mean share of above ground carbon over time")
 
 
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/pdf/clusters/cluster_means_per_PFT_",pid,".pdf"), width = 15, height = 10)
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/png/clusters/cluster_means_per_PFT_",pid,".png"), width = 15, height = 10)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/cluster_means_per_PFT_",pid,".pdf"), width = 15, height = 10)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/cluster_means_per_PFT_",pid,".png"), width = 15, height = 10)
 
 
 
@@ -384,8 +433,8 @@ g1 = ggplot(plot_data_all) +
   theme_bw() +
   theme(text = element_text(size = 10),plot.title = element_text(size = 10, face = "bold",hjust = 0.5))
 
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/pdf/PC1vsPC2/PC1_vs_PC2_",pid,"_clustered_all.pdf"), plot = g1, width = 7, height = 4.5)
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/png/PC1vsPC2/PC1_vs_PC2_",pid,"_clustered_all.png"), plot = g1, width = 7, height = 4.5)
+ggsave(paste0("Scripts/Plots/MFPCA/PC1vsPC2/pdf/PC1_vs_PC2_",pid,"_clustered_all.pdf"), plot = g1, width = 7, height = 4.5)
+ggsave(paste0("Scripts/Plots/MFPCA/PC1vsPC2/png/PC1_vs_PC2_",pid,"_clustered_all.png"), plot = g1, width = 7, height = 4.5)
 
 
 
@@ -399,33 +448,147 @@ g2 = ggplot(plot_data_all) +
   theme_bw() +
   theme(text = element_text(size = 10),plot.title = element_text(size = 10, face = "bold",hjust = 0.5))
 
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/pdf/PC1vsPC2/PC1_vs_PC2_",pid,"_scenarios.pdf"), plot = g2, width = 7, height = 4.5)
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/png/PC1vsPC2/PC1_vs_PC2_",pid,"_scenarios.png"), plot = g2, width = 7, height = 4.5)
+ggsave(paste0("Scripts/Plots/MFPCA/PC1vsPC2/pdf/PC1_vs_PC2_",pid,"_scenarios.pdf"), plot = g2, width = 7, height = 4.5)
+ggsave(paste0("Scripts/Plots/MFPCA/PC1vsPC2/png/PC1_vs_PC2_",pid,"_scenarios.png"), plot = g2, width = 7, height = 4.5)
 
 
 plot_grid(g1,g2)
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/pdf/PC1vsPC2/PC1_vs_PC2_",pid,"_scenarios_clustered_all.pdf"), width = 14, height = 7)
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/png/PC1vsPC2/PC1_vs_PC2_",pid,"_scenarios_clustered_all.png"), width = 14, height = 7)
+ggsave(paste0("Scripts/Plots/MFPCA/PC1vsPC2/pdf/PC1_vs_PC2_",pid,"_scenarios_clustered_all.pdf"), width = 14, height = 7)
+ggsave(paste0("Scripts/Plots/MFPCA/PC1vsPC2/png/PC1_vs_PC2_",pid,"_scenarios_clustered_all.png"), width = 14, height = 7)
 
 ######################### Plot principal components ############################
 
+# Plot mean function
+pdf("Scripts/Plots/MFPCA/PCs/pdf/mean.pdf", width = 15, height = 5)
+plot(MFPCA_all$meanFunction, xlab = paste("Year after Disturbance"), xlim = c(1,100), ylab = "PFT", ylim = c(0.5,5.5), cex = 1.5, main = "Mean function - MFPCA")
+dev.off()
+
+png("Scripts/Plots/MFPCA/PCs/png/mean.png", width = 1500, height = 500)
+plot(MFPCA_all$meanFunction, xlab = paste("Year after Disturbance"), xlim = c(1,100), ylab = "PFT", ylim = c(0.5,5.5), cex = 1.5, main = "Mean function - MFPCA")
+dev.off()
+
+
+# Plot deviations from the mean for each PC
 for (iPC in (1:M)){
-  #pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/pdf/PCs/PCs_PC", iPC, ".pdf"), width = 15, height = 10)
-  pdf("test.pdf", width = 15, height = 10)
-  plot.MFPCAfit2D(MFPCA_all, combined = FALSE, plotPCs = 1, xlab = paste("Year after Disturbance"), xlim = c(0,100), ylab = "PFT", ylim = c(0.5,5.5), cex = 1.5)
+  pdf(paste0("Scripts/Plots/MFPCA/PCs/pdf/PCs_PC", iPC, ".pdf"), width = 15, height = 10)
+  plot.MFPCAfit2D(MFPCA_all, combined = FALSE, plotPCs = iPC, xlab = paste("Year after Disturbance"), xlim = c(1,100), ylab = "PFT", ylim = c(0.5,5.5), cex = 1.5)
   mtext(paste("PC", iPC, "for all four scenarios"), side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1.1)
   
   dev.off()
   
-  png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/png/PCs/PCs_PC", iPC, ".png"), width = 1500, height = 1000)
-  plot.MFPCAfit2D(MFPCA_all, combined = FALSE, plotPCs = iPC, xlab = paste("Year after Disturbance"), xlim = c(0,100), ylab = "PFT", ylim = c(0.5,5.5), makeZlim = makeZlim, cex = 1.5)
+  png(paste0("Scripts/Plots/MFPCA/PCs/png/PCs_PC", iPC, ".png"), width = 1500, height = 1000)
+  plot.MFPCAfit2D(MFPCA_all, combined = FALSE, plotPCs = iPC, xlab = paste("Year after Disturbance"), xlim = c(1,100), ylab = "PFT", ylim = c(0.5,5.5), cex = 1.5)
   mtext(paste("PC", iPC, "for all four scenarios"), side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1.1)
   
   dev.off()
 }
 
 ######################## Plot reconstructed curves #############################
-# not implemented in the package
+# not implemented in the package, but self-implemented:
+
+bounds = t(matrix(c(1,434,434+1,434+1+441,434+1+441+1, 434+1+441+1+461, 434+1+441+1+461+1, 434+1+441+1+461+1+464), ncol = 4))
+
+for (scen in scenarios){
+  i = 1
+  j = 1
+  print(scen)
+  for (pft in pfts){
+    print(pft)
+    # Get original curves
+    ## Import fd object
+    fit.scen.pft = readRDS(paste0("Scripts/MA_FDA_veg/02_FPCA/FdObjects/Wfdobj_", scen, "_", pft, ".rds"))
+    fit.scen.pft_exp = fit.scen.pft
+    fit.scen.pft_exp$Wfdobj$coefs = exp(fit.scen.pft_exp$Wfdobj$coefs)
+    
+    ## Run FPCA
+    
+    fit.pca = pca.fd(fit.scen.pft_exp$Wfdobj,3)
+    
+    for (nPC in 2:10){
+      print(nPC)
+      funs = MFPCA_all$functions[[1]]
+      funs@X = funs@X[1:nPC,,]
+      univExp <- univExpansion(type = "default", 
+                               scores = as.matrix(MFPCA_all$normFactors[1:nPC]/MFPCA_all$scores[,1:nPC]),
+                               argvals = MFPCA_all$functions[[1]]@argvals,
+                               functions = funs)
+      
+      multiExp = multiFunData(univExp) + MFPCA_all$meanFunction
+      
+      # plot(multiExp@.Data[[1]]@X[180,,1], type = "l", ylim = c(0,1), xlim = c(0,100))
+      
+      ## Plot reconstructed and original fits for using 2,...,10 PCs
+  
+      # Save as pdf
+      pdf(paste0("Scripts/Plots/MFPCA/Reconstruction/pdf/", scen, "/", pft, "/MFPCA_reconstruct_",scen, "_",pft, "_",pid,"_",nPC,"PCs.pdf"), width = 10, height = 4.5)
+      par(mfrow = c(1,2))
+      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = paste0("Original fit - ", long_names_scenarios(scen), " - ", long_names_pfts(tolower(pft))))
+      for (icurve in 1:nrow(fit.pca$scores)){
+        lines(fit.scen.pft_exp$Wfdobj[icurve], col = pal(450)[icurve])
+      }
+      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = paste("Reconstructed fit using", nPC, "PCs"))
+      
+      for (icurve in bounds[j,1]:bounds[j,2]){
+        lines(multiExp@.Data[[1]]@X[icurve,,i], col = pal(450)[icurve])
+      }
+      dev.off()
+      
+      # Save single plots
+      pdf(paste0("Scripts/Plots/MFPCA/Reconstruction/pdf/", scen, "/", pft, "/MFPCA_reconstruct_",scen, "_",pft, "_",pid,"_orig.pdf"), width = 10, height = 8)
+      par(mfrow = c(1,1))
+      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = paste0("Original fit - ", long_names_scenarios(scen), " - ", long_names_pfts(tolower(pft))))
+      for (icurve in 1:nrow(fit.pca$scores)){
+        lines(fit.scen.pft_exp$Wfdobj[icurve], col = pal(450)[icurve])
+      }
+      dev.off()
+      
+      pdf(paste0("Scripts/Plots/MFPCA/Reconstruction/pdf/", scen, "/", pft, "/MFPCA_reconstruct_",scen, "_",pft, "_",pid,"_",nPC,"PCs_only.pdf"), width = 10, height = 8)
+      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = paste("Reconstructed fit using", nPC, "PCs"))
+      
+      for (icurve in bounds[j,1]:bounds[j,2]){
+        lines(multiExp@.Data[[1]]@X[icurve,,i], col = pal(450)[icurve])
+      }
+      dev.off()
+      
+      # # Save as png
+      png(paste0("Scripts/Plots/MFPCA/Reconstruction/png/", scen, "/", pft, "/MFPCA_reconstruct_",scen, "_",pft, "_",pid,"_",nPC,"PCs.png"), width = 1000, height = 450)
+      
+      par(mfrow = c(1,2))
+      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = paste0("Original fit - ", long_names_scenarios(scen), " - ", long_names_pfts(tolower(pft))))
+      for (icurve in 1:nrow(fit.pca$scores)){
+        lines(fit.scen.pft_exp$Wfdobj[icurve], col = pal(450)[icurve])
+      }
+      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = paste("Reconstructed fit using", nPC, "PCs"))
+      
+      for (icurve in bounds[j,1]:bounds[j,2]){
+        lines(multiExp@.Data[[1]]@X[icurve,,i], col = pal(450)[icurve])
+      }
+      dev.off()
+      
+      # Save single plots
+      png(paste0("Scripts/Plots/MFPCA/Reconstruction/png/", scen, "/", pft, "/MFPCA_reconstruct_",scen, "_",pft, "_",pid,"_orig.png"), width = 1000, height = 800)
+      par(mfrow = c(1,1))
+      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = paste0("Original fit - ", long_names_scenarios(scen), " - ", long_names_pfts(tolower(pft))))
+      for (icurve in 1:nrow(fit.pca$scores)){
+        lines(fit.scen.pft_exp$Wfdobj[icurve], col = pal(450)[icurve])
+      }
+      dev.off()
+      
+      png(paste0("Scripts/Plots/MFPCA/Reconstruction/png/", scen, "/", pft, "/MFPCA_reconstruct_",scen, "_",pft, "_",pid,"_",nPC,"PCs_only.png"), width = 1000, height = 800)
+      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = paste("Reconstructed fit using", nPC, "PCs"))
+      
+      for (icurve in bounds[j,1]:bounds[j,2]){
+        lines(multiExp@.Data[[1]]@X[icurve,,i], col = pal(450)[icurve])
+      }
+      dev.off()
+      
+    }
+    
+    i = i+1
+  }
+  j = j+1
+}
+
 
 ######################### Plot Cluster Assignments #############################
 ## Import fd objects
@@ -460,7 +623,7 @@ for (scen in scenarios){
   for (pft in pfts){
     
     # Save as pdf
-    pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/pdf/clusters/Cluster_", k,"-means_",scen, "_",pft, "_",pid, ".pdf"),width = 10, height = 10)
+    pdf(paste0("Scripts/Plots/MFPCA/Clusters/pdf/Cluster_", k,"-means_",scen, "_",pft, "_",pid, ".pdf"),width = 10, height = 10)
     par(mfrow = c(2,2))
     plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey", main = paste("Cluster 1 -", sum(cluster1), "of", sum(scores[,M+1] == 1), "grid cells"), lty = 1)
     lines(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster1_", scen,"_", pft))], col = "#F8766D", lwd = 3, lty = 1)
@@ -482,7 +645,7 @@ for (scen in scenarios){
     dev.off()
     
     # Save as png
-    png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/png/clusters/Cluster_", k,"-means_",scen, "_",pft, "_",pid, ".png"),width = 1000, height = 1000)
+    png(paste0("Scripts/Plots/MFPCA/Clusters/png/Cluster_", k,"-means_",scen, "_",pft, "_",pid, ".png"),width = 1000, height = 1000)
     par(mfrow = c(2,2))
     plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey", main = paste("Cluster 1 -", sum(cluster1), "of", sum(scores[,M+1] == 1), "grid cells"), lty = 1)
     lines(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster1_", scen,"_", pft))], col = "#F8766D", lwd = 3, lty = 1)
@@ -508,11 +671,11 @@ for (scen in scenarios){
 }
 ############################ Screeplot of MFPCA ################################
 
-pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/pdf/screeplot_",pid, ".pdf"),width = 10, height = 8)
+pdf(paste0("Scripts/Plots/MFPCA/PCs/pdf/screeplot_",pid, ".pdf"),width = 10, height = 8)
 screeplot(MFPCA_all, main = "Screeplot of MFPCA", cex = 1.3)
 dev.off()
 
-png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/MFPCA/mfpca_all/png/screeplot_",pid, ".png"),width = 1000, height = 800)
+png(paste0("Scripts/Plots/MFPCA/PCs/png/screeplot_",pid, ".png"),width = 1000, height = 800)
 screeplot(MFPCA_all, main = "Screeplot of MFPCA", cex = 1.3)
 dev.off()
 
