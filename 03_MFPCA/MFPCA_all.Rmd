@@ -46,7 +46,7 @@ kable(df)
 ```
 Note that this time, the values truly represent the accounted variation, not only the relative part. Obviously, the first principal component already captures nearly all of the variability in the data. The screeplot depicted in Figure 1 underlines this result:
 
-![**Figure 1:** Screeplot of the MFPCA. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/screeplot_1.png)
+![**Figure 1:** Screeplot of the MFPCA. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/PCs/png/screeplot_1.png)
 
 ***
 
@@ -54,41 +54,41 @@ In order to investigate changes in the values of the first 10 principal componen
 
 ***
 
-![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/PCs/PCs_PC1.png)
+![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/PCs/png/PCs_PC1.png)
 
 ***
 
-![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/PCs/PCs_PC2.png)
+![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/PCs/png/PCs_PC2.png)
 
 ***
 
-![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/PCs/PCs_PC3.png)
+![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/PCs/png/PCs_PC3.png)
 
 ***
 
-![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/PCs/PCs_PC4.png)
+![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/PCs/png/PCs_PC4.png)
 
 ***
 
-![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/PCs/PCs_PC5.png)
+![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/PCs/png/PCs_PC5.png)
 
 ***
 
-![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/PCs/PCs_PC6.png)
+![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/PCs/png/PCs_PC6.png)
 
 ***
 
-![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/PCs/PCs_PC7.png)
+![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/PCs/png/PCs_PC7.png)
 
 ***
 
-![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/PCs/PCs_PC8.png)
+![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/PCs/png/PCs_PC8.png)
 
 ***
 
-![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/PCs/PCs_PC9.png)
+![ ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/PCs/png/PCs_PC9.png)
 
-![**Figure 2:** First 10 principal components. Here, the y-axis represents *PFTs* (*Tundra* (1), *Needleleaf Evergreen* (2), *Pioneering Broadlef* (3), *other Conifers* (4) and *Temperate Broadleaf* (5)), and the x-axis the *Year after Disturbance*. The first row of each PC indicates positive deviations to the mean while the second row visualizes negative deviations to the mean. Note that these plots only cover differences, not the mean itself.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/PCs/PCs_PC10.png)
+![**Figure 2:** First 10 principal components. Here, the y-axis represents *PFTs* (*Tundra* (1), *Needleleaf Evergreen* (2), *Pioneering Broadlef* (3), *other Conifers* (4) and *Temperate Broadleaf* (5)), and the x-axis the *Year after Disturbance*. The first row of each PC indicates positive deviations to the mean while the second row visualizes negative deviations to the mean. Note that these plots only cover differences, not the mean itself.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/PCs/png/PCs_PC10.png)
 
 ***
 
@@ -105,7 +105,7 @@ So in total, high values in the first component indicate a lower share of *Needl
 ## Clustering
 In order to group the curves into clusters, the first 10 PC scores are clustered by a k-means algorithm. In order to evaluate an appropriate number of clusters, Figure 3 shows an elbow plot for $k \in \{1,...,10\}$:
 
-![**Figure 3:** Elbow plot for k-means clustering for $k \in \{1,...,10\}$. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/elbow_plot_1.png)
+![**Figure 3:** Elbow plot for k-means clustering for $k \in \{1,...,10\}$. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/elbow_plot_1.png)
 
 ***
 
@@ -128,7 +128,7 @@ In order to get a first impression of the cluster-specific PFT-behavior, Figure 
 
 ***
 
-![**Figure 4:** PFT-wise mean shares of above ground carbon over time. Note that the values are averages over locations and clusters. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/cluster_means_per_PFT_1.png)
+![**Figure 4:** PFT-wise mean shares of above ground carbon over time. Note that the values are averages over locations and clusters. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/cluster_means_per_PFT_1.png)
 
 ***
 
@@ -140,7 +140,7 @@ Theory in science of vegetation states that the vegetation composition after dis
 
 ***
 
-![**Figure 5:** Cluster composition over years after disturbance for all four scenarios. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/clusters_with_years_1.png)
+![**Figure 5:** Cluster composition over years after disturbance for all four scenarios. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/clusters_with_years_1.png)
 
 ***
 
@@ -152,7 +152,7 @@ In order to further investigate these patterns, Figure 6 shows the cluster-wise 
 
 ***
 
-![**Figure 6:** Cluster-wise mean shares of above ground carbon over different time spans. Note that the values are averages over locations and clusters. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/cluster_means_with_years_1.png)
+![**Figure 6:** Cluster-wise mean shares of above ground carbon over different time spans. Note that the values are averages over locations and clusters. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/cluster_means_with_years_1.png)
 
 ***
 
@@ -165,7 +165,7 @@ We can see that (depending on the PFT), the dominance of specific PFTs establish
 Figure 7 shows the first two principal components plotted against each other. The colors in the left plot visualize the clusters, while in the right plot, they indicate the scenario.
 
 
-![**Figure 7:** PC 1 vs. PC 2 for the MFPCA for grid cells which are disturbed in one scenario only. The left plot shows the resulting clusters using a 4-means clustering algorithm, the right plot shows the scenarios. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/PC1vsPC2/PC1_vs_PC2_1_scenarios_clustered_all.png)
+![**Figure 7:** PC 1 vs. PC 2 for the MFPCA for grid cells which are disturbed in one scenario only. The left plot shows the resulting clusters using a 4-means clustering algorithm, the right plot shows the scenarios. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/PC1vsPC2/png/PC1_vs_PC2_1_scenarios_clustered_all.png)
 
 ***
 
@@ -181,7 +181,7 @@ Figure 8 shows the four clusters for scenario *Control*. Cluster 3 represents th
 
 ***
 
-![**Figure 8:** Clustered curves for scenario *Control* and PFT *Tundra*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_picontrol_Tundra_1.png)
+![**Figure 8:** Clustered curves for scenario *Control* and PFT *Tundra*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_picontrol_Tundra_1.png)
 
 ***
 
@@ -189,7 +189,7 @@ Next, Figure 9 shows the equivalent plot for scenario *SSP1-RCP2.6*. Here, the t
 
 ***
 
-![**Figure 9:** Clustered curves for scenario *SSP1-RCP2.6* and PFT *Tundra*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_ssp126_Tundra_1.png)
+![**Figure 9:** Clustered curves for scenario *SSP1-RCP2.6* and PFT *Tundra*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_ssp126_Tundra_1.png)
 
 ***
 
@@ -197,7 +197,7 @@ Figure 10 (scenario *SSP3-RCP7.0*) shows a similar pattern: there are no substan
 
 ***
 
-![**Figure 10:** Clustered curves for scenario *SSP3-RCP7.0* and PFT *Tundra*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_ssp370_Tundra_1.png)
+![**Figure 10:** Clustered curves for scenario *SSP3-RCP7.0* and PFT *Tundra*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_ssp370_Tundra_1.png)
 
 
 ***
@@ -205,7 +205,7 @@ Finally, Figure 11 shows the clustered curves for the most drastic scenario *SSP
 
 ***
 
-![**Figure 11:**  Clustered curves for scenario *SSP5-RCP8.5* and PFT *Tundra*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_ssp585_Tundra_1.png)
+![**Figure 11:**  Clustered curves for scenario *SSP5-RCP8.5* and PFT *Tundra*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_ssp585_Tundra_1.png)
 
 ***
   
@@ -218,7 +218,7 @@ In total, PFT *Tundra* seems not to be dominant for cluster building.
 Second, let's take a look at PFT *Needleleaf Evergreen*. Figure 12 shows the clustered curves for scenario *Control*:
 
 ***
-  ![**Figure 12:** Clustered curves for scenario *Control* and PFT *Needleleaf Evergreen*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_picontrol_BNE_1.png)
+  ![**Figure 12:** Clustered curves for scenario *Control* and PFT *Needleleaf Evergreen*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_picontrol_BNE_1.png)
 
 ***
   
@@ -228,7 +228,7 @@ Figure 13 shows the equivalent plot for scenario *SSP1-RCP2.6*:
 
 ***
 
-  ![**Figure 13:** Clustered curves for scenario *SSP1-RCP2.6* and PFT *Needleleaf Evergreen*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_ssp126_BNE_1.png)
+  ![**Figure 13:** Clustered curves for scenario *SSP1-RCP2.6* and PFT *Needleleaf Evergreen*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_ssp126_BNE_1.png)
 
 ***
 
@@ -236,7 +236,7 @@ Here, the same patterns as for the *Control* scenario become apparent: the two d
 
 ***
 
-  ![**Figure 14:** Clustered curves for scenario *SSP3-RCP7.0* and PFT *Needleleaf Evergreen*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_ssp370_BNE_1.png)
+  ![**Figure 14:** Clustered curves for scenario *SSP3-RCP7.0* and PFT *Needleleaf Evergreen*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_ssp370_BNE_1.png)
 
 ***
 
@@ -244,7 +244,7 @@ Figure 14 and Figure 15 visualize the clustering for scenarios *SSP3-RCP7.0* and
 
 ***
   
-  ![**Figure 15:** Clustered curves for scenario *SSP5-RCP8.5* and PFT *Needleleaf Evergreen*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_ssp585_BNE_1.png)
+  ![**Figure 15:** Clustered curves for scenario *SSP5-RCP8.5* and PFT *Needleleaf Evergreen*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_ssp585_BNE_1.png)
   
 ***
 
@@ -258,7 +258,7 @@ Figure 16 shows the clustered curves for scenario *Control* and PFT *Pioneering 
 
 ***
   
-  ![**Figure 16:** Clustered curves for scenario *Control* and PFT *Pioneering Broadleaf*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_picontrol_IBS_1.png)
+  ![**Figure 16:** Clustered curves for scenario *Control* and PFT *Pioneering Broadleaf*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_picontrol_IBS_1.png)
 
 ***
 
@@ -268,7 +268,7 @@ Figure 17 shows the equivalent plot for scenario *SSP1-RCP2.6*:
 
 ***
 
-  ![**Figure 17:** Clustered curves for scenario *SSP1-RCP2.6* and PFT *Pioneering Broadleaf*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_ssp126_IBS_1.png)
+  ![**Figure 17:** Clustered curves for scenario *SSP1-RCP2.6* and PFT *Pioneering Broadleaf*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_ssp126_IBS_1.png)
 
 ***
 
@@ -276,7 +276,7 @@ The two dominant clusters 3 and 4 represent mostly very low and very high shares
 
 ***
   
-  ![**Figure 18:** Clustered curves for scenario *SSP3-RCP7.0* and PFT *Pioneering Broadleaf*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_ssp370_IBS_1.png)
+  ![**Figure 18:** Clustered curves for scenario *SSP3-RCP7.0* and PFT *Pioneering Broadleaf*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_ssp370_IBS_1.png)
 
 ***
 
@@ -284,7 +284,7 @@ Figure 18 and 19 show the dynamics for scenarios *SSP3-RCP7.0* and *SSP5-RCP8.5*
 
 ***
   
-  ![**Figure 19:** Clustered curves for scenario *SSP5-RCP8.5* and PFT *Pioneering Broadleaf*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_ssp585_IBS_1.png)
+  ![**Figure 19:** Clustered curves for scenario *SSP5-RCP8.5* and PFT *Pioneering Broadleaf*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_ssp585_IBS_1.png)
 
 ***
 
@@ -298,7 +298,7 @@ Figure 20 shows the clustering dynamics for scenario *Control* and PFT *Conifers
 
 ***
 
-  ![**Figure 20:** Clustered curves for scenario *Control* and PFT *Conifers (others)*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_picontrol_otherC_1.png)
+  ![**Figure 20:** Clustered curves for scenario *Control* and PFT *Conifers (others)*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_picontrol_otherC_1.png)
 
 ***
 
@@ -306,7 +306,7 @@ Figure 21 shows the equivalent plot for scenario *SSP1-RCP2.6*. Now, the two dom
  
 ***
   
-  ![**Figure 21:** Clustered curves for scenario *SSP1-RCP2.6* and PFT *Conifers (others)*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_ssp126_otherC_1.png)
+  ![**Figure 21:** Clustered curves for scenario *SSP1-RCP2.6* and PFT *Conifers (others)*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_ssp126_otherC_1.png)
 
 ***
   
@@ -314,12 +314,12 @@ Figure 22 and Figure 23 show the same dynamics for scenarios *SSP3-RCP7.0* and *
 
 ***
 
-  ![**Figure 22:** Clustered curves for scenario *SSP3-RCP7.0* and PFT *Conifers (others)*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_ssp370_otherC_1.png)
+  ![**Figure 22:** Clustered curves for scenario *SSP3-RCP7.0* and PFT *Conifers (others)*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.  ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_ssp370_otherC_1.png)
 
 
 ***
   
-  ![**Figure 23:** Clustered curves for scenario *SSP5-RCP8.5* and PFT *Conifers (others)*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_ssp585_otherC_1.png)
+  ![**Figure 23:** Clustered curves for scenario *SSP5-RCP8.5* and PFT *Conifers (others)*. The colored curves indicate the belonging to the respective cluster. The dark curves represent the cluster-specific mean functions.   ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_ssp585_otherC_1.png)
   
 ***
 
@@ -333,7 +333,7 @@ Lastly, let's take a look at PFT *Temperate Broadleaf*. Figure 24 shows the clus
 
 ***
 
-  ![**Figure 24:** *Temperate Broadleaf* - Control. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_picontrol_TeBS_1.png)
+  ![**Figure 24:** *Temperate Broadleaf* - Control. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_picontrol_TeBS_1.png)
 
 ***
 
@@ -341,7 +341,7 @@ In the *Control* scenario, only a few grid cells have a non-zero share of above 
 
 ***
   
-  ![**Figure 25:** *Temperate Broadleaf* - SSP1-RCP2.6 ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_ssp126_TeBS_1.png)
+  ![**Figure 25:** *Temperate Broadleaf* - SSP1-RCP2.6 ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_ssp126_TeBS_1.png)
 
 ***
 
@@ -349,7 +349,7 @@ Figure 25 shows the equivalent plot for scenario *SSP1-RCP2.6*. Clearly, some de
 
 ***
   
-  ![**Figure 26:** *Temperate Broadleaf* - SSP3-RCP7.0 ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_ssp370_TeBS_1.png)
+  ![**Figure 26:** *Temperate Broadleaf* - SSP3-RCP7.0 ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_ssp370_TeBS_1.png)
 
 ***
 
@@ -357,7 +357,7 @@ With increase in temperature, *Temperate Broadleaf* becomes more and more import
 
 ***
 
-  ![**Figure 27:** *Temperate Broadleaf* - SSP5-RCP8.5 ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/FPCA/PCs_2015_2040/MFPCA/mfpca_all/png/clusters/Cluster_4-means_ssp585_TeBS_1.png)
+  ![**Figure 27:** *Temperate Broadleaf* - SSP5-RCP8.5 ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/Cluster_4-means_ssp585_TeBS_1.png)
   
 ***
 
