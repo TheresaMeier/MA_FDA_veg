@@ -85,10 +85,10 @@ Figure 7 shows again the corresponding ARI values, here for the separate scenari
 
 ### Soil properties
 
-Figure 8 shows some soil properties per cluster and scenario. Note that the data is missing for scenario *SSP3-RCP7.0*.
+Figure 8 shows some soil properties per cluster and scenario.
 
 ***
 
-![**Figure 8:** Soil properties for each cluster and three scenarios. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/soil_props_1.png)
+![**Figure 8:** Soil properties for each cluster and all four scenarios. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/Clusters/png/soil_props_1.png)
 
 ***

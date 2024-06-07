@@ -15,7 +15,7 @@ library(stringr)
 library(cowplot)
 library(ggplot2)
 
-scenarios = c("picontrol", "ssp126", "ssp585")
+scenarios = c("picontrol", "ssp126", "ssp370", "ssp585")
 
 ## Load data
 pid = 1
@@ -52,7 +52,7 @@ for (scen in scenarios){
 }
 
 # Merge data sets for all scenarios
-d_all = rbind(d_picontrol_all, d_ssp126_all, d_ssp585_all)
+d_all = rbind(d_picontrol_all, d_ssp126_all, d_ssp370_all, d_ssp585_all)
 
 # Get soil factors means
 d_all_means = d_all %>%
