@@ -29,7 +29,7 @@ scenarios = c("picontrol", "ssp126", "ssp370", "ssp585")
 ## Choose parameters:
 start_year = 2015
 end_year = 2040
-pft = "TeBS"      # Choose from Tundra, BNE, IBS, otherC, TeBS
+pft = "otherC"      # Choose from Tundra, BNE, IBS, otherC, TeBS
 pid = 1           # Choose pid (int) or 'all'
 
 #######################
@@ -41,19 +41,19 @@ d_ssp126 = get_data_fpca("ssp126", start_year, end_year,pid,pft)
 d_ssp370 = get_data_fpca("ssp370", start_year, end_year,pid,pft)
 d_ssp585 = get_data_fpca("ssp585", start_year, end_year,pid,pft)
 
-## Get basis representation
+########################### Get basis representation ###########################
 
-fit.picontrol = get_basis_rep(start_year,end_year,data.matrix(d_picontrol[[1]][,-1])) 
-saveRDS(fit.picontrol, paste0("Scripts/FPCA/FdObjects/Wfdobj_picontrol_", pft, ".rds"))
+fit.picontrol = get_basis_rep(start_year,end_year,data.matrix(d_picontrol[[1]][1:100,-1])) 
+saveRDS(fit.picontrol, paste0("Scripts/MA_FDA_veg/02_FPCA/FdObjects/Wfdobj_picontrol_", pft, ".rds"))
 
-fit.ssp126 = get_basis_rep(start_year,end_year,data.matrix(d_ssp126[[1]][,-1])) 
-saveRDS(fit.ssp126, paste0("Scripts/FPCA/FdObjects/Wfdobj_ssp126_", pft, ".rds"))
+fit.ssp126 = get_basis_rep(start_year,end_year,data.matrix(d_ssp126[[1]][1:100,-1])) 
+saveRDS(fit.ssp126, paste0("Scripts/MA_FDA_veg/02_FPCA/FdObjects/Wfdobj_ssp126_", pft, ".rds"))
 
-fit.ssp370 = get_basis_rep(start_year,end_year,data.matrix(d_ssp370[[1]][,-1])) 
-saveRDS(fit.ssp370, paste0("Scripts/FPCA/FdObjects/Wfdobj_ssp370_", pft, ".rds"))
+fit.ssp370 = get_basis_rep(start_year,end_year,data.matrix(d_ssp370[[1]][1:100,-1])) 
+saveRDS(fit.ssp370, paste0("Scripts/MA_FDA_veg/02_FPCA/FdObjects/Wfdobj_ssp370_", pft, ".rds"))
 
-fit.ssp585 = get_basis_rep(start_year,end_year,data.matrix(d_ssp585[[1]][,-1])) 
-saveRDS(fit.ssp585, paste0("Scripts/FPCA/FdObjects/Wfdobj_ssp585_", pft, ".rds"))
+fit.ssp585 = get_basis_rep(start_year,end_year,data.matrix(d_ssp585[[1]][1:100,-1])) 
+saveRDS(fit.ssp585, paste0("Scripts/MA_FDA_veg/02_FPCA/FdObjects/Wfdobj_ssp585_", pft, ".rds"))
 
 # Transform the values to exp- scale for plotting
 fit.picontrol_2 = fit.picontrol
@@ -66,7 +66,7 @@ fit.ssp585_2 = fit.ssp585
 fit.ssp585_2$Wfdobj$coefs = exp(fit.ssp585_2$Wfdobj$coefs)
 
 # Plot the fits
-pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/PCA_",pft, "_",pid,".pdf"),width = 10, height = 10)
+pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/BasisRep/pdf/BasisRep_",pft, "_",pid,".pdf"),width = 10, height = 10)
 par(mfrow=c(2,2))
 plot(fit.picontrol_2$Wfdobj, main = paste("Smoothed fit - Control -", long_names_pfts(tolower(pft))), xlim = c(0,100))
 plot(fit.ssp126_2$Wfdobj, main = paste("Smoothed fit - SSP1-RSP2.6 -", long_names_pfts(tolower(pft))), xlim = c(0,100))
@@ -74,7 +74,7 @@ plot(fit.ssp370_2$Wfdobj, main = paste("Smoothed fit - SSP3-RSP7.0 -", long_name
 plot(fit.ssp585_2$Wfdobj, main = paste("Smoothed fit - SSP5-RSP8.5 -", long_names_pfts(tolower(pft))), xlim = c(0,100))
 dev.off()
 
-png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/PCA_",pft, "_",pid,".png"),width = 1000, height = 1000)
+png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/BasisRep/png/BasisRep_",pft, "_",pid,".png"),width = 1000, height = 1000)
 par(mfrow=c(2,2))
 plot(fit.picontrol_2$Wfdobj, main = paste("Smoothed fit - Control -", long_names_pfts(tolower(pft))), xlim = c(0,100))
 plot(fit.ssp126_2$Wfdobj, main = paste("Smoothed fit - SSP1-RSP2.6 -", long_names_pfts(tolower(pft))), xlim = c(0,100))
@@ -126,13 +126,14 @@ dev.off()
 # dev.off()
 
 
-## Run FPCA without registration
+###################### Run FPCA without registration ###########################
+
 picontrol.pca = pca.fd(fit.picontrol_2$Wfdobj,2)
 ssp126.pca = pca.fd(fit.ssp126_2$Wfdobj,2)
 ssp370.pca = pca.fd(fit.ssp370_2$Wfdobj,2)
 ssp585.pca = pca.fd(fit.ssp585_2$Wfdobj,2)
 
-pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/unrotated/",pft,"/PCA_",pft, "_",pid,"_unrotated.pdf",width = 10, height = 10))
+pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/FPCA/unrotated/",pft,"/pdf/PCs_",pft, "_",pid,"_unrotated.pdf"), width = 10, height = 10)
 par(mfrow = c(2,2))
 
 plot.pca.fd(picontrol.pca, xlab = "Control", xlim = c(0,100), cex.main = 0.9)
@@ -143,25 +144,25 @@ plot.pca.fd(ssp585.pca, xlab = "SSP5-RSP8.5", xlim = c(0,100), cex.main = 0.9)
 dev.off()
 
 # Save as png as well
-png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/unrotated/",pft,"/PCA_control_126_",pft, "_",pid,"_unrotated.png"),width = 1000, height = 1000)
+png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/FPCA/unrotated/",pft,"/png/PCs_control_126_",pft, "_",pid,"_unrotated.png"),width = 1000, height = 1000)
 par(mfrow = c(2,2))
 plot.pca.fd(picontrol.pca, xlab = "Control", xlim = c(0,100))
 plot.pca.fd(ssp126.pca, xlab = "SSP1-RSP2.6", xlim = c(0,100))
 dev.off()
 
-png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/unrotated/",pft,"/PCA_370_585_",pft, "_",pid,"_unrotated.png"),width = 1000, height = 1000)
+png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/FPCA/unrotated/",pft,"/png/PCs_370_585_",pft, "_",pid,"_unrotated.png"),width = 1000, height = 1000)
 par(mfrow = c(2,2))
 plot.pca.fd(ssp370.pca, xlab = "SSP3-RSP7.0", xlim = c(0,100))
 plot.pca.fd(ssp585.pca, xlab = "SSP5-RSP8.5", xlim = c(0,100))
 dev.off()
 
-# Problem: lack of interpretability --> rotate principal components with VARIMAX
+# Problem: possible lack of interpretability --> rotate principal components with VARIMAX
 picontrol.pca.varimax = varmx.pca.fd(picontrol.pca)
 ssp126.pca.varimax = varmx.pca.fd(ssp126.pca)
 ssp370.pca.varimax = varmx.pca.fd(ssp370.pca)
 ssp585.pca.varimax = varmx.pca.fd(ssp585.pca)
 
-pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/varimax/",pft,"/PCA_",pft, "_",pid,"_varimax.pdf"),width = 10, height = 10)
+pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/FPCA/VARIMAX/",pft,"/pdf/PCs_",pft, "_",pid,"_varimax.pdf"), width = 10, height = 10)
 par(mfrow = c(2,2))
 
 plot.pca.fd(picontrol.pca.varimax, xlab = "Control - rotated", xlim = c(0,100))
@@ -171,13 +172,13 @@ plot.pca.fd(ssp585.pca.varimax, xlab = "SSP5-RSP8.5 - rotated", xlim = c(0,100))
 dev.off()
 
 # Save as png as well
-png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/varimax/",pft,"/PCA_control_126_",pft, "_",pid,"_varimax.png"),width = 1000, height = 1000)
+png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/FPCA/VARIMAX/",pft,"/png/PCs_control_126_",pft, "_",pid,"_varimax.png"),width = 1000, height = 1000)
 par(mfrow = c(2,2))
 plot.pca.fd(picontrol.pca.varimax, xlab = "Control - rotated", xlim = c(0,100))
 plot.pca.fd(ssp126.pca.varimax, xlab = "SSP1-RSP2.6 - rotated", xlim = c(0,100))
 dev.off()
 
-png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/varimax/",pft,"/PCA_370_585_",pft, "_",pid,"_varimax.png"),width = 1000, height = 1000)
+png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/FPCA/VARIMAX/",pft,"/png/PCs_370_585_",pft, "_",pid,"_varimax.png"),width = 1000, height = 1000)
 par(mfrow = c(2,2))
 plot.pca.fd(ssp370.pca.varimax, xlab = "SSP3-RSP7.0 - rotated", xlim = c(0,100))
 plot.pca.fd(ssp585.pca.varimax, xlab = "SSP5-RSP8.5 - rotated", xlim = c(0,100))
@@ -212,7 +213,7 @@ dev.off()
 # plot.pca.fd(ssp585.pca.reg, xlab = "SSP5-RSP8.5 - registered", xlim = c(0,100))
 # dev.off()
 
-## Plot PC1 vs. PC2 for Clustering
+####################### Plot PC1 vs. PC2 for Clustering ########################
 
 for (scen in scenarios){
   data_loc = get(paste0("d_",scen))
@@ -235,7 +236,7 @@ for (scen in scenarios){
 
 plot_data = purrr::reduce(list(plot_data_picontrol, plot_data_ssp126, plot_data_ssp370, plot_data_ssp585), bind_rows)
 
-write.table(plot_data, file = paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/plot_data/plot_data_",pft,"_",pid))
+write.table(plot_data, file = paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/plot_data/plot_data_",pft,"_",pid, ".txt"))
 
 
 # unrotated and unregistered
@@ -251,8 +252,8 @@ ggplot(plot_data) +
   theme_bw() +
   theme(text = element_text(size = 10),plot.title = element_text(size = 10, face = "bold",hjust = 0.5))
 
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/unrotated/",pft,"/PC1_vs_PC2_",pft,"_",pid,"_unrotated.pdf"), width = 7, height = 4.5)
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/unrotated/",pft,"/PC1_vs_PC2_",pft,"_",pid,"_unrotated.png"), width = 7, height = 4.5)
+ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/FPCA/unrotated/",pft,"/pdf/PC1_vs_PC2_",pft,"_",pid,"_unrotated.pdf"), width = 7, height = 4.5)
+ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/FPCA/unrotated/",pft,"/png/PC1_vs_PC2_",pft,"_",pid,"_unrotated.png"), width = 7, height = 4.5)
   
 # with VARIMAX rotation
 ggplot(plot_data) + 
@@ -268,8 +269,8 @@ ggplot(plot_data) +
   theme(text = element_text(size = 10),plot.title = element_text(size = 10, face = "bold",hjust = 0.5))
 
 
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/varimax/",pft,"/PC1_vs_PC2_",pft,"_",pid,"_varimax.pdf"), width = 7, height = 4.5)
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/varimax/",pft,"/PC1_vs_PC2_",pft,"_",pid,"_varimax.png"), width = 7, height = 4.5)
+ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/FPCA/VARIMAX/",pft,"/pdf/PC1_vs_PC2_",pft,"_",pid,"_varimax.pdf"), width = 7, height = 4.5)
+ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/FPCA/VARIMAX/",pft,"/png/PC1_vs_PC2_",pft,"_",pid,"_varimax.png"), width = 7, height = 4.5)
 
 # 
 # for (scen in scenarios){

@@ -61,13 +61,12 @@ classify_region <- function(lat, lon) {
 
 # Get basis representation
 get_basis_rep = function(start_year, end_year, data, lambda = 1, norder = 6, nderiv = 3) {
-  dif_years = end_year - start_year
-  yearrange = seq(0,100+dif_years,by=1)
-  yearbasis = create.bspline.basis(c(0,100+dif_years), ncol(data), norder)
+  yearrange = seq(1,100,by=1)
+  yearbasis = create.bspline.basis(c(1,100), ncol(data), norder)
   
   WfdPar = fdPar(yearbasis,nderiv, lambda) # 2 means it penalizes the second derivative
   
-  yearrange.5 = c(0,yearrange[-1]-0.5)
+  yearrange.5 = c(1,yearrange[-1]-0.5)
   
   # fit = smooth.basis(yearrange.5, data, WfdPar)
   fit = smooth.pos(yearrange.5, data, WfdPar, dbglev = 1)

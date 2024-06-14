@@ -7,7 +7,7 @@
 ## Set working directory and get plotting functions
 setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
 source("Scripts/MA_FDA_veg/02_FPCA/functions.R")
-source("Scripts/MA_FDA_ve/01_Description/utils.R")
+source("Scripts/MA_FDA_veg/01_Description/utils.R")
 
 ## Load libraries
 library(duckdb)
@@ -26,23 +26,21 @@ con = dbConnect(duckdb(), dbdir = "Data/patches.duckdb", read_only = FALSE)
 dbListTables(con)
 scenarios = c("picontrol", "ssp126", "ssp370", "ssp585")
 pfts = c("Tundra", "BNE", "IBS", "otherC", "TeBS")
-#set.seed(2)
 
 ## Choose parameters:
 start_year = 2015
 end_year = 2040
-#pft = "Tundra"      # Choose from Tundra, BNE, IBS, otherC, TeBS
 pid = 1           # Choose pid (int) or 'all'
 
 #######################
 set.seed(2)
 
-png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/unrotated/Clustering/PCs/Ellbow_", k,"-means_",scen,"_",pid,".png"),width = 1000, height = 1000)
+pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/Clustering/Elbow_",pid,".pdf"), width = 10, height = 10)
 par(mfrow = c(2,2))
 ## Import fd objects
 for (scen in scenarios){
   for (pft in pfts){
-    fit.scen_pft = readRDS(paste0("Scripts/FPCA/FdObjects/Wfdobj_", scen, "_", pft, ".rds"))
+    fit.scen_pft = readRDS(paste0("Scripts/MA_FDA_veg/02_FPCA/FdObjects/Wfdobj_", scen, "_", pft, ".rds"))
     fit.scen_pft_exp = fit.scen_pft
     fit.scen_pft_exp$Wfdobj$coefs = exp(fit.scen_pft_exp$Wfdobj$coefs)
     
@@ -52,7 +50,7 @@ for (scen in scenarios){
     
     assign(paste0(scen, ".pca_", pft), scen.pca_pft)
   }
-
+  
   print("Fd objects loaded.")
   # Get scores
   scores.pca.scen <- cbind(get(paste0(scen,".pca_Tundra"))$scores,  
@@ -85,6 +83,34 @@ for (scen in scenarios){
 }
 dev.off()
 
+# Save as png as well
+set.seed(2)
+
+png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/Clustering/Elbow_",pid,".png"), width = 1000, height = 1000)
+par(mfrow = c(2,2))
+## Import fd objects
+for (scen in scenarios){
+  
+  scores.pca.scen = get(paste0("scores.pca.", scen))
+  
+  print( "Scores derived.")
+  
+  ## Clustering of the coefficients for different k
+  wcss <- sapply(1:10, function(k) {
+    kmeans(scores.pca.scen, centers = k)$tot.withinss
+  })
+  
+  # Plot the elbow curve
+  plot(1:10, wcss, type = "b", pch = 19, frame = TRUE, 
+       xlab = "Number of Clusters", ylab = "Within-cluster Sum of Squares",
+       main = long_names_scenarios(scen))
+  
+  # Add lines for visual aid
+  abline(v = 1:10, lty = 3, col = "gray")
+  mtext("Elbow Plots for k-means Clustering", side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1)
+}
+dev.off()
+
 ## Look at correlations between scores 
 library(ggcorrplot)
 
@@ -98,8 +124,8 @@ for (scen in scenarios){
 }
 
 plot_grid(g_picontrol, g_ssp126, g_ssp370, g_ssp585)
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/unrotated/Clustering/PCs/correlations_",pid,".pdf"), width = 14, height = 14)
-ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/unrotated/Clustering/PCs/correlations_",pid,".png"), width = 14, height = 14)
+ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/FPCA/unrotated/correlations_",pid,".pdf"), width = 14, height = 14)
+ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/FPCA/unrotated/correlations_",pid,".png"), width = 14, height = 14)
 
 
 ## Run k-means clustering with 4 clusters
@@ -123,7 +149,7 @@ for (scen in scenarios){
   for (pft in pfts){
 
     # Save as pdf
-    pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/unrotated/Clustering/PCs/", pft, "/Cluster_", k,"-means_",scen, "_",pft, "_",pid,".pdf"),width = 10, height = 10)
+    pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/Clustering/", pft, "/pdf/Cluster_", k,"-means_",scen, "_",pft, "_",pid,".pdf"),width = 10, height = 10)
     par(mfrow = c(2,2))
     plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey", main = paste("Cluster 1 -", sum(cluster1), "curves"), lty = 1)
     lines(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[cluster1], col = "#F8766D", lwd = 3, lty = 1)
@@ -145,7 +171,7 @@ for (scen in scenarios){
     dev.off()
 
     # Save as png
-    png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/unrotated/Clustering/PCs/", pft, "/Cluster_", k,"-means_",scen, "_",pft, "_",pid,".png"),width = 1000, height = 1000)
+    png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/Clustering/", pft, "/png/Cluster_", k,"-means_",scen, "_",pft, "_",pid,".png"),width = 1000, height = 1000)
     par(mfrow = c(2,2))
     plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey", main = paste("Cluster 1 -", sum(cluster1), "curves"), lty = 1)
     lines(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[cluster1], col = "#F8766D", lwd = 3, lty = 1)
@@ -206,9 +232,7 @@ for (pft in pfts){
     theme_bw() +
     theme(text = element_text(size = 10),plot.title = element_text(size = 10, face = "bold",hjust = 0.5))
   
-  ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/unrotated/Clustering/PCs/",pft,"/PC1_vs_PC2_",pft,"_",pid,"_clustered.pdf"), width = 7, height = 4.5)
-  ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/unrotated/Clustering/PCs/",pft,"/PC1_vs_PC2_",pft,"_",pid,"_clustered.png"), width = 7, height = 4.5)
-  
-  
+  ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/Clustering/",pft,"/pdf/PC1_vs_PC2_",pft,"_",pid,"_clustered.pdf"), width = 7, height = 4.5)
+  ggsave(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/Clustering/",pft,"/png/PC1_vs_PC2_",pft,"_",pid,"_clustered.png"), width = 7, height = 4.5)
 }
 

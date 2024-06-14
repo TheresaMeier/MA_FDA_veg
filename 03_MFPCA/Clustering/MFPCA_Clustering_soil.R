@@ -2,7 +2,7 @@
 ############################ Master's Thesis ###################################
 ################################################################################
 
-########################### Climate and Soil data ##############################
+########################### Clustering: Soil data ##############################
 
 ## Set working directory and get plotting functions
 setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
@@ -54,28 +54,6 @@ for (scen in scenarios){
 # Merge data sets for all scenarios
 d_all = rbind(d_picontrol_all, d_ssp126_all, d_ssp370_all, d_ssp585_all)
 
-# Get soil factors means
-d_all_means = d_all %>%
-  group_by(Cluster) %>%
-  summarize(mean_sand_fraction = mean(sand_fraction),
-            mean_silt_fraction = mean(silt_fraction),
-            mean_clay_fraction = mean(clay_fraction),
-            mean_bulkdensity_soil = mean(bulkdensity_soil),
-            mean_ph_soil = mean(ph_soil),
-            mean_soilcarbon = mean(soilcarbon),
-            min_sand_fraction = min(sand_fraction),
-            min_silt_fraction = min(silt_fraction),
-            min_clay_fraction = min(clay_fraction),
-            min_bulkdensity_soil = min(bulkdensity_soil),
-            min_ph_soil = min(ph_soil),
-            min_soilcarbon = min(soilcarbon),
-            max_sand_fraction = max(sand_fraction),
-            max_silt_fraction = max(silt_fraction),
-            max_clay_fraction = max(clay_fraction),
-            max_bulkdensity_soil = max(bulkdensity_soil),
-            max_ph_soil = max(ph_soil),
-            max_soilcarbon = max(soilcarbon))
-
 d_all_long_fraction = melt(setDT(d_all[,c(1:7)]), id.vars = c("Scenario", "Cluster", "Lon", "Lat"), variable.name = "property") 
 d_all_long_fraction$property = gsub("_", " ", d_all_long_fraction$property)
 d_all_long_fraction$property = gsub("sand", "Sand ", d_all_long_fraction$property)
@@ -121,5 +99,5 @@ plot_grid(
   rel_heights = c(1, 1)
 )
 
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/soil_props_",pid,".pdf"), width = 20, height = 10)
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/soil_props_",pid,".png"), width = 20, height = 10)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/soil_props_",pid,".pdf"), width = 10, height = 5)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/soil_props_",pid,".png"), width = 10, height = 5)
