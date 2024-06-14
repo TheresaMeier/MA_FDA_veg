@@ -124,8 +124,6 @@ ggplot(d_climate) +
               method = "loess", se = FALSE, linewidth = 2.5, color = "black", show.legend = FALSE) +
   geom_smooth(data = d_climate_mean, aes(x = Year, y = mean_precip, color = Scenario), 
               method = "loess", se = FALSE, linewidth = 1.5) +  
-  geom_hline(yintercept = 20, color = "black", size = 0.25, alpha = .75, lty = "dashed") +
-  geom_hline(yintercept = 30, color = "black", size = 0.25, alpha = .75, lty = "dashed") +
   scale_x_continuous(name = "Year", expand = c(0, 0), breaks = seq(2020, 2140, by = 10)) +
   scale_y_continuous(name = bquote("Yearly precipitation in kg/m"^2), expand = c(0, 0)) +
   scale_color_manual(name = "Scenario", drop = TRUE,
@@ -148,8 +146,6 @@ ggplot(d_climate) +
               method = "loess", se = FALSE, linewidth = 2.5, color = "black", show.legend = FALSE) +
   geom_smooth(data = d_climate_mean, aes(x = Year, y = mean_precip, color = Scenario), 
               method = "loess", se = FALSE, linewidth = 1.5) +  
-  geom_hline(yintercept = 20, color = "black", size = 0.25, alpha = .75, lty = "dashed") +
-  geom_hline(yintercept = 30, color = "black", size = 0.25, alpha = .75, lty = "dashed") +
   scale_x_continuous(name = "Year", expand = c(0, 0), breaks = seq(2020, 2140, by = 10)) +
   scale_y_continuous(name = bquote("Yearly precipitation in kg/m"^2), expand = c(0, 0), limits = c(500, 1000)) +
   scale_color_manual(name = "Scenario", drop = TRUE,

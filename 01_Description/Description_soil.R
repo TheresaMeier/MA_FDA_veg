@@ -25,214 +25,131 @@ for (scen in scenarios){
   d_scen_2015_2040 = fread(paste0("Data/data_", scen, "_2015_2040.csv"))
   
   d_soil_scen = d_scen_2015_2040 %>%
-    distinct(Lon,Lat,sand_fraction,silt_fraction, clay_fraction, bulkdensity_soil, ph_soil, soilcarbon)
+    distinct(Lon,Lat,sand_fraction,silt_fraction, clay_fraction, bulkdensity_soil, ph_soil, soilcarbon) %>%
+    mutate(Scenario = long_names_scenarios(scen))
   
   assign(paste0("d_soil_", scen), d_soil_scen)
-  
 }
+
+d_soil = rbind(d_soil_picontrol, d_soil_ssp126, d_soil_ssp370, d_soil_ssp585) %>%
+  distinct(Lon,Lat,sand_fraction, silt_fraction,clay_fraction,bulkdensity_soil,ph_soil,soilcarbon)
+
+d_soil_long = melt(setDT(d_soil[,c(1:5)]), id.vars = c("Lon", "Lat"), variable.name = "property")
+d_soil_long$property = gsub("_", " ", d_soil_long$property)
+d_soil_long$property = gsub("sand", "Sand ", d_soil_long$property)
+d_soil_long$property = gsub("clay", "Clay ", d_soil_long$property)
+d_soil_long$property = gsub("silt", "Silt ", d_soil_long$property)
 
 register_google(key = "AIzaSyATIWAZ4gtgJhdH6GP_E8iSubdFh6XQ32Y")
 
 # Get map
 worldmap <- get_map(location = c(lon =-4.068561, lat = 58.87355), zoom = 1)
 
-g_picontrol_sand = ggmap(worldmap) +
-  geom_point(data = d_soil_picontrol, 
-             aes(x = Lon, y = Lat, color = sand_fraction), 
+########################### Soil composition ####################################
+ggmap(worldmap) +
+  geom_point(data = d_soil_long, 
+             aes(x = Lon, y = Lat, color = value), 
              size = 1.5) +
+  facet_wrap(~ property, ncol = 1) +
   xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
-  ylab("Latitude") + theme_bw() + ggtitle("Control") +
+  ylab("Latitude") + theme_bw() + ggtitle("Soil composition for all disturbed grid cells") +
   theme(text = element_text(size = 15),
-        plot.title = element_text(size = 20, face = "bold", hjust = 0.5)) +
-  labs(color = "Sand Fraction") +
+      plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+      strip.text.x = element_text(size = 15, face = "bold", angle = 0, hjust = 0.5),
+      strip.text.y = element_text(size = 15, face = "bold", angle = 0, hjust = 0.5)) +
+  labs(color = "Fraction") +
   theme(legend.position = "right",
         legend.title = element_text(size = 15, face = "bold"),
         legend.text = element_text(size = 12)) +
-  #scale_color_gradient(low = "slateblue4", high = "firebrick1")  
-  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 0.5, limits = c(0, 1))  
+  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 0.5, limits = c(0, 1))
 
-g_ssp126_sand = ggmap(worldmap) +
-  geom_point(data = d_soil_ssp126, 
-             aes(x = Lon, y = Lat, color = sand_fraction), 
+ggsave("Scripts/Plots/Descriptive/Soil/pdf/soil_map.pdf", width = 20, height = 15)
+ggsave("Scripts/Plots/Descriptive/Soil/png/soil_map.png", width = 20, height = 15)
+
+# As boxplots
+ggplot(d_soil_long, aes(x=property, y=value)) + 
+  geom_boxplot() + theme_bw() + ylab("Fraction") + xlab("Soil component") +
+  theme(text = element_text(size = 15), 
+        plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
+        axis.text.x = element_text(angle = 30, hjust = 1)) +
+  ggtitle("Soil composition for all disturbed grid cells")
+
+ggsave("Scripts/Plots/Descriptive/Soil/pdf/soil_boxplot.pdf", width = 8, height = 6)
+ggsave("Scripts/Plots/Descriptive/Soil/png/soil_boxplot.png", width = 8, height = 6)
+
+
+################################# Bulkdensity ##################################
+
+ggmap(worldmap) +
+  geom_point(data = d_soil, 
+             aes(x = Lon, y = Lat, color = bulkdensity_soil), 
              size = 1.5) +
   xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
-  ylab("Latitude") + theme_bw() + ggtitle("SSP1-RCP2.6") +
+  ylab("Latitude") + theme_bw() + ggtitle("Bulk density for all disturbed grid cells") +
   theme(text = element_text(size = 15),
         plot.title = element_text(size = 20, face = "bold", hjust = 0.5)) +
-  labs(color = "Sand Fraction") +
+  labs(color = "Value") +
   theme(legend.position = "right",
         legend.title = element_text(size = 15, face = "bold"),
         legend.text = element_text(size = 12)) +
-  #scale_color_gradient(low = "slateblue4", high = "firebrick1")  
-  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 0.5, limits = c(0, 1))  
+  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 0.85, limits = c(0.1, 1.7))
 
-g_ssp370_sand = ggmap(worldmap) +
-  geom_point(data = d_soil_ssp370, 
-             aes(x = Lon, y = Lat, color = sand_fraction), 
+ggsave("Scripts/Plots/Descriptive/Soil/pdf/bulk_map.pdf", width = 20, height = 15)
+ggsave("Scripts/Plots/Descriptive/Soil/png/bulk_map.png", width = 20, height = 15)
+
+################################## PH value ####################################
+
+ggmap(worldmap) +
+  geom_point(data = d_soil, 
+             aes(x = Lon, y = Lat, color = ph_soil), 
              size = 1.5) +
   xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
-  ylab("Latitude") + theme_bw() + ggtitle("SSP3-RCP7.0") +
+  ylab("Latitude") + theme_bw() + ggtitle("pH value in water for all disturbed grid cells") +
   theme(text = element_text(size = 15),
         plot.title = element_text(size = 20, face = "bold", hjust = 0.5)) +
-  labs(color = "Sand Fraction") +
+  labs(color = "Value") +
   theme(legend.position = "right",
         legend.title = element_text(size = 15, face = "bold"),
         legend.text = element_text(size = 12)) +
-  #scale_color_gradient(low = "slateblue4", high = "firebrick1")  
-  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 0.5, limits = c(0, 1))  
+  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 6.4, limits = c(4.5, 8.2))
 
-g_ssp585_sand = ggmap(worldmap) +
-  geom_point(data = d_soil_ssp585, 
-             aes(x = Lon, y = Lat, color = sand_fraction), 
+ggsave("Scripts/Plots/Descriptive/Soil/pdf/ph_map.pdf", width = 20, height = 15)
+ggsave("Scripts/Plots/Descriptive/Soil/png/ph_map.png", width = 20, height = 15)
+
+################################# Soil carbon ##################################
+
+ggmap(worldmap) +
+  geom_point(data = d_soil, 
+             aes(x = Lon, y = Lat, color = soilcarbon), 
              size = 1.5) +
   xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
-  ylab("Latitude") + theme_bw() + ggtitle("SSP5-RCP8.5") +
+  ylab("Latitude") + theme_bw() + ggtitle("Organic carbon content for all disturbed grid cells") +
   theme(text = element_text(size = 15),
         plot.title = element_text(size = 20, face = "bold", hjust = 0.5)) +
-  labs(color = "Sand Fraction") +
+  labs(color = "Value") +
   theme(legend.position = "right",
         legend.title = element_text(size = 15, face = "bold"),
         legend.text = element_text(size = 12)) +
-  #scale_color_gradient(low = "slateblue4", high = "firebrick1")  
-  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 0.5, limits = c(0, 1))  
+  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 9.4, limits = c(0.5, 17.3))
 
-plot_grid(g_picontrol_sand, g_ssp126_sand, g_ssp370_sand, g_ssp585_sand, ncol = 1)
+ggsave("Scripts/Plots/Descriptive/Soil/pdf/soilcarbon_map.pdf", width = 20, height = 15)
+ggsave("Scripts/Plots/Descriptive/Soil/png/soilcarbon_map.png", width = 20, height = 15)
 
-ggsave("Scripts/Plots/Descriptive/Soil/pdf/sand.pdf", width = 20, height = 15)
-ggsave("Scripts/Plots/Descriptive/Soil/png/sand.png", width = 20, height = 15)
+# As boxplots
 
-g_picontrol_clay = ggmap(worldmap) +
-  geom_point(data = d_soil_picontrol, 
-             aes(x = Lon, y = Lat, color = clay_fraction), 
-             size = 1.5) +
-  xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
-  ylab("Latitude") + theme_bw() + ggtitle("Control") +
-  theme(text = element_text(size = 15),
-        plot.title = element_text(size = 20, face = "bold", hjust = 0.5)) +
-  labs(color = "Clay Fraction") +
-  theme(legend.position = "right",
-        legend.title = element_text(size = 15, face = "bold"),
-        legend.text = element_text(size = 12)) +
-  #scale_color_gradient(low = "slateblue4", high = "firebrick1")  
-  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 0.5, limits = c(0, 1))  
-
-g_ssp126_clay = ggmap(worldmap) +
-  geom_point(data = d_soil_ssp126, 
-             aes(x = Lon, y = Lat, color = clay_fraction), 
-             size = 1.5) +
-  xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
-  ylab("Latitude") + theme_bw() + ggtitle("SSP1-RCP2.6") +
-  theme(text = element_text(size = 15),
-        plot.title = element_text(size = 20, face = "bold", hjust = 0.5)) +
-  labs(color = "Clay Fraction") +
-  theme(legend.position = "right",
-        legend.title = element_text(size = 15, face = "bold"),
-        legend.text = element_text(size = 12)) +
-  #scale_color_gradient(low = "slateblue4", high = "firebrick1")  
-  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 0.5, limits = c(0, 1))  
-
-g_ssp370_clay = ggmap(worldmap) +
-  geom_point(data = d_soil_ssp370, 
-             aes(x = Lon, y = Lat, color = clay_fraction), 
-             size = 1.5) +
-  xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
-  ylab("Latitude") + theme_bw() + ggtitle("SSP3-RCP7.0") +
-  theme(text = element_text(size = 15),
-        plot.title = element_text(size = 20, face = "bold", hjust = 0.5)) +
-  labs(color = "Clay Fraction") +
-  theme(legend.position = "right",
-        legend.title = element_text(size = 15, face = "bold"),
-        legend.text = element_text(size = 12)) +
-  #scale_color_gradient(low = "slateblue4", high = "firebrick1")  
-  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 0.5, limits = c(0, 1))  
-
-g_ssp585_clay = ggmap(worldmap) +
-  geom_point(data = d_soil_ssp585, 
-             aes(x = Lon, y = Lat, color = clay_fraction), 
-             size = 1.5) +
-  xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
-  ylab("Latitude") + theme_bw() + ggtitle("SSP5-RCP8.5") +
-  theme(text = element_text(size = 15),
-        plot.title = element_text(size = 20, face = "bold", hjust = 0.5)) +
-  labs(color = "Clay Fraction") +
-  theme(legend.position = "right",
-        legend.title = element_text(size = 15, face = "bold"),
-        legend.text = element_text(size = 12)) +
-  #scale_color_gradient(low = "slateblue4", high = "firebrick1")  
-  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 0.5, limits = c(0, 1))  
+d_soil_long_2 = melt(setDT(d_soil[,c(1,2,6:8)]), id.vars = c("Lon", "Lat"), variable.name = "property")
+d_soil_long_2$property = ifelse(d_soil_long_2$property == "bulkdensity_soil", "Bulk density", 
+                 ifelse(d_soil_long_2$property == "ph_soil", "pH in water",
+                         ifelse(d_soil_long_2$property == "soilcarbon", "Organic carbon content", NA)))
 
 
-plot_grid(g_picontrol_clay, g_ssp126_clay, g_ssp370_clay, g_ssp585_clay, ncol = 1)
-ggsave("Scripts/Plots/Descriptive/Soil/pdf/clay.pdf", width = 20, height = 15)
-ggsave("Scripts/Plots/Descriptive/Soil/png/clay.png", width = 20, height = 15)
+ggplot(d_soil_long_2, aes(y=value)) + 
+  geom_boxplot() + facet_wrap(~property) +theme_bw() + ylab("Value") + xlab("") +
+  theme(text = element_text(size = 15), 
+        plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  ggtitle("Soil attributes")
 
-
-g_picontrol_silt = ggmap(worldmap) +
-  geom_point(data = d_soil_picontrol, 
-             aes(x = Lon, y = Lat, color = silt_fraction), 
-             size = 1.5) +
-  xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
-  ylab("Latitude") + theme_bw() + ggtitle("Control") +
-  theme(text = element_text(size = 15),
-        plot.title = element_text(size = 20, face = "bold", hjust = 0.5)) +
-  labs(color = "Silt Fraction") +
-  theme(legend.position = "right",
-        legend.title = element_text(size = 15, face = "bold"),
-        legend.text = element_text(size = 12)) +
-  #scale_color_gradient(low = "slateblue4", high = "firebrick1")  
-  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 0.5, limits = c(0, 1))  
-
-g_ssp126_silt = ggmap(worldmap) +
-  geom_point(data = d_soil_ssp126, 
-             aes(x = Lon, y = Lat, color = silt_fraction), 
-             size = 1.5) +
-  xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
-  ylab("Latitude") + theme_bw() + ggtitle("SSP1-RCP2.6") +
-  theme(text = element_text(size = 15),
-        plot.title = element_text(size = 20, face = "bold", hjust = 0.5)) +
-  labs(color = "Silt Fraction") +
-  theme(legend.position = "right",
-        legend.title = element_text(size = 15, face = "bold"),
-        legend.text = element_text(size = 12)) +
-  #scale_color_gradient(low = "slateblue4", high = "firebrick1")  
-  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 0.5, limits = c(0, 1))  
-
-
-g_ssp370_silt = ggmap(worldmap) +
-  geom_point(data = d_soil_ssp370, 
-             aes(x = Lon, y = Lat, color = silt_fraction), 
-             size = 1.5) +
-  xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
-  ylab("Latitude") + theme_bw() + ggtitle("SSP3-RCP7.0") +
-  theme(text = element_text(size = 15),
-        plot.title = element_text(size = 20, face = "bold", hjust = 0.5)) +
-  labs(color = "Silt Fraction") +
-  theme(legend.position = "right",
-        legend.title = element_text(size = 15, face = "bold"),
-        legend.text = element_text(size = 12)) +
-  #scale_color_gradient(low = "slateblue4", high = "firebrick1")  
-  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 0.5, limits = c(0, 1))  
-
-
-g_ssp585_silt = ggmap(worldmap) +
-  geom_point(data = d_soil_ssp585, 
-             aes(x = Lon, y = Lat, color = silt_fraction), 
-             size = 1.5) +
-  xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
-  ylab("Latitude") + theme_bw() + ggtitle("SSP5-RCP8.5") +
-  theme(text = element_text(size = 15),
-        plot.title = element_text(size = 20, face = "bold", hjust = 0.5)) +
-  labs(color = "Silt Fraction") +
-  theme(legend.position = "right",
-        legend.title = element_text(size = 15, face = "bold"),
-        legend.text = element_text(size = 12)) +
-  #scale_color_gradient(low = "slateblue4", medium = "white", high = "firebrick1")  
-  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 0.5, limits = c(0, 1))  
-
-plot_grid(g_picontrol_silt, g_ssp126_silt, g_ssp370_silt, g_ssp585_silt, ncol = 1)
-
-ggsave("Scripts/Plots/Descriptive/Soil/pdf/silt.pdf", width = 20, height = 15)
-ggsave("Scripts/Plots/Descriptive/Soil/png/silt.png", width = 20, height = 15)
-
-
-
+ggsave("Scripts/Plots/Descriptive/Soil/pdf/soil_attributes_boxplot.pdf", width = 8, height = 5)
+ggsave("Scripts/Plots/Descriptive/Soil/png/soil_attributes_boxplot.png", width = 8, height = 5)
