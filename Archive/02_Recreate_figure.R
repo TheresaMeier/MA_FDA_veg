@@ -1,5 +1,5 @@
 setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit") # specific working dir
-source("Scripts/Description/utils.R")
+source("Scripts/MA_FDA_veg/01_Description/utils.R")
 
 library(duckdb)
 library(tidyverse)
@@ -89,9 +89,68 @@ ggplot() +
                                "Conifers (other)" = "#56B4E9", "Tundra" = "#009E73")) +
   ggtitle("Recovery trajectories with disturbances between 2015 and 2040") +
   add_common_layout() +
-  theme(text = element_text(size = 10),plot.title = element_text(size = 10))
-  
+  theme(text = element_text(size = 10), 
+        plot.title = element_text(size = 12, face = "bold", hjust = 0.5))  
 
 ggsave("Scripts/Plots/Descriptive/g_regeneration_2015_2040.pdf")
 ggsave("Scripts/Plots/Descriptive/g_regeneration_2015_2040.png")
+
+
+df_wide <- df_mean %>%
+  pivot_wider(names_from = name, values_from = relative)
+
+# Calculate the relative differences
+df_diff <- df_wide %>%
+  mutate(
+    `SSP1-RCP2.6` = `SSP1-RCP2.6` - Control,
+    `SSP3-RCP7.0` = `SSP3-RCP7.0` - Control,
+    `SSP5-RCP8.5` = `SSP5-RCP8.5` - Control
+  )
+
+# Select only relevant columns for plotting
+df_plot <- df_diff %>%
+  select(age, PFT, starts_with("SSP"))
+
+# Reshape for ggplot2
+df_plot_long <- df_plot %>%
+  pivot_longer(cols = starts_with("SSP"), names_to = "Scenario", values_to = "Relative_Difference")
+
+# Plot the data
+ggplot(df_plot_long, aes(x = age, y = Relative_Difference, color = PFT)) +
+  geom_line() + xlim(0,100) +
+  geom_hline(yintercept = 0, linetype = "solid", color = "darkgrey") +  
+  facet_grid(rows = vars(Scenario)) +
+  labs(title = "Difference in vegetation relative to Control",
+       x = "Year after disturbance",
+       y = "Relative Difference",
+       color = "Scenario") +
+  scale_color_manual(name = "Dominant vegetation", drop = TRUE,
+                     values = c("Temperate broadleaf" = "#D55E00", "Pioneering broadleaf" = "#E69F00",  "Needleleaf evergreen" = "#0072B2",   
+                                "Conifers (other)" = "#56B4E9", "Tundra" = "#009E73")) +
+  theme_bw() + theme(text = element_text(size = 10), 
+                             plot.title = element_text(size = 12, face = "bold", hjust = 0.5))
+ggsave("Scripts/Plots/Descriptive/diff_veg_control.pdf")
+ggsave("Scripts/Plots/Descriptive/diff_veg_control.png")
+
+
+
+# Filter for age = 100
+df_age_100 <- df_diff %>%
+  filter(age == 100) %>%
+  select(PFT, SSP1_RCP2_6_diff, SSP3_RCP7_0_diff, SSP5_RCP8_5_diff)
+
+# Reshape for ggplot2
+df_age_100_long <- df_age_100 %>%
+  pivot_longer(cols = starts_with("SSP"), names_to = "Scenario", values_to = "Relative_Difference")
+
+# Plot the data
+ggplot(df_age_100_long, aes(x = Scenario, y = Relative_Difference, fill = Relative_Difference > 0)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~ PFT, nrow = 1) +
+  scale_fill_manual(values = c("TRUE" = "cornflowerblue", "FALSE" = "darkred"), guide = FALSE) +
+  labs(title = "Relative Difference at Age 100 by PFT",
+       x = "Scenario",
+       y = "Relative Difference") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 

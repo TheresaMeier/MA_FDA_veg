@@ -15,6 +15,8 @@ library(stringr)
 library(cowplot)
 library(ggplot2)
 library(ggmap)
+library(ggridges)
+library(forcats)
 
 scenarios = c("picontrol", "ssp126", "ssp370", "ssp585")
 
@@ -66,16 +68,19 @@ ggmap(worldmap) +
 ggsave("Scripts/Plots/Descriptive/Soil/pdf/soil_map.pdf", width = 20, height = 15)
 ggsave("Scripts/Plots/Descriptive/Soil/png/soil_map.png", width = 20, height = 15)
 
-# As boxplots
-ggplot(d_soil_long, aes(x=property, y=value)) + 
-  geom_boxplot() + theme_bw() + ylab("Fraction") + xlab("Soil component") +
-  theme(text = element_text(size = 15), 
-        plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
-        axis.text.x = element_text(angle = 30, hjust = 1)) +
-  ggtitle("Soil composition for all disturbed grid cells")
+# As ridge plot
+ggplot(d_soil_long, aes(x = value)) + 
+  geom_density_ridges(aes(height = after_stat(density)), stat = "density", scale = 0.75) + 
+  theme_bw() +  facet_wrap(~property) +
+  ylab("Density") + xlab("Fraction") + 
+   theme(
+    text = element_text(size = 18), 
+    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    axis.text.x = element_text(angle = 30, hjust = 1)
+  )
 
-ggsave("Scripts/Plots/Descriptive/Soil/pdf/soil_boxplot.pdf", width = 8, height = 6)
-ggsave("Scripts/Plots/Descriptive/Soil/png/soil_boxplot.png", width = 8, height = 6)
+ggsave("Scripts/Plots/Descriptive/Soil/pdf/soil_ridgeplot.pdf", width = 8, height = 6)
+ggsave("Scripts/Plots/Descriptive/Soil/png/soil_ridgeplot.png", width = 8, height = 6)
 
 
 ################################# Bulkdensity ##################################
@@ -135,21 +140,22 @@ ggmap(worldmap) +
 ggsave("Scripts/Plots/Descriptive/Soil/pdf/soilcarbon_map.pdf", width = 20, height = 15)
 ggsave("Scripts/Plots/Descriptive/Soil/png/soilcarbon_map.png", width = 20, height = 15)
 
-# As boxplots
+# As ridge plots
 
 d_soil_long_2 = melt(setDT(d_soil[,c(1,2,6:8)]), id.vars = c("Lon", "Lat"), variable.name = "property")
 d_soil_long_2$property = ifelse(d_soil_long_2$property == "bulkdensity_soil", "Bulk density", 
                  ifelse(d_soil_long_2$property == "ph_soil", "pH in water",
                          ifelse(d_soil_long_2$property == "soilcarbon", "Organic carbon content", NA)))
 
+ggplot(d_soil_long_2, aes(x = value)) + 
+  geom_density_ridges(aes(height = after_stat(density)), stat = "density", scale = 0.75) + 
+  theme_bw() +  facet_wrap(~property, scales = "free") +
+  ylab("Density") + xlab("Value") + 
+  theme(
+    text = element_text(size = 18), 
+    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    axis.text.x = element_text(angle = 30, hjust = 1)
+  )
 
-ggplot(d_soil_long_2, aes(y=value)) + 
-  geom_boxplot() + facet_wrap(~property) +theme_bw() + ylab("Value") + xlab("") +
-  theme(text = element_text(size = 15), 
-        plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
-  ggtitle("Soil attributes")
-
-ggsave("Scripts/Plots/Descriptive/Soil/pdf/soil_attributes_boxplot.pdf", width = 8, height = 5)
-ggsave("Scripts/Plots/Descriptive/Soil/png/soil_attributes_boxplot.png", width = 8, height = 5)
+ggsave("Scripts/Plots/Descriptive/Soil/pdf/soil_attributes_ridgeplot.pdf", width = 8, height = 6)
+ggsave("Scripts/Plots/Descriptive/Soil/png/soil_attributes_ridgeplot.png", width = 8, height = 6)

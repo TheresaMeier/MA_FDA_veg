@@ -14,6 +14,8 @@ library(data.table)
 library(stringr)
 library(cowplot)
 library(ggplot2)
+library(ggridges)
+library(forcats)
 
 scenarios = c("picontrol", "ssp126", "ssp370", "ssp585")
 
@@ -52,7 +54,9 @@ for (scen in scenarios){
 }
 
 # Merge data sets for all scenarios
-d_all = rbind(d_picontrol_all, d_ssp126_all, d_ssp370_all, d_ssp585_all)
+d_all = rbind(d_picontrol_all, d_ssp126_all, d_ssp370_all, d_ssp585_all) %>%
+  mutate(Cluster = factor(Cluster, levels = c("1", "2", "3", "4"), labels = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4")),
+         Cluster = fct_rev(Cluster))
 
 d_all_long_fraction = melt(setDT(d_all[,c(1:7)]), id.vars = c("Scenario", "Cluster", "Lon", "Lat"), variable.name = "property") 
 d_all_long_fraction$property = gsub("_", " ", d_all_long_fraction$property)
@@ -60,44 +64,87 @@ d_all_long_fraction$property = gsub("sand", "Sand ", d_all_long_fraction$propert
 d_all_long_fraction$property = gsub("clay", "Clay ", d_all_long_fraction$property)
 d_all_long_fraction$property = gsub("silt", "Silt ", d_all_long_fraction$property)
 
-g_fraction = ggplot(d_all_long_fraction, aes(x=Scenario, y=value, fill=Cluster)) + 
-  geom_boxplot() + facet_wrap(~property) + theme_bw() + ylab("Fraction") +
-  theme(text = element_text(size = 10), plot.title = element_text(size = 15, face = "bold",hjust = 0.5), axis.text.x = element_text(angle = 30,hjust=1)) +
-  ggtitle("Soil properties per scenario and cluster")
 
+d_all_long_fraction <- d_all_long_fraction %>%
+  mutate(Cluster = factor(Cluster, levels = c("1", "2", "3", "4"), labels = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4")),
+         Cluster = fct_rev(Cluster))
 
-g_bulk = ggplot(d_all, aes(x=Scenario, y=bulkdensity_soil, fill=Cluster)) + 
-  geom_boxplot() + theme_bw() + ylab("Value") + xlab("") +
+ggplot(d_all_long_fraction, aes(x = value, y = Cluster, fill = Cluster)) + 
+  geom_density_ridges(aes(height = after_stat(density)), stat = "density", scale = 0.7) + 
+  theme_bw() +  facet_grid(Scenario~property) +
+  ylab("Scenario") + xlab("Fraction") + 
+  #xlim(0, 100) +
+  scale_fill_manual(
+    name = "Cluster", 
+    values = c("Cluster 1" = "#F8766D", "Cluster 2" = "#7CAE00", "Cluster 3" = "#00BFC4", "Cluster 4" = "#C77CFF"),
+    guide = "none"  # Remove legend
+  ) +
   theme(
     text = element_text(size = 10), 
-    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
-    axis.text.x = element_text(angle = 30, hjust=1),
-    legend.position = "none"  # This line removes the legend
+    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
-  ggtitle("Bulk density")
+  ggtitle("Soil composition per scenario and cluster")
 
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/soil_composition.pdf"), width = 10, height = 8)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/soil_composition.png"), width = 10, height = 8)
 
-g_ph = ggplot(d_all, aes(x=Scenario, y=ph_soil, fill=Cluster)) + 
-  geom_boxplot() + theme_bw() + ylab("") + 
+ggplot(d_all, aes(x = bulkdensity_soil, y = Cluster, fill = Cluster)) + 
+  geom_density_ridges(aes(height = after_stat(density)), stat = "density", scale = 1) + 
+  theme_bw() + facet_grid(~Scenario) +
+  ylab("Scenario") + xlab("Value") + 
+  #xlim(0, 100) +
+  scale_fill_manual(
+    name = "Cluster", 
+    values = c("Cluster 1" = "#F8766D", "Cluster 2" = "#7CAE00", "Cluster 3" = "#00BFC4", "Cluster 4" = "#C77CFF"),
+    guide = "none"  # Remove legend
+  ) +
   theme(
     text = element_text(size = 10), 
-    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
-    axis.text.x = element_text(angle = 30, hjust=1),
-    legend.position = "none"  # This line removes the legend
+    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
-  ggtitle("PH value")
+  ggtitle("Bulk density per scenario and cluster")
 
-g_carbon = ggplot(d_all, aes(x=Scenario, y=soilcarbon, fill=Cluster)) + 
-  geom_boxplot() + theme_bw() + ylab("") + xlab("") +
-  theme(text = element_text(size = 10), plot.title = element_text(size = 15, face = "bold",hjust = 0.5), axis.text.x = element_text(angle = 30,hjust=1)) +
-  ggtitle("Soil carbon")
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/bulk_density.pdf"), width = 10, height = 8)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/bulk_density.png"), width = 10, height = 8)
 
-plot_grid(
-  g_fraction, 
-  plot_grid(g_bulk, g_ph, g_carbon, ncol = 3, rel_widths = c(0.9, 0.9, 1)), 
-  ncol = 1, 
-  rel_heights = c(1, 1)
-)
+ggplot(d_all, aes(x = ph_soil, y = Cluster, fill = Cluster)) + 
+  geom_density_ridges(aes(height = after_stat(density)), stat = "density", scale = 1) + 
+  theme_bw() + facet_grid(~Scenario) +
+  ylab("Scenario") + xlab("Value") + 
+  #xlim(0, 100) +
+  scale_fill_manual(
+    name = "Cluster", 
+    values = c("Cluster 1" = "#F8766D", "Cluster 2" = "#7CAE00", "Cluster 3" = "#00BFC4", "Cluster 4" = "#C77CFF"),
+    guide = "none"  # Remove legend
+  ) +
+  theme(
+    text = element_text(size = 10), 
+    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    axis.text.x = element_text(angle = 30, hjust = 1)
+  ) +
+  ggtitle("pH in water per scenario and cluster")
 
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/soil_props_",pid,".pdf"), width = 10, height = 5)
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/soil_props_",pid,".png"), width = 10, height = 5)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/ph_soil.pdf"), width = 10, height = 8)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/ph_soil.png"), width = 10, height = 8)
+
+ggplot(d_all, aes(x = soilcarbon, y = Cluster, fill = Cluster)) + 
+  geom_density_ridges(aes(height = after_stat(density)), stat = "density", scale = 1) + 
+  theme_bw() + facet_grid(~Scenario) +
+  ylab("Scenario") + xlab("Value") + 
+  #xlim(0, 100) +
+  scale_fill_manual(
+    name = "Cluster", 
+    values = c("Cluster 1" = "#F8766D", "Cluster 2" = "#7CAE00", "Cluster 3" = "#00BFC4", "Cluster 4" = "#C77CFF"),
+    guide = "none"  # Remove legend
+  ) +
+  theme(
+    text = element_text(size = 10), 
+    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    axis.text.x = element_text(angle = 30, hjust = 1)
+  ) +
+  ggtitle("Organic carbon content per scenario and cluster")
+
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/soilcarbon.pdf"), width = 10, height = 5)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/soilcarbon.png"), width = 10, height = 5)
