@@ -7,7 +7,7 @@
 ## Set working directory and get plotting functions
 setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
 source("Scripts/MA_FDA_veg/02_FPCA/functions.R")
-source("Scripts/MA_FDA_veg/03_MFPCA/MFPCA/MFPCA_calculation.R")
+# source("Scripts/MA_FDA_veg/03_MFPCA/MFPCA/MFPCA_calculation.R")
 source("Scripts/MA_FDA_veg/01_Description/utils.R")
 
 ## Load libraries
@@ -30,7 +30,7 @@ library(funData)
 con = dbConnect(duckdb(), dbdir = "Data/patches.duckdb", read_only = FALSE) 
 dbListTables(con)
 scenarios = c("picontrol", "ssp126", "ssp370", "ssp585")
-pfts = c("Tundra", "BNE", "IBS", "otherC", "TeBS")
+pfts = c("BNE", "IBS", "otherC", "TeBS","Tundra")
 set.seed(1)
 
 ## Choose parameters:
@@ -43,6 +43,7 @@ M = 10            # Number of PCs
 createFunData = FALSE
 runMFPCA = FALSE
 # scen = "picontrol"
+locs_disturbed = read.table("Scripts/Plots/MFPCA/plot_data/locs_disturbed.txt")
 
 #######################
 ## Get 450 different colors for plotting
@@ -59,42 +60,52 @@ pal <- colorRampPalette(palette_450)
 #######################
 # Create funData object 
 if(createFunData){
-  for (scen in scenarios){
-    print(paste("Start with scenario", long_names_scenarios(scen)))
+  for (pft in pfts){
+    print(paste("Start with PFT", long_names_pfts(tolower(pft))))
     
-    # Create funData objects
-    for (pft in pfts){
-      print(pft)
-      d_pft = get_data_fpca(scen, start_year, end_year,pid,pft)
-      assign(paste0("d_",pft), d_pft)
+    for (scen in scenarios){
+      print(long_names_scenarios(scen))
+      d_scen = get_data_fpca(scen, start_year, end_year,pid,pft)
+      assign(paste0("d_",scen), d_scen)
       print("...done.")
     }
-    d_scen = abind(list(t(d_Tundra[[1]][,-1]), t(d_BNE[[1]][,-1]), t(d_IBS[[1]][,-1]), t(d_otherC[[1]][,-1]), t(d_TeBS[[1]][,-1])), along = 3)
-    assign(paste0("d_", scen), d_scen)
+    d_pft = rbind(t(d_picontrol[[1]][,-1]), t(d_ssp126[[1]][,-1]), t(d_ssp370[[1]][,-1]), t(d_ssp585[[1]][,-1]))
+    assign(paste0("d_", pft), d_pft)
   }
   
-  d_all = abind(d_picontrol, d_ssp126, d_ssp370, d_ssp585, along = 1)
-
-  funData_tmp = funData(argvals = list(1:100, 1:5), X = d_all)
+  # Create univariate funData objects
+  for (pft in pfts) {
+    fun_pft <- funData(argvals = 1:100,
+                       X = get(paste0("d_", pft)))
+    dimnames(fun_pft@X)[[2]] = 1:100
+    assign(paste0("fun_", pft), fun_pft)
+    saveRDS(fun_pft, paste0("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_", pft, ".rds"))
+  }
   
-  funData_all = multiFunData(funData_tmp)
-  saveRDS(funData_all, "Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_all_1803.rds")
-  saveRDS(funData_tmp, "Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_tmp_1803.rds")
+  # Create multiFunData object
+  multiFun_pft = multiFunData(fun_BNE, fun_IBS, fun_otherC, fun_TeBS, fun_Tundra)
+  
+  saveRDS(multiFun_pft, "Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_all_1803.rds")
   
   print("... all done.")
 }
 
 # Run MFPCA
 if (runMFPCA){
-  funData_all = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_all_1803.rds")
-  funData_tmp = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_tmp_1803.rds")
+  multiFun_pft = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_all_1803.rds")
   
-  MFPCA_all = MFPCA2(funData_all, M=M, uniExpansions = list(list(type = "given", funData_tmp, ortho = TRUE)), fit = FALSE, approx.eigen = FALSE)
+  uniExpansions <- list(list(type = "uFPCA", npc = 4),
+                        list(type = "uFPCA", npc = 4),
+                        list(type = "uFPCA", npc = 4),
+                        list(type = "uFPCA", npc = 4),
+                        list(type = "uFPCA", npc = 4))
+  
+  MFPCA_all <- MFPCA(multiFun_pft, M = M, fit = TRUE, uniExpansions = uniExpansions)
   saveRDS(MFPCA_all, paste0("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/MFPCA_all_1803_100y.rds"))
 }
 
 # Get multiFunData objects
-funData_all = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_all_1803.rds")
+multiFun_pft = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_all_1803.rds")
 
 # Get MFPCA results
 MFPCA_all = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/MFPCA_all_1803_100y.rds")
@@ -102,7 +113,7 @@ MFPCA_all = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/MFPCA_all_1803_100y.r
 set.seed(1)
 # Compute WCSS for different values of k
 wcss <- sapply(1:10, function(k) {
-  kmeans(MFPCA_all$scores, centers = k)$tot.withinss
+  kmeans(MFPCA_all$scores[,1:M], centers = k)$tot.withinss
 })
 
 # Save elbow plot as pdf
@@ -138,8 +149,8 @@ dev.off()
 
 # Clustering of the coefficient
 set.seed(1)
-kmeans_result = kmeans(MFPCA_all$scores,4)
-scores = cbind(MFPCA_all$scores, kmeans_result$cluster)
+kmeans_result = kmeans(MFPCA_all$scores[,1:M],4)
+scores = cbind(MFPCA_all$scores[,1:M], kmeans_result$cluster)
 
 names = c("PC1", "PC2")
 for (i in (3:M)) names = c(names, paste0("PC", i))
@@ -161,7 +172,7 @@ list_var = c()
 list_pft = c()
 list_cl = c()
 for (iPFT in c(1:5)){
-  d_pft = funData_all@.Data[[1]]@X[,,iPFT]
+  d_pft = multiFun_pft@.Data[[iPFT]]@X
     
   for (iCl in c(1:4)) {
     list_var = c(list_var, colMeans(d_pft[plot_data_all$Cluster == iCl,]))
@@ -252,137 +263,54 @@ ggsave(paste0("Scripts/Plots/MFPCA/PC1vsPC2/png/PC1_vs_PC2_",pid,"_scenarios_clu
 
 ######################### Plot principal components ############################
 
-# Plot mean function
-pdf("Scripts/Plots/MFPCA/PCs/pdf/mean.pdf", width = 15, height = 5)
-plot(MFPCA_all$meanFunction, xlab = paste("Year after Disturbance"), xlim = c(1,100), ylab = "PFT", ylim = c(0.5,5.5), cex = 1.5, main = "Mean function - MFPCA")
-dev.off()
-
-png("Scripts/Plots/MFPCA/PCs/png/mean.png", width = 1500, height = 500)
-plot(MFPCA_all$meanFunction, xlab = paste("Year after Disturbance"), xlim = c(1,100), ylab = "PFT", ylim = c(0.5,5.5), cex = 1.5, main = "Mean function - MFPCA")
-dev.off()
-
-
-# Plot deviations from the mean for each PC
+# Plot 10 first PCs
 for (iPC in (1:M)){
-  pdf(paste0("Scripts/Plots/MFPCA/PCs/pdf/PCs_PC", iPC, ".pdf"), width = 15, height = 10)
-  plot.MFPCAfit2D(MFPCA_all, combined = FALSE, plotPCs = iPC, xlab = paste("Year after Disturbance"), xlim = c(1,100), ylab = "PFT", ylim = c(0.5,5.5), cex = 1.5)
-  mtext(paste("PC", iPC, "for all four scenarios"), side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1.1)
+  pdf(paste0("Scripts/Plots/MFPCA/PCs/pdf/PCs_PC", iPC, ".pdf"), width = 15, height = 5)
+  plot(MFPCA_all, plotPCs = iPC, combined = TRUE, xlab = paste("Year after Disturbance"), xlim = c(1,100), ylab = "PFT", cex = 1.5)
+  #mtext(paste("PC", iPC, "for all four scenarios"), side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1.1)
   
   dev.off()
   
-  png(paste0("Scripts/Plots/MFPCA/PCs/png/PCs_PC", iPC, ".png"), width = 1500, height = 1000)
-  plot.MFPCAfit2D(MFPCA_all, combined = FALSE, plotPCs = iPC, xlab = paste("Year after Disturbance"), xlim = c(1,100), ylab = "PFT", ylim = c(0.5,5.5), cex = 1.5)
-  mtext(paste("PC", iPC, "for all four scenarios"), side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1.1)
+  png(paste0("Scripts/Plots/MFPCA/PCs/png/PCs_PC", iPC, ".png"), width = 1500, height = 500)
+  plot(MFPCA_all, plotPCs = iPC, combined = TRUE, xlab = paste("Year after Disturbance"), xlim = c(1,100), ylab = "PFT", cex = 1.5)
+  #mtext(paste("PC", iPC, "for all four scenarios"), side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1.1)
   
   dev.off()
 }
 
 ######################## Plot reconstructed curves #############################
-# not implemented in the package, but self-implemented:
+bounds = t(matrix(c(1,434,435,876,877,1338,1339,1803), nrow = 2))
+iPFT = 0
 
-bounds = t(matrix(c(1,434,434+1,434+1+441,434+1+441+1, 434+1+441+1+461, 434+1+441+1+461+1, 434+1+441+1+461+1+464), ncol = 4))
-
-for (scen in scenarios){
-  i = 1
-  j = 1
-  print(scen)
-  for (pft in pfts){
-    print(pft)
-    # Get original curves
-    ## Import fd object
-    fit.scen.pft = readRDS(paste0("Scripts/MA_FDA_veg/02_FPCA/FdObjects/Wfdobj_", scen, "_", pft, ".rds"))
-    fit.scen.pft_exp = fit.scen.pft
-    fit.scen.pft_exp$Wfdobj$coefs = exp(fit.scen.pft_exp$Wfdobj$coefs)
+for(pft in pfts){
+  iPFT = iPFT + 1
+  iScen = 0
+  for (scen in scenarios){
+    iScen = iScen + 1
+    nOb = bounds[iScen,2] - bounds[iScen,1] + 1
+    # Save as pdf
+    pdf(paste0("Scripts/Plots/MFPCA/Reconstruction/pdf/", scen, "/", pft,"/MFPCA_reconstruct_",scen, "_",pft, "_",M,"PCs.pdf"), width = 8, height = 6.5)
+    plot(MFPCA_all$fit[[iPFT]], obs = c(bounds[iScen,1]: bounds[iScen,2]), col = pal(nOb)[1:nOb],
+         xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',
+         cex.main = 1.8, cex = 1.5, 
+         xlab = "Year after Disturbance",
+         ylab = "Share of aboveground carbon", 
+         main = paste("Reconstructed fit using", M, "PCs") )
+    lines(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2)
+    dev.off()
     
-    ## Run FPCA
-    
-    fit.pca = pca.fd(fit.scen.pft_exp$Wfdobj,3)
-    
-    for (nPC in 2:10){
-      print(nPC)
-      funs = MFPCA_all$functions[[1]]
-      funs@X = funs@X[1:nPC,,]
-      univExp <- univExpansion(type = "default", 
-                               scores = as.matrix(MFPCA_all$normFactors[1:nPC]/MFPCA_all$scores[,1:nPC]),
-                               argvals = MFPCA_all$functions[[1]]@argvals,
-                               functions = funs)
-      
-      multiExp = multiFunData(univExp) + MFPCA_all$meanFunction
-      
-      # plot(multiExp@.Data[[1]]@X[180,,1], type = "l", ylim = c(0,1), xlim = c(0,100))
-      
-      ## Plot reconstructed and original fits for using 2,...,10 PCs
-  
-      # Save as pdf
-      pdf(paste0("Scripts/Plots/MFPCA/Reconstruction/pdf/", scen, "/", pft, "/MFPCA_reconstruct_",scen, "_",pft, "_",pid,"_",nPC,"PCs.pdf"), width = 10, height = 4.5)
-      par(mfrow = c(1,2))
-      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = paste0("Original fit - ", long_names_scenarios(scen), " - ", long_names_pfts(tolower(pft))))
-      for (icurve in 1:nrow(fit.pca$scores)){
-        lines(fit.scen.pft_exp$Wfdobj[icurve], col = pal(450)[icurve])
-      }
-      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = paste("Reconstructed fit using", nPC, "PCs"))
-      
-      for (icurve in bounds[j,1]:bounds[j,2]){
-        lines(multiExp@.Data[[1]]@X[icurve,,i], col = pal(450)[icurve])
-      }
-      dev.off()
-      
-      # Save single plots
-      pdf(paste0("Scripts/Plots/MFPCA/Reconstruction/pdf/", scen, "/", pft, "/MFPCA_reconstruct_",scen, "_",pft, "_",pid,"_orig.pdf"), width = 10, height = 8)
-      par(mfrow = c(1,1))
-      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = paste0("Original fit - ", long_names_scenarios(scen), " - ", long_names_pfts(tolower(pft))))
-      for (icurve in 1:nrow(fit.pca$scores)){
-        lines(fit.scen.pft_exp$Wfdobj[icurve], col = pal(450)[icurve])
-      }
-      dev.off()
-      
-      pdf(paste0("Scripts/Plots/MFPCA/Reconstruction/pdf/", scen, "/", pft, "/MFPCA_reconstruct_",scen, "_",pft, "_",pid,"_",nPC,"PCs_only.pdf"), width = 10, height = 8)
-      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = paste("Reconstructed fit using", nPC, "PCs"))
-      
-      for (icurve in bounds[j,1]:bounds[j,2]){
-        lines(multiExp@.Data[[1]]@X[icurve,,i], col = pal(450)[icurve])
-      }
-      dev.off()
-      
-      # # Save as png
-      png(paste0("Scripts/Plots/MFPCA/Reconstruction/png/", scen, "/", pft, "/MFPCA_reconstruct_",scen, "_",pft, "_",pid,"_",nPC,"PCs.png"), width = 1000, height = 450)
-      
-      par(mfrow = c(1,2))
-      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = paste0("Original fit - ", long_names_scenarios(scen), " - ", long_names_pfts(tolower(pft))))
-      for (icurve in 1:nrow(fit.pca$scores)){
-        lines(fit.scen.pft_exp$Wfdobj[icurve], col = pal(450)[icurve])
-      }
-      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = paste("Reconstructed fit using", nPC, "PCs"))
-      
-      for (icurve in bounds[j,1]:bounds[j,2]){
-        lines(multiExp@.Data[[1]]@X[icurve,,i], col = pal(450)[icurve])
-      }
-      dev.off()
-      
-      # Save single plots
-      png(paste0("Scripts/Plots/MFPCA/Reconstruction/png/", scen, "/", pft, "/MFPCA_reconstruct_",scen, "_",pft, "_",pid,"_orig.png"), width = 1000, height = 800)
-      par(mfrow = c(1,1))
-      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = paste0("Original fit - ", long_names_scenarios(scen), " - ", long_names_pfts(tolower(pft))))
-      for (icurve in 1:nrow(fit.pca$scores)){
-        lines(fit.scen.pft_exp$Wfdobj[icurve], col = pal(450)[icurve])
-      }
-      dev.off()
-      
-      png(paste0("Scripts/Plots/MFPCA/Reconstruction/png/", scen, "/", pft, "/MFPCA_reconstruct_",scen, "_",pft, "_",pid,"_",nPC,"PCs_only.png"), width = 1000, height = 800)
-      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = paste("Reconstructed fit using", nPC, "PCs"))
-      
-      for (icurve in bounds[j,1]:bounds[j,2]){
-        lines(multiExp@.Data[[1]]@X[icurve,,i], col = pal(450)[icurve])
-      }
-      dev.off()
-      
-    }
-    
-    i = i+1
+    # Save as png
+    png(paste0("Scripts/Plots/MFPCA/Reconstruction/png/", scen, "/", pft,"/MFPCA_reconstruct_",scen, "_",pft, "_",M,"PCs.png"), width = 800, height = 650)
+    plot(MFPCA_all$fit[[1]], obs = c(1:434), col = pal(450)[1:434],
+         xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',
+         cex.main = 1.8, cex = 1.5, 
+         xlab = "Year after Disturbance",
+         ylab = "Share of aboveground carbon", 
+         main = paste("Reconstructed fit using", M, "PCs") )
+    lines(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2)
+    dev.off()
   }
-  j = j+1
 }
-
 
 ######################### Plot Cluster Assignments #############################
 ## Import fd objects

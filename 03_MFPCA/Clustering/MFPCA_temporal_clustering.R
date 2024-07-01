@@ -7,7 +7,6 @@
 ## Set working directory and get plotting functions
 setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
 source("Scripts/MA_FDA_veg/02_FPCA/functions.R")
-source("Scripts/MA_FDA_veg/03_MFPCA/MFPCA/MFPCA_calculation.R")
 source("Scripts/MA_FDA_veg/01_Description/utils.R")
 
 ## Load libraries
@@ -32,32 +31,27 @@ MFPCA_all = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/MFPCA_all_1803_100y.r
 funData_all = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_all_1803.rds")
 M = 10      # 10 PCs
 scenarios = c("picontrol", "ssp126", "ssp370", "ssp585")
-pfts = c("Tundra", "BNE", "IBS", "otherC", "TeBS")
+pfts = c("BNE", "IBS", "otherC", "TeBS", "Tundra")
 pid = 1
 
-# Extract features for readibility
-mean_function <- MFPCA_all$meanFunction@.Data[[1]]@X
-PCs <- MFPCA_all$functions@.Data[[1]]@X
-X_orig = funData_all@.Data[[1]]@X
-
 # Center the data by subtracting the mean function
-X_orig_centered <- array(NA, dim = c(1803, 100, 5))
-for (i in 1:1803) {
-  for (j in 1:5){
-    X_orig_centered[i,,j] <- X_orig[i,,j] - mean_function[,,j]
+funData_centered = funData_all
+for (iPFT in 1:5){
+  for (iCurve in 1:1803) {
+    funData_centered@.Data[[iPFT]]@X[iCurve,] = funData_centered@.Data[[iPFT]]@X[iCurve,] - MFPCA_all$meanFunction@.Data[[iPFT]]@X
   }
 }
 
 ################# Calculate and cluster temporal scores ########################
 
 for (iYear in seq(10,100,by=10)){
+  
   # Calculate scores manually
-  scores_manual <- matrix(0, nrow = 1803, ncol = 10)
-  for (i in 1:1803) {
-    for (k in 1:10) {
-      scores_manual[i, k] <- sum(X_orig_centered[i,1:iYear,] * PCs[k,1:iYear,])
-    }
-  }
+  scores_manual = funData_centered@.Data[[1]]@X[,1:iYear] %*% t(MFPCA_all$functions[[1]]@X[,1:iYear]) +
+          funData_centered@.Data[[2]]@X[,1:iYear] %*% t(MFPCA_all$functions[[2]]@X[,1:iYear])+
+          funData_centered@.Data[[3]]@X[,1:iYear] %*% t(MFPCA_all$functions[[3]]@X[,1:iYear]) +
+          funData_centered@.Data[[4]]@X[,1:iYear] %*% t(MFPCA_all$functions[[4]]@X[,1:iYear])+
+          funData_centered@.Data[[5]]@X[,1:iYear] %*% t(MFPCA_all$functions[[5]]@X[,1:iYear])
   
   # Cluster temporal scores
   set.seed(1)
@@ -192,58 +186,4 @@ ggplot(ari_values, aes(x = Year, y = ARI, color = Scenario)) +
 
 ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/ARI_clusters_with_years_",pid,".pdf"), width = 15, height = 10)
 ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/ARI_clusters_with_years_",pid,".png"), width = 15, height = 10)
-
-
-####################### Get temporal cluster description #######################
-
-for (pft in pfts) 
-  for (cl in c(1:4)) assign(paste0(pft,"_cl", cl), rep(0,10))
-
-for (iPFT in c(1:5)){
-  d_pft = funData_all@.Data[[1]]@X[,,iPFT]
-  i=1
-  for (iYear in seq(10,100,by=10)){
-    plot_data_iYear = get(paste0("plot_data_", iYear))
-    
-    for (iCl in c(1:4)) {
-      
-      pft_cl = get(paste0(pfts[iPFT], "_cl", iCl))
-      
-      pft_cl[i] = mean(d_pft[plot_data_iYear$Cluster == iCl,c(1:iYear)])
-      assign(paste0(pfts[iPFT],"_cl", iCl), pft_cl)
-    }
-    i=i+1
-  }
-}
-
-# Create full data set for plotting
-for (pft in pfts){
-  d_pft = as.data.frame(cbind(c(get(paste0(pft, "_cl1")), get(paste0(pft, "_cl2")), get(paste0(pft, "_cl3")), get(paste0(pft, "_cl4"))), rep(c(5,seq(10,120,by=10),126),4), c(rep(1,14),rep(2,14),rep(3,14), rep(4,14)), rep(pft,14*4)))
-  colnames(d_pft) = c("value", "year", "Cluster", "PFT")
-  assign(paste0("d_", pft), d_pft)
-}
-
-d_pft = rbind(d_Tundra, d_BNE, d_IBS, d_otherC, d_TeBS) %>%
-  mutate(value = as.numeric(value),
-         year = as.numeric(year),
-         Cluster = as.factor(Cluster),
-         PFT = long_names_pfts(tolower(PFT)))
-
-
-# Plot the results
-
-
-ggplot(d_pft) + 
-  geom_line(data = d_pft,
-            aes(x = year, y = value, color = Cluster), lwd = 2) +
-  facet_grid(rows = vars(PFT)) + 
-  scale_y_continuous(name = "Share of above ground carbon") + 
-  scale_x_continuous(name = "Year after Disturbance", breaks = seq(10,100,by=10)) +
-  scale_color_manual(name = "Cluster", values = c("1" = "#F8766D", "2" = "#7CAE00" , "3" = "#00BFC4", "4" = "#C77CFF", "5" = "darkgrey"), labels = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5")) +
-  geom_vline(xintercept = seq(10,100,by=10), linetype = "dashed", color = "black", lwd = 0.5) +
-  theme_bw() + theme(plot.title = element_text(hjust = .5)) +
-  ggtitle("Cluster-wise mean share of above ground carbon over time")
-
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/cluster_means_with_years_",pid,".pdf"), width = 15, height = 10)
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/cluster_means_with_years_",pid,".png"), width = 15, height = 10)
 

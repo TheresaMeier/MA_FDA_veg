@@ -79,7 +79,7 @@ for (scen in scenarios){
       
       # Save as pdf
       pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/FPCA/unrotated/",pft,"/pdf/PCA_reconstruct_",scen, "_",pft, "_",pid,"_",nPC,"PCs.pdf"), width = 8, height = 6.5)
-      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, cex.main = 1.8, cex = 1.5, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = if_else(nPC == 1, paste("Reconstructed fit using", nPC, "PC"),paste("Reconstructed fit using", nPC, "PCs")))
+      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), type = 'l',lty = 2, cex.main = 1.8, cex = 1.5, xlab = "Year after Disturbance", ylab = "Share of aboveground carbon", main = if_else(nPC == 1, paste("Reconstructed fit using", nPC, "PC"),paste("Reconstructed fit using", nPC, "PCs")))
       for (icurve in 1:nrow(fit.pca$scores)){
         if (nPC == 1) lines(fit.pca$harmonics[1,] * fit.pca$scores[icurve,1] + fit.pca$meanfd, col = pal(450)[icurve])
         if (nPC == 2) lines(fit.pca$harmonics[1,] * fit.pca$scores[icurve,1] + fit.pca$harmonics[2,] * fit.pca$scores[icurve,2] + fit.pca$meanfd, col = pal(450)[icurve])
@@ -89,7 +89,7 @@ for (scen in scenarios){
       
       # Save as png
       png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/FPCA/unrotated/",pft,"/png/PCA_reconstruct_",scen, "_",pft, "_",pid,"_",nPC,"PCs.png"), width = 800, height = 650)
-      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), cex.main = 1.8, cex = 1.5, type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of above ground carbon", main = if_else(nPC == 1, paste("Reconstructed fit using", nPC, "PC"),paste("Reconstructed fit using", nPC, "PCs")))
+      plot(x = c(1:100),y = rep(0,100), xlim = c(0,100), ylim = c(-0.05,1.2), cex.main = 1.8, cex = 1.5, type = 'l',lty = 2, xlab = "Year after Disturbance", ylab = "Share of aboveground carbon", main = if_else(nPC == 1, paste("Reconstructed fit using", nPC, "PC"),paste("Reconstructed fit using", nPC, "PCs")))
       for (icurve in 1:nrow(fit.pca$scores)){
         if (nPC == 1) lines(fit.pca$harmonics[1,] * fit.pca$scores[icurve,1] + fit.pca$meanfd, col = pal(450)[icurve])
         if (nPC == 2) lines(fit.pca$harmonics[1,] * fit.pca$scores[icurve,1] + fit.pca$harmonics[2,] * fit.pca$scores[icurve,2] + fit.pca$meanfd, col = pal(450)[icurve])

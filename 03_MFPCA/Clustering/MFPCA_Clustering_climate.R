@@ -76,7 +76,7 @@ ggplot(d_climate_mean_cluster) +
   # geom_smooth(data = d_climate_mean_cluster, aes(x = Year, y = mean_tas_mean, color = Cluster),
   #             method = "loess", se = FALSE, linewidth = 1) +  
   facet_wrap(~Scenario) +
-  geom_hline(yintercept = 0, color = "black", size = 0.25, alpha = .95) +
+  geom_hline(yintercept = 0, color = "black", linewidth = 0.25, alpha = .95) +
   # geom_hline(yintercept = 5, color = "black", size = 0.25, alpha = .75, lty = "dashed") +
   # geom_hline(yintercept = -5, color = "black", size = 0.25, alpha = .75, lty = "dashed") +
   scale_x_continuous(name = "Year", expand = c(0,0), breaks = seq(2020,2140, by = 20)) +

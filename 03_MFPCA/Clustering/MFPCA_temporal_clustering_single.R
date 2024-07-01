@@ -7,7 +7,6 @@
 ## Set working directory and get plotting functions
 setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
 source("Scripts/MA_FDA_veg/02_FPCA/functions.R")
-source("Scripts/MA_FDA_veg/03_MFPCA/MFPCA/MFPCA_calculation.R")
 source("Scripts/MA_FDA_veg/01_Description/utils.R")
 
 ## Load libraries
@@ -35,16 +34,11 @@ scenarios = c("picontrol", "ssp126", "ssp370", "ssp585")
 pfts = c("Tundra", "BNE", "IBS", "otherC", "TeBS")
 pid = 1
 
-# Extract features for readibility
-mean_function <- MFPCA_all$meanFunction@.Data[[1]]@X
-PCs <- MFPCA_all$functions@.Data[[1]]@X
-X_orig = funData_all@.Data[[1]]@X
-
 # Center the data by subtracting the mean function
-X_orig_centered <- array(NA, dim = c(1803, 100, 5))
-for (i in 1:1803) {
-  for (j in 1:5){
-    X_orig_centered[i,,j] <- X_orig[i,,j] - mean_function[,,j]
+funData_centered = funData_all
+for (iPFT in 1:5){
+  for (iCurve in 1:1803) {
+    funData_centered@.Data[[iPFT]]@X[iCurve,] = funData_centered@.Data[[iPFT]]@X[iCurve,] - MFPCA_all$meanFunction@.Data[[iPFT]]@X
   }
 }
 
@@ -52,12 +46,11 @@ for (i in 1:1803) {
 
 for (iYear in c(seq(10,100,by=10))){
   # Calculate scores manually
-  scores_manual <- matrix(0, nrow = 1803, ncol = 10)
-  for (i in 1:1803) {
-    for (k in 1:10) {
-      scores_manual[i, k] <- sum(X_orig_centered[i,iYear,] * PCs[k,iYear,])
-    }
-  }
+  scores_manual = funData_centered@.Data[[1]]@X[,iYear] %*% t(MFPCA_all$functions[[1]]@X[,iYear]) +
+    funData_centered@.Data[[2]]@X[,iYear] %*% t(MFPCA_all$functions[[2]]@X[,iYear])+
+    funData_centered@.Data[[3]]@X[,iYear] %*% t(MFPCA_all$functions[[3]]@X[,iYear]) +
+    funData_centered@.Data[[4]]@X[,iYear] %*% t(MFPCA_all$functions[[4]]@X[,iYear])+
+    funData_centered@.Data[[5]]@X[,iYear] %*% t(MFPCA_all$functions[[5]]@X[,iYear])
   
   # Cluster temporal scores
   set.seed(1)
