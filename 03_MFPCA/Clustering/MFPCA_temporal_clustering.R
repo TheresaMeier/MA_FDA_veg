@@ -7,7 +7,7 @@
 ## Set working directory and get plotting functions
 setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
 source("Scripts/MA_FDA_veg/02_FPCA/functions.R")
-source("Scripts/MA_FDA_veg/03_MFPCA/MFPCA_calculation.R")
+source("Scripts/MA_FDA_veg/03_MFPCA/MFPCA/MFPCA_calculation.R")
 source("Scripts/MA_FDA_veg/01_Description/utils.R")
 
 ## Load libraries

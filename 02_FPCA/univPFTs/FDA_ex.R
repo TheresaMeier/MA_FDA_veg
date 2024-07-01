@@ -5,7 +5,7 @@ library(dplyr)
 
 # Extract data from fda object (example, adjust as needed)
 
-fit.BNE.picontrol = readRDS("Scripts/MA_FDA_veg/FdObjects/Wfdobj_picontrol_BNE.rds")
+fit.BNE.picontrol = readRDS("Scripts/MA_FDA_veg/02_FPCA/FdObjects/Wfdobj_picontrol_BNE.rds")
 fit.BNE.picontrol$Wfdobj$coefs = exp(fit.BNE.picontrol$Wfdobj$coefs)
 
 Wfdobj_data <- eval.fd(1:100, fit.BNE.picontrol$Wfdobj[1]) # Example: generating data for plotting
@@ -34,7 +34,7 @@ ggplot(combined_df) +
   geom_point(data = points_df, aes(x = x, y = y, shape = series, color = series), size = 3) +
   ggtitle("FDA fit and original data points for one grid cell (Patch 1, Needleleaf Evergreen)") +
   xlim(0, 100) +
-  labs(x = "Year after Disturbance", y = "Share of above ground carbon", color = "", shape = "Fit") +
+  labs(x = "Year after Disturbance", y = "Share of aboveground carbon", color = "", shape = "Fit") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_color_manual(values = c('FDA Fit' = 'blue', 'Original Data Points' = 'black')) +

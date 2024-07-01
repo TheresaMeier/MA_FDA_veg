@@ -69,13 +69,12 @@ if(createFunData){
       assign(paste0("d_",pft), d_pft)
       print("...done.")
     }
-    d_scen = abind(t(d_Tundra[[1]][,-1]), t(d_BNE[[1]][,-1]), t(d_IBS[[1]][,-1]), t(d_otherC[[1]][,-1]), t(d_TeBS[[1]][,-1]), along = 3)
+    d_scen = abind(list(t(d_Tundra[[1]][,-1]), t(d_BNE[[1]][,-1]), t(d_IBS[[1]][,-1]), t(d_otherC[[1]][,-1]), t(d_TeBS[[1]][,-1])), along = 3)
     assign(paste0("d_", scen), d_scen)
   }
   
   d_all = abind(d_picontrol, d_ssp126, d_ssp370, d_ssp585, along = 1)
-  # Only consider first 100 years
-  d_all = d_all[,1:100,]
+
   funData_tmp = funData(argvals = list(1:100, 1:5), X = d_all)
   
   funData_all = multiFunData(funData_tmp)
@@ -100,6 +99,7 @@ funData_all = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_all_1803.rd
 # Get MFPCA results
 MFPCA_all = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/MFPCA_all_1803_100y.rds")
 
+set.seed(1)
 # Compute WCSS for different values of k
 wcss <- sapply(1:10, function(k) {
   kmeans(MFPCA_all$scores, centers = k)$tot.withinss

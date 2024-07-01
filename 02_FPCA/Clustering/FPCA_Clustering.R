@@ -33,7 +33,7 @@ end_year = 2040
 pid = 1           # Choose pid (int) or 'all'
 
 #######################
-set.seed(2)
+set.seed(1)
 
 pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/Clustering/Elbow_",pid,".pdf"), width = 10, height = 10)
 par(mfrow = c(2,2))
@@ -87,6 +87,8 @@ dev.off()
 set.seed(2)
 
 png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/Clustering/Elbow_",pid,".png"), width = 1000, height = 1000)
+pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/Clustering/Elbow_",pid,".pdf"), width = 10, height = 10)
+
 par(mfrow = c(2,2))
 ## Import fd objects
 for (scen in scenarios){
@@ -110,6 +112,7 @@ for (scen in scenarios){
   mtext("Elbow Plots for k-means Clustering", side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1)
 }
 dev.off()
+
 
 ## Look at correlations between scores 
 library(ggcorrplot)

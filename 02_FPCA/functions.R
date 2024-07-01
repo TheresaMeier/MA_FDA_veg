@@ -69,7 +69,7 @@ get_basis_rep = function(start_year, end_year, data, lambda = 1, norder = 6, nde
   yearrange.5 = c(1,yearrange[-1]-0.5)
   
   # fit = smooth.basis(yearrange.5, data, WfdPar)
-  fit = smooth.pos(yearrange.5, data, WfdPar, dbglev = 1)
+  fit = smooth.pos(yearrange.5, data, WfdPar, dbglev = 0)
   fit$Wfdobj$fdnames = list('Year after Disturbance' = yearrange, 'Location/PID' = colnames(data), 'Share of aboveground carbon')
   
   #fit$fd$fdnames = list('Year after Disturbance' = yearrange, 'Location/PID' = colnames(data), 'Share of aboveground carbon')
@@ -79,34 +79,24 @@ get_basis_rep = function(start_year, end_year, data, lambda = 1, norder = 6, nde
 get_data_fpca = function(scenario = "picontrol", start_year, end_year, pid = 1, pft = "Tundra") {
   
   data <- get_data_scenario(scenario, start_year, end_year,'cmass',pid)
+  data = data[!duplicated(data),]
   
-  data_pft <- data[data$PFT == pft, c("Year", "Lon", "Lat", "PID", "relative")]
+  data_pft <- data[data$PFT == pft, c("Lon", "Lat", "age", "relative")] %>%
+    filter(age <= 100 & age >0) # Filter for 100 years of recovery
   
-  data_loc = data_pft %>%
-    distinct(Lon,Lat,PID)
+  data_loc = data_pft[,c(1,2)] %>%
+    distinct(Lon,Lat)
   
   pivot_data_pft <- data_pft %>%
-    pivot_wider(names_from = c(Lon,Lat,PID), values_from = relative, values_fn = list) %>%
-    arrange(Year) %>%
-    rename_with(~ gsub("_", "/", .), everything()) 
+    pivot_wider(names_from = c(Lon,Lat), values_from = relative) %>%
+    arrange(age) %>%
+    rename_with(~ gsub("_", "/", .), everything()) %>%
+    ungroup()
+  
+  # pivot_data_pft <- pivot_data_pft %>%
+  #   unnest_wider(everything(), names_sep = "/")
 
-  max_length <- max(sapply(pivot_data_pft[,-1], function(x) length(unlist(x))))
-  
-  # Pad shorter lists with NA values
-  pivot_data_pft <- as.data.frame(lapply(pivot_data_pft, function(x) {
-    if(length(unlist(x)) < max_length) {
-      c(unlist(x),rep(NA, max_length - length(unlist(x))))
-      #c(rep(NA, max_length - length(unlist(x))),unlist(x))
-    } else {
-      unlist(x)
-    }
-  }))
-  
-  pivot_data_pft = pivot_data_pft %>%
-    filter(!is.na(Year)) %>%
-    mutate_all(~ifelse(is.na(.), 0, .))
-  
-  return(list(pivot_data_pft, data_loc))
+  return(list(as.data.frame(pivot_data_pft), data_loc))
 }
 
 
