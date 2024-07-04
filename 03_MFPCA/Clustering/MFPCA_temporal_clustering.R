@@ -90,11 +90,11 @@ for (cb in 1:nrow(combis)){
     }
   }
   
-  right_order = max.col(t(lens), "first")
-  
-  if (!any(duplicated(right_order))) y2_data$Cluster = right_order[y2_data$Cluster]
+  right_order = max.col(lens, "first")
+
+  if (!any(duplicated(right_order)))  y2_data$Cluster = right_order[y2_data$Cluster]
   assign(paste0("plot_data_", combis[cb,2]), y2_data)
-  print(cb)
+  #print(cb)
 }
 
 # Save resulting plot data
@@ -149,7 +149,46 @@ plot_grid(sankey_plot_picontrol_sorted, sankey_plot_ssp126_sorted, sankey_plot_s
 ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/clusters_with_years_",pid,".pdf"), width = 15, height = 10)
 ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/clusters_with_years_",pid,".png"), width = 15, height = 10)
 
-# Check Adjusted Rand Index (ARI) for Cluster consistency:
+
+
+# For all scenarios together
+cluster_list = list()
+
+for (iYear in c(seq(10,100,by=10))){
+  cluster_list[[iYear]] <- get(paste0("plot_data_", iYear))[, "Cluster"]
+}
+
+sankey_data = as.data.frame(do.call(cbind,cluster_list))
+colnames(sankey_data) = paste0("y", c(seq(10,100,by=10))) 
+
+sankey_data_tmp = sankey_data %>% make_long(y10,y20,y30,y40,y50,y60,y70,y80,y90,y100) 
+
+# Create Sankey plot  
+ggplot(sankey_data_tmp, aes(x = x, 
+                            next_x = next_x, 
+                            node = node, 
+                            next_node = next_node,
+                            fill = factor(node)))  +
+  labs(x = "Years after disturbance",
+       y = NULL,
+       fill = "Cluster",
+       color = NULL) +
+  geom_sankey(flow.alpha = .6,
+              node.color = "gray30") +
+  #geom_sankey_label(size = 3, color = "white", fill = "gray40") +
+  scale_fill_discrete(drop=FALSE) + ggtitle("Cluster development over time for all scenarios combined") +
+  theme_bw() +
+  theme(plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+        text = element_text(size = 15),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()) +
+  scale_x_discrete(labels = c(seq(10,100,by=10)))
+
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/clusters_with_years_",pid,"_combined.pdf"), width = 15, height = 10)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/clusters_with_years_",pid,"_combined.png"), width = 15, height = 10)
+
+
+########### Check Adjusted Rand Index (ARI) for Cluster consistency ############
 library(mclust)
 adjusted_rand_for_consecutive_columns <- function(df) {
   n <- ncol(df)
@@ -159,30 +198,44 @@ adjusted_rand_for_consecutive_columns <- function(df) {
   }
   return(results)
 }
+pastel_colors <- c("Control" = "skyblue2",  # Light blue
+                   "SSP1-RCP2.6" = "#77DD77",    # Light green
+                   "SSP3-RCP7.0" = "#FFB347",    # Light orange
+                   "SSP5-RCP8.5" = "plum2",    # Light purple
+                   "Combined" = "grey30")  # Light red
 
 ari_values <- data.frame(
-  Year = rep(seq(10,100,by=10)[-1], 4),  # Exclude the first year as ARI is calculated between consecutive years
+  Year = rep(c(seq(10,100,by=10))[-1], 5),  # Exclude the first year as ARI is calculated between consecutive years
   ARI = c(
     round(adjusted_rand_for_consecutive_columns(sankey_data_picontrol), 2),
     round(adjusted_rand_for_consecutive_columns(sankey_data_ssp126), 2),
     round(adjusted_rand_for_consecutive_columns(sankey_data_ssp370), 2),
-    round(adjusted_rand_for_consecutive_columns(sankey_data_ssp585), 2)
+    round(adjusted_rand_for_consecutive_columns(sankey_data_ssp585), 2),
+    round(adjusted_rand_for_consecutive_columns(sankey_data), 2)
   ),
-  Scenario = rep(c("picontrol", "ssp126", "ssp370", "ssp585"), each = 9)
+  Scenario = rep(c("picontrol", "ssp126", "ssp370", "ssp585", "Combined"), each = 9)
 )
 
 ari_values$Scenario = long_names_scenarios(ari_values$Scenario)
+ari_values$Scenario <- factor(ari_values$Scenario, levels = c("Control", "SSP1-RCP2.6", "SSP3-RCP7.0", "SSP5-RCP8.5", "Combined"))
+
 
 ggplot(ari_values, aes(x = Year, y = ARI, color = Scenario)) +
-  geom_line(linewidth = 1) +
+  geom_line(aes(linewidth = ifelse(Scenario == "Combined", 2, 1))) +  # Adjust linewidth based on Scenario
   geom_point(size = 2) +
   geom_hline(yintercept = 1, color = "darkgrey", size = 0.5) +
   labs(title = "Adjusted Rand Index (ARI) Over Time for Different Scenarios",
        x = "Years after disturbance",
        y = "Adjusted Rand Index (ARI)",
        color = "Scenario") +
-  theme_bw() + theme(text = element_text(size = 15),plot.title = element_text(size = 20, face = "bold",hjust = 0.5)) +
-  scale_x_continuous(breaks = seq(10,100,by=10)[-1])
+  theme_bw() +
+  theme(
+    text = element_text(size = 15),
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5)
+  ) +
+  scale_x_continuous(breaks = c(seq(10, 100, by = 10))[-1]) +
+  scale_linewidth_identity() +
+  scale_color_manual(values = pastel_colors)
 
 ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/ARI_clusters_with_years_",pid,".pdf"), width = 15, height = 10)
 ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/ARI_clusters_with_years_",pid,".png"), width = 15, height = 10)

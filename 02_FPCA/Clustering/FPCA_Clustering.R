@@ -33,10 +33,7 @@ end_year = 2040
 pid = 1           # Choose pid (int) or 'all'
 
 #######################
-set.seed(1)
 
-pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/Clustering/Elbow_",pid,".pdf"), width = 10, height = 10)
-par(mfrow = c(2,2))
 ## Import fd objects
 for (scen in scenarios){
   for (pft in pfts){
@@ -66,8 +63,15 @@ for (scen in scenarios){
   assign(paste0("scores.pca.", scen), scores.pca.scen)
   
   print( "Scores derived.")
-  
+}
+
+set.seed(2)
+pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/Clustering/Elbow_",pid,".pdf"), width = 10, height = 10)
+par(mfrow = c(2,2))
+for (scen in scenarios){
   ## Clustering of the coefficients for different k
+  
+  scores.pca.scen = get(paste0("scores.pca.", scen))
   wcss <- sapply(1:10, function(k) {
     kmeans(scores.pca.scen, centers = k)$tot.withinss
   })
@@ -85,19 +89,12 @@ dev.off()
 
 # Save as png as well
 set.seed(2)
-
 png(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/Clustering/Elbow_",pid,".png"), width = 1000, height = 1000)
-pdf(paste0("Scripts/Plots/FPCA/PCs_",start_year, "_", end_year,"/Clustering/Elbow_",pid,".pdf"), width = 10, height = 10)
-
 par(mfrow = c(2,2))
-## Import fd objects
 for (scen in scenarios){
+  ## Clustering of the coefficients for different k
   
   scores.pca.scen = get(paste0("scores.pca.", scen))
-  
-  print( "Scores derived.")
-  
-  ## Clustering of the coefficients for different k
   wcss <- sapply(1:10, function(k) {
     kmeans(scores.pca.scen, centers = k)$tot.withinss
   })
@@ -112,6 +109,8 @@ for (scen in scenarios){
   mtext("Elbow Plots for k-means Clustering", side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1)
 }
 dev.off()
+
+
 
 
 ## Look at correlations between scores 

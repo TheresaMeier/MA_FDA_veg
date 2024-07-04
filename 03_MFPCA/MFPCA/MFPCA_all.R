@@ -7,7 +7,7 @@
 ## Set working directory and get plotting functions
 setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
 source("Scripts/MA_FDA_veg/02_FPCA/functions.R")
-# source("Scripts/MA_FDA_veg/03_MFPCA/MFPCA/MFPCA_calculation.R")
+source("Scripts/MA_FDA_veg/03_MFPCA/MFPCA/MFPCA_calculation.R")
 source("Scripts/MA_FDA_veg/01_Description/utils.R")
 
 ## Load libraries
@@ -94,13 +94,13 @@ if(createFunData){
 if (runMFPCA){
   multiFun_pft = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/funData_all_1803.rds")
   
-  uniExpansions <- list(list(type = "uFPCA", npc = 4),
-                        list(type = "uFPCA", npc = 4),
-                        list(type = "uFPCA", npc = 4),
-                        list(type = "uFPCA", npc = 4),
-                        list(type = "uFPCA", npc = 4))
+  uniExpansions <- list(list(type = "uFPCA", npc = 10),
+                        list(type = "uFPCA", npc = 10),
+                        list(type = "uFPCA", npc = 10),
+                        list(type = "uFPCA", npc = 10),
+                        list(type = "uFPCA", npc = 10))
   
-  MFPCA_all <- MFPCA(multiFun_pft, M = M, fit = TRUE, uniExpansions = uniExpansions)
+  MFPCA_all <- MFPCA_2(multiFun_pft, M = M, fit = TRUE, uniExpansions = uniExpansions)
   saveRDS(MFPCA_all, paste0("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/MFPCA_all_1803_100y.rds"))
 }
 
