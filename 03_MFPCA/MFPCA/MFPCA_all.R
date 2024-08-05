@@ -193,11 +193,11 @@ d_plot = as.data.frame(cbind("year" = rep(c(1:100),20), "value" = list_var, "Clu
 ggplot(d_plot) + 
   geom_line(data = d_plot, aes(x = year, y = value, col = Cluster), lwd = 2) +
   facet_grid(rows = vars(PFT)) + 
-  scale_y_continuous(name = "Share of above ground carbon") + 
+  scale_y_continuous(name = "Share of aboveground carbon") + 
   scale_x_continuous(name = "Year after Disturbance", breaks = seq(0,100,by=10), limits = c(0,100)) +
   scale_color_manual(name = "Cluster", values = c("1" = "#F8766D", "2" = "#7CAE00" , "3" = "#00BFC4", "4" = "#C77CFF", "5" = "darkgrey"), labels = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5")) +
   theme_bw() + theme(text = element_text(size = 15),plot.title = element_text(size = 20, face = "bold",hjust = 0.5)) +
-  ggtitle("Cluster-wise mean share of above ground carbon over time")
+  ggtitle("Cluster-wise mean share of aboveground carbon over time")
 
 ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/cluster_means_per_cluster_",pid,".pdf"), width = 15, height = 10)
 ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/cluster_means_per_cluster_",pid,".png"), width = 15, height = 10)
@@ -210,16 +210,16 @@ d_plot = d_plot %>%
 ggplot(d_plot) + 
   geom_line(data = d_plot, aes(x = year, y = value, col = PFT), lwd = 2) +
   facet_grid(rows = vars(Cluster)) + 
-  scale_y_continuous(name = "Share of above ground carbon") + 
+  scale_y_continuous(name = "Share of aboveground carbon") + 
   scale_x_continuous(name = "Year after Disturbance", breaks = seq(0,100,by=10), limits = c(0,100)) +
   scale_color_manual(name = "Dominant vegetation", drop = TRUE,
                      values = c("Temperate broadleaf" = "#D55E00", "Pioneering broadleaf" = "#E69F00",  "Needleleaf evergreen" = "#0072B2",   
                                 "Conifers (other)" = "#56B4E9", "Tundra" = "#009E73")) +
-  theme_bw() + theme(text = element_text(size = 15),plot.title = element_text(size = 20, face = "bold",hjust = 0.5)) +
-  ggtitle("PFT-wise mean share of above ground carbon over time")
+  theme_bw() + theme(text = element_text(size = 20), plot.title = element_text(size = 20, face = "bold",hjust = 0.5)) +
+  ggtitle("PFT-wise mean share of aboveground carbon over time")
 
 
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/cluster_means_per_PFT_",pid,".pdf"), width = 15, height = 10)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/cluster_means_per_PFT_",pid,".pdf"), width = 10, height = 6)
 ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/cluster_means_per_PFT_",pid,".png"), width = 15, height = 10)
 
 
@@ -264,18 +264,20 @@ ggsave(paste0("Scripts/Plots/MFPCA/PC1vsPC2/png/PC1_vs_PC2_",pid,"_scenarios_clu
 ######################### Plot principal components ############################
 
 # Plot 10 first PCs
-for (iPC in (1:M)){
-  pdf(paste0("Scripts/Plots/MFPCA/PCs/pdf/PCs_PC", iPC, ".pdf"), width = 15, height = 5)
-  plot(MFPCA_all, plotPCs = iPC, combined = TRUE, xlab = paste("Year after Disturbance"), xlim = c(1,100), ylab = "PFT", cex = 1.5)
-  #mtext(paste("PC", iPC, "for all four scenarios"), side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1.1)
+for (iPC in (1:2)){
+  pdf(paste0("Scripts/Plots/MFPCA/PCs/pdf/PCs_PC", iPC, "_Presentation.pdf"), width = 15, height = 5)
+  plot.MFPCAfit_2(MFPCA_all, plotPCs = iPC, combined = TRUE, xlab = paste("Year after Disturbance"), 
+                  xlim = c(1,100), ylab = "Share of aboveground carbon", cex.main = 2, cex.lab = 1.5,
+                  cols = c("#0072B2", "#E69F00", "#56B4E9",  "#D55E00", "#009E73"),
+                  main = long_names_pfts(tolower(pfts)))
   
   dev.off()
   
-  png(paste0("Scripts/Plots/MFPCA/PCs/png/PCs_PC", iPC, ".png"), width = 1500, height = 500)
-  plot(MFPCA_all, plotPCs = iPC, combined = TRUE, xlab = paste("Year after Disturbance"), xlim = c(1,100), ylab = "PFT", cex = 1.5)
-  #mtext(paste("PC", iPC, "for all four scenarios"), side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1.1)
-  
-  dev.off()
+  # png(paste0("Scripts/Plots/MFPCA/PCs/png/PCs_PC", iPC, ".png"), width = 1500, height = 500)
+  # plot(MFPCA_all, plotPCs = iPC, combined = TRUE, xlab = paste("Year after Disturbance"), xlim = c(1,100), ylab = "PFT", cex = 1.5)
+  # #mtext(paste("PC", iPC, "for all four scenarios"), side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1.1)
+  # 
+  # dev.off()
 }
 
 ######################## Plot reconstructed curves #############################
@@ -401,4 +403,56 @@ png(paste0("Scripts/Plots/MFPCA/PCs/png/screeplot_",pid, ".png"),width = 1000, h
 screeplot(MFPCA_all, main = "Screeplot of MFPCA", cex = 1.3)
 dev.off()
 
+#################### Means per Cluster with original curves ####################
+d_picontrol = get_data_scenario("picontrol", 2015, 2040, "cmass", 1)
+d_ssp126 = get_data_scenario("ssp126", 2015, 2040, "cmass", 1)
+d_ssp370 = get_data_scenario("ssp370", 2015, 2040, "cmass", 1)
+d_ssp585 = get_data_scenario("ssp585", 2015, 2040, "cmass", 1)
+
+df_trajectories = purrr::reduce(list(d_picontrol, d_ssp126, d_ssp370, d_ssp585), bind_rows) %>%
+  mutate(PFT = long_names_pfts(tolower(PFT))) # make pft names pretty
+
+df_trajectories = df_trajectories %>%
+  filter(age > 0 & age < 101)
+
+locs_disturbed$name = locs_disturbed$Scenario
+
+merged_df <- merge(df_trajectories, locs_disturbed[,c(1,2,5,6)], by = c('Lon', 'Lat', 'name'), all.x = TRUE)
+
+# Step 2: Create the Cluster column in df_large based on the merged data
+df_large$Cluster <- merged_df$Cluster
+
+df_mean = merged_df %>%
+  group_by(age, PFT, Cluster) %>%
+  summarize(relative = mean(relative, na.rm = T)) 
+
+merged_df = merged_df %>%
+  mutate(Cluster = if_else(Cluster == 1,"Cluster 1",
+                           if_else(Cluster == 2, "Cluster 2", 
+                                   if_else(Cluster == 3, "Cluster 3",
+                                           if_else(Cluster == 4, "Cluster 4", NA)))))
+
+# Assuming 'd_plot' represents the data frame containing the lines you want to highlight
+
+ggplot(merged_df) + 
+  geom_line(data = merged_df, linewidth = .05, alpha = .15,
+            aes(x = age, y = relative, color = PFT, group = interaction(Lon, Lat, PID, PFT))) +
+  geom_path(data = d_plot, aes(x = year, y = value, color = PFT, group = PFT), size = 1.5, color = "black") +  # Thick black outline
+  geom_line(data = d_plot, aes(x = year, y = value, color = PFT, group = PFT), size = 1) +  # Thinner lines on top
+  facet_grid(rows = vars(Cluster)) +
+  scale_x_continuous(name = "Year after disturbance", expand = c(0, 0), limits = c(0, 100)) +
+  scale_y_continuous(name = "Share of aboveground carbon", expand = c(0, 0),
+                     breaks = c(0.25, 0.50, 0.75, 1.00)) +
+  scale_color_manual(name = "Dominant vegetation", drop = TRUE,
+                     values = c("Temperate broadleaf" = "#D55E00", "Pioneering broadleaf" = "#E69F00", "Needleleaf evergreen" = "#0072B2",   
+                                "Conifers (other)" = "#56B4E9", "Tundra" = "#009E73")) +
+  theme_bw() + 
+  theme(
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5)
+  ) +
+  ggtitle("PFT-wise mean share of aboveground carbon over time")
+
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/cluster_means_per_PFT_all.pdf"), width = 15, height = 10)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/cluster_means_per_PFT_all.png"), width = 15, height = 10)
 

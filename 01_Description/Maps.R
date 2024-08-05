@@ -17,8 +17,8 @@ con = dbConnect(duckdb(), dbdir = "Data/patches.duckdb", read_only = FALSE)
 dbListTables(con)
 
 # Replace 'YOUR_API_KEY' with your actual API key
-register_google(key = "AIzaSyATIWAZ4gtgJhdH6GP_E8iSubdFh6XQ32Y")
-
+# register_google(key = "AIzaSyATIWAZ4gtgJhdH6GP_E8iSubdFh6XQ32Y")
+register_google(key = "AIzaSyA_eUpOhj7hoPyzyynWvyMqcGEA1Z_SZVY")
 scenarios = c("picontrol", "ssp126", "ssp370", "ssp585")
 
 # Get map

@@ -142,7 +142,7 @@ Prior to running the model, the data was split into test and train data sets. In
 
 ***
 
-The basis functions estimated by the MFPCA for the target can now be used to transform the predicted PC scores of the unseen data into functional data. As an example, Figure shows for four randomly picked disturbed grid cells, one for each scenario, the true functional fit and the predicted one from the model.
+The basis functions estimated by the MFPCA for the target can now be used to transform the predicted PC scores of the unseen data into functional data. As an example, Figure 10 shows for four randomly picked disturbed grid cells, one for each scenario, the true functional fit and the predicted one from the model.
 
 ***
 

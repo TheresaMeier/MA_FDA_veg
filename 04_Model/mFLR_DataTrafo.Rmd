@@ -1,0 +1,374 @@
+---
+title: "Analyzing the effects of climate change on vegetation dynamics using functional data analysis"
+author: "Theresa Meier, 10.07.2024"
+output: html_document
+---
+
+***
+
+## Functional Linear Regression - Attempts to improve the model fit
+
+***
+
+Recall that the residuals in the first model attempt were rather structured, indicating a major issue in the model of unknown source. In order to address for this structure and to improve the general model fit in the process, several model modifications are proposed. These include the transformation of the target functions, adding more PCs of the climate variables, adding non-linear effects and checking for possible interactions.
+
+As a reminder, the summary output of the initial model is given here:
+
+***
+
+```{r echo=FALSE}
+setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
+lm_1 = readRDS("Scripts/MA_FDA_veg/04_Model/ModelRDS/lm_1.rds")
+summary(lm_1)
+```
+
+***
+
+Figure 1 shows the residuals and Q-Q plots from last week:
+
+***
+
+![**Figure 1:** Model residuals and Q-Q plots for both predicted PCs (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/residuals.png)
+
+***
+
+Figure 2 shows the true PC scores vs. the predicted PC scores for the test set.
+
+***
+
+![**Figure 2:** True vs. fitted PC scores for unseen data. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/True_vs_fitted_test.png)
+
+***
+
+Figure 3 shows for four randomly picked disturbed grid cells, one for each scenario, the true functional fit and the predicted one from the model.
+
+***
+
+![**Figure 3:** True functional fit and predicted functional fit for four different example grid cells, one for each scenario. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/True_vs_fitted_examples.png)
+
+***
+
+### 1. Removing covariates
+As a first step to improve the model and to address the structure in the residuals, several configurations of covariates are tested, here as linear effects. None of these attempts improved the model substantially. It became clear that no matter which variables are in the model, the structure in the residuals is present. This leads to the conclusion that not one (or multiple) covariates are responsible, but rather the target variable or the model itself.
+
+A common technique in variable selection is a stepwise approach based on AIC. In particular this means that for each considered variable configuration, the AIC is derived by
+
+<center>
+AIC $= 2k - 2\ln{L} = 2k + n \left (r\ln{2\pi} + \ln{|\Sigma|} + r\right )$,
+</center>
+
+where $n$ is the number of observations, $k$ is the number of parameters in the model, and $r$ is the number of response variables. With that, adding and removing covariates is assessed in a stepwise manner. 
+
+The resulting model improves the AIC only marginally (from 12103 to 12099) and removes variable `recruitment_ten_years_otherC`. Removing this covariate only is not an option though, since eather all five `recruitment_ten_years` variables should be included, or none of the five. In addition, removing this covariate does not account for the structured residuals.
+
+Note that in this approach, only linear effects and no interactions are considered.
+
+***
+
+### 2. Data transformation: Transform the PFT shares
+As a second attempt, the shares of PFT are transformed. Recall that in the data pre-processing, the absolute amounts of aboveground carbon (`cmass`) were transformed to portions relative to all five provided PFTs, i.e., all values are in the interval $[0,1]$ and these values are the input for the MFPCA in the subsequent step. Now, two different approaches based on transformed values are explored: first, we take a look at transforming the probabilities, denoted as $\mathbf{p} = (p_\text{BNE}, p_\text{IBS}, p_\text{otherC}, p_\text{TeBS}, p_\text{Tundra}) = (p_1,p_2,p_3,p_4,p_5)$ with the softmax function. Second, we fit the model using the initial absolute values of `cmass`.
+
+#### 2.1 Transformation via Softmax Function
+The softmax function is given as
+<center>
+$p_i = \frac{e^{x_i}}{\sum_{j=1}^5 e^{x_j}}$, $i=1,...,5$.
+</center>
+
+Rearranging this equation to isolate $x_i$ yields
+
+
+<center>
+$x_i = \log(p_i) + \log\left(\sum_{j=1}^5 e^{x_j}\right) =: \log(p_i) + C$, $i = 1,...,5$.
+</center>
+
+
+Since every $x_i$ depends on all the $x_j$, $j=1,...5$, solving for $\mathbf{x} = (x_1,x_2,x_3,x_4,x_5)$ requires constraints on the calculation. Two possible constraints are examined in more detail in the following:
+
+  - Constrain $C$ to be zero, i.e.:
+  <center>
+  $\sum_{j=1}^5 e^{x_j} = 0 \quad \rightarrow \quad x_i = \log(p_i), \quad i = 1, ..., 5$.
+  </center>
+  - Choose a reference category (e.g., Tundra): 
+  <center>
+  $x_i = \log\left(\frac{p_i}{p_5}\right), \quad i = 1,..., 4, \quad x_5 = 0.$
+  </center>  
+
+The second approach is not valid in this case. Choosing one reference category implies setting one of the five data matrices of dimension $n_\text{locations} \times 100$ equal to 0, making it impossible to derive a proper eigendecomposition of the data. That is, a MFPCA cannot longer be performed. Consequently, this analysis focuses on the first approach. Since some of the shares are equal to 0, the transformation is set to 
+<center>
+$x_i = \log(1+p_i), \quad i = 1, ..., 5$
+</center>
+in order to avoid computation errors.
+
+Another possibility would be to apply a Newton-Raphson approximation to some initial (guessed) values of $\mathbf{x}$. This approach is not tested yet.
+
+The model output for the log-transformed possibilities is given here:
+
+***
+
+```{r echo=FALSE}
+setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
+lm_2 = readRDS("Scripts/MA_FDA_veg/04_Model/ModelRDS/lm_1_log.rds")
+summary(lm_2)
+```
+
+***
+
+Unfortunately, this transformation does not solve the initial problem of structured residuals. Looking at Figure 4 still reveals some structure:
+
+***
+
+![**Figure 4:** Model residuals and Q-Q plots for both predicted PCs for log-transformed probabilities (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/residuals_log.png)
+
+***
+
+Interestingly, the plot only deviates slightly from the residuals for the non-transformed PFT-shares (Figure 1). But it should be noted that the scale of the residuals decreases.
+
+***
+
+![**Figure 5:** True vs. fitted PC scores for unseen data with log-transformed PFT-shares. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/True_vs_fitted_test_log.png)
+
+***
+
+Finally, Figure 6 shows the resulting functional fit for four randomly chosen disturbed grid cells:
+
+***
+
+![**Figure 6:** True functional fit and predicted functional fit for four different example grid cells, one for each scenario, and log-transformed PFT-shares. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/True_vs_fitted_examples_log.png)
+
+***
+
+Also here the differences are rather small.
+
+**Questions here:** This was to be expected, right? The log-transformation only does not solve the problem. How else could $\mathbf{p}$ be transformed? Newton-Raphson?
+
+***
+
+#### 2.2 Taking absolute values of aboveground carbon instead of portions
+Second, the absolute values of aboveground carbon are used for MFPCA and model fitting. First, let's take a look at the model summary:
+
+***
+
+```{r echo=FALSE}
+setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
+lm_3 = readRDS("Scripts/MA_FDA_veg/04_Model/ModelRDS/lm_1_cmass.rds")
+summary(lm_3)
+```
+
+***
+
+Again, this modification does not improve the initial residual problem, as Figure 7 indicates:
+
+***
+
+![**Figure 7:** Model residuals and Q-Q plots for both predicted PCs for absolute `cmass` values (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/residuals_cmass.png)
+
+***
+
+Now, the residuals clearly follow a different structure than before, but are still bounded. Figure 8 shows again the accuracy of the predictions on unseen data:
+
+***
+
+![**Figure 8:** True vs. fitted PC scores for unseen data for absolute `cmass` values. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/True_vs_fitted_test_cmass.png)
+
+***
+
+Now, let's take a look at functional predictions. Since the targets are total values of aboveground carbon, the general curve behavior of course deviates from the usual one.
+
+***
+
+![**Figure 9:** True functional fit and predicted functional fit for four different example grid cells, one for each scenario, and absolut `cmass` values. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/True_vs_fitted_examples_cmass.png)
+
+***
+
+In order to compare this fit to the fits from the two models above, the predicted `cmass` values are transformed into proportions. One issue arises when choosing this approach: when transforming the predicted `cmass` values to shares, there appear some negative `cmass` values. In this approach, all negative shares are set to 0 which of course induces additional bias. This procedure was applied when deriving Figure 10:
+
+***
+
+![**Figure 10:** True functional fit and predicted functional fit for four different example grid cells, one for each scenario, and absolut `cmass` values transformed to proportions. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/True_vs_fitted_examples_cmass_shares.png)
+
+***
+
+For these example grid cells, the fit seems more appropriate than for the first two models.
+
+***
+
+### 3. Include more PCs for both temperature and precipitation
+
+Several numbers of PCs were checked with no change to the structural residuals. Therefore, the model outputs and corresponding plots are not reported here.
+
+### 4. Check for non-linear effects: Fitting an additive model
+
+Several combinations of smooth effects were tested. For variables `Lon` and `PC1_temp` it might make sense to include additive effects. However, this does not change the structural behavior. The output of the model is given in the following:
+
+***
+
+```{r echo=FALSE}
+setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
+gam_1 = readRDS("Scripts/MA_FDA_veg/04_Model/ModelRDS/gam_1.rds")
+summary(gam_1)
+```
+
+***
+
+![**Figure 11:** Smooth effects of both covariates `Lon` and `PC1_temp` for the additive model (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/gam_1_smooth_effect.png)
+
+***
+
+Figure 11 shows the residuals and Q-Q plots. Again, there is no major difference to the residuals and Q-Q plots from Figure 1.
+
+***
+
+![**Figure 12:** Model residuals and Q-Q plots for both predicted PCs for the gam (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/residuals_gam.png)
+
+***
+
+The two plots indicating the goodness of prediction are leaved out here.
+
+***
+
+### 5. Check for interactions
+To improve the general model fit, several interaction terms are evaluated:
+
+- `Lon` - `Lat`: small effects, significant for both PCs
+- `sand_fraction` - `silt_fraction`: very small effects, significant for PC 1 only
+- `PC1_temp` - `PC1_precip`: medium effects, significant for PC 2 only
+
+These interactions result from 'logical' considerations, but should be double-checked with Lucia.
+
+The model output is given by:
+
+***
+```{r echo=FALSE}
+setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
+lm_4 = readRDS("Scripts/MA_FDA_veg/04_Model/ModelRDS/lm_1_interaction.rds")
+summary(lm_4)
+```
+
+***
+
+Since the residuals and the prediction accuracy hardly changes, these plots are left out here.
+
+***
+
+### 6. Models for single PFTs
+In order to assess whether considering the PFTs separately might mitigate the structure, the initial model is fitted to FPCA scores using one PFT at a time. The following figures show the residuals for each PFT.
+
+***
+
+![**Figure 13:** Model residuals and Q-Q plots for both predicted PCs for PFT *Needleleaf evergreen* (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/residuals_BNE.png)
+
+***
+
+![**Figure 14:** Model residuals and Q-Q plots for both predicted PCs for PFT *Pioneering broadleaf* (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/residuals_IBS.png)
+
+***
+
+![**Figure 15:** Model residuals and Q-Q plots for both predicted PCs for PFT *Conifers (other)* (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/residuals_otherC.png)
+
+***
+
+![**Figure 16:** Model residuals and Q-Q plots for both predicted PCs for PFT *Temperate broadleaf* (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/residuals_TeBS.png)
+
+***
+
+![**Figure 17:** Model residuals and Q-Q plots for both predicted PCs for PFT *Tundra* (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/residuals_Tundra.png)
+
+***
+
+Interestingly, the general residual shape in Figure 1 resembles strongly to that of both *Needleleaf evergreen* and *Pioneering broadleaf* in Figures 13 and 14, respectively. However, the residuals are bounded for all five PFTs, but they differ strongly in the shape of the structure.
+
+
+### 7. Models for the original data
+One possible explanation for the structured residuals is that the model is not compatible with the MFPCA scores. In order to investigate this further, the model is fit to the original data. Clearly, this is not possible for the whole data set, but the model can be fed with shares of specific time points and specific PFTs. Since the analysis above indicated a strong influence of *Needleleaf evergreen* (BNE), in the following, this PFT is considered for different time points. Figure 18 shows the residuals for five different time points, namely after 20, 40, 60, 80 and 100 years of recovery.
+
+***
+
+![**Figure 18:** Model residuals and Q-Q plots for five different time points and PFT *Needleleaf evergreen* (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/residuals_orig.png)
+
+***
+
+Apparently, the longer the recovery period, the more this structure becomes apparent. So the thought of MFPCA scores are not compatible with the model is not confirmed.
+
+This leads to the question: If it is not the target data, nor non-linear or interaction effects, and not because of the FPCA scores for temperature and precipitation - what else could be the reason for the structured residuals?
+
+**Conclusion**
+
+After the attempts above and even more non-shown here to mitigate the structure in the residuals, the question, why the residuals show this structure, remains. However, I can think of two possible reasons:
+
+- The data is simulated and therefore interdependent. Maybe this first model attempt unfolds these dependencies which results in the observed structures?
+- Maybe the model in general is not appropriate and other techniques for functional data should be applied to that kind of data?
+
+***
+
+## Appendix
+### A.1 AIC values for all presented approaches
+The following table shows AIC values for all presented approaches. Clearly, the additive model wins in terms of lowest values, while the model fitted to the absolute `cmass' values has twice the AIC values.
+
+***
+
+```{r echo=FALSE, results='asis'}
+library(knitr)
+
+df = as.data.frame(t(cbind("AIC" = c(12103, 12099, 10251, 24927, 8382, 12020))))
+colnames(df) = c("Initial model", "Stepwise selection", "Softmax", "Absolute cmass", "Additive model", "Interactions")
+kable(df)
+```
+
+***
+
+### A.2 Further Residual Plots
+Here, each covariate is plotted against the residuals for the first model:
+
+***
+
+![**Figure 19:** Residuals for location covariates (Lon and Lat; on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/Resid_location.png)
+
+***
+
+![**Figure 20:** Residuals for soil composition (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/Resid_soil_composition.png)
+
+***
+
+![**Figure 21:** Residuals for soil attributes (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/Resid_soil_attributes.png)
+
+***
+
+![**Figure 22:** Residuals for initial recruitment (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/Resid_initial_recruitment.png)
+
+***
+
+![**Figure 23:** Residuals for recruitment after ten years (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/Resid_recruitment_ten_years.png)
+
+***
+
+![**Figure 24:** Residuals for previous vegetation (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/Resid_previous_state.png)
+
+***
+
+![**Figure 25:** Residuals for climate FPCA scores (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/Resid_climate.png)
+
+***
+
+### A.3 First two PCs of target MFPCA for interpretation
+
+***
+
+![**Figure 26:** First PC of target variable: BNE, IBS, otherC, TeBS, Tundra. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/PCs/png/PCs_PC1.png)
+
+***
+
+![**Figure 27:** Second PC of target variable: BNE, IBS, otherC, TeBS, Tundra. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/PCs/png/PCs_PC2.png)
+
+***
+
+### A.4 Spatial distribution of residuals
+
+***
+
+![**Figure 28:** Spatial distribution of residuals corresponding to the first PC. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/Map_residuals_PC1.png)
+
+***
+
+![**Figure 29:** Spatial distribution of residuals corresponding to the second PC. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/Map_residuals_PC2.png)
+
+***

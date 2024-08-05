@@ -22,17 +22,12 @@ library(funData)
 library(abind)
 library(tidyverse)
 library(RColorBrewer)
+library(rlang)
 
 scenarios = c("picontrol", "ssp126", "ssp370", "ssp585")
 
-# The data provided can be classified into these four groups:
-# - PFT-dependent and time-varying: Nuptake
-# - PFT-dependent only: initial_recruitment, recruitment_ten_years, previous_state, time_since_dist
-# - time-varying only: tas_yearlymax, tas_yearlymin, tas_yearlsmeam, pr_yearlysum, Nuptake_total
-# - Location dependent only: sand_fraction, silt_fraction, clay_fraction, bulkdensity_soil, ph_soil, soilcarbon
-
 #######################
-## Get 450 different colors for plotting
+## Get different colors for plotting
 
 palettes <- c("Set1", "Set2", "Set3", "Dark2", "Paired", "Accent")
 all_colors <- character()
@@ -62,11 +57,23 @@ for (scen in scenarios){
              tas_yearlymax, tas_yearlymin, tas_yearlymeam, pr_yearlysum) %>%
     mutate(Scenario = long_names_scenarios(scen))
   
-  assign(paste0("d_climate_", scen), d_climate_scen)
+  d_nuptake_PFT = d_scen_2015_2040 %>%
+    filter(PID == pid) %>%
+    distinct(Lon, Lat, age, PFT, Nuptake) %>%
+    mutate(Scenario = long_names_scenarios(scen))
   
+  assign(paste0("d_climate_", scen), d_climate_scen)
+  assign(paste0("d_nuptake_PFT_", scen), d_nuptake_PFT)
 }
 
 d_climate = rbind(d_climate_picontrol,d_climate_ssp126, d_climate_ssp370, d_climate_ssp585)
+
+
+d_nuptake_PFT = rbind(d_nuptake_PFT_picontrol,
+                      d_nuptake_PFT_ssp126, 
+                      d_nuptake_PFT_ssp370, 
+                      d_nuptake_PFT_ssp585)
+
 
 ############################### Perform MFPCA ##################################
 ## Get functional fit
@@ -78,433 +85,320 @@ d_climate = d_climate %>%
 
 d_climate = d_climate[!duplicated(d_climate),]
 
+d_nuptake_PFT = d_nuptake_PFT %>%
+  filter(age <= 100 & age > 0)
+
+d_nuptake_PFT = d_nuptake_PFT[!duplicated(d_nuptake_PFT),]
+
+d_nuptake_PFT_wide <- d_nuptake_PFT %>%
+  pivot_wider(names_from = PFT, values_from = c(Nuptake))
+
 # store Lon/Lat values
 locs_climate = d_climate %>% distinct(Lon,Lat,Scenario)
 
-# Get wider format
+### Get wider format
+names.dfs = c("temp", "temp_min", "temp_max", "precip", "nuptake_total",
+              "nuptake_BNE", "nuptake_IBS", "nuptake_otherC", "nuptake_TeBS", "nuptake_Tundra")
 
-d_climate_temp_wide <- d_climate %>%
-  distinct(Lon,Lat, age, tas_yearlymeam, Scenario) %>%
-  pivot_wider(names_from = c(Lon,Lat,Scenario), values_from = tas_yearlymeam) %>%
-  arrange(age) %>%
-  rename_with(~ gsub("_", "/", .), everything()) 
+names.vars = c("tas_yearlymeam", "tas_yearlymin", "tas_yearlymax", "pr_yearlysum", "Nuptake_total",
+               "BNE", "IBS", "otherC", "TeBS", "Tundra")
 
+for (i in 1:5) {
+  var <- names.vars[i]
+  
+  d_climate_wide <- d_climate %>%
+    distinct(Lon, Lat, age, !!sym(var), Scenario) %>%
+    pivot_wider(names_from = c(Lon, Lat, Scenario), values_from = !!sym(var)) %>%
+    arrange(age) %>%
+    rename_with(~ gsub("_", "/", .), everything()) 
+  
+  assign(paste0("d_climate_", names.dfs[i], "_wide"), d_climate_wide)
+  
+  # Get funData objects
+  funData_obj = funData(argvals = 1:100, X = t(d_climate_wide[,-1]))
+  assign(paste0("funData_", names.dfs[i]), funData_obj)
+  saveRDS(funData_obj, paste0("Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/funData_",names.dfs[i],".rds"))
+  
+  ## Run MFPCA
+  MFPCA_climate = MFPCA_2(multiFunData(funData_obj), M = 6, uniExpansions = list(list(type = "uFPCA", npc = 10)), fit = TRUE)
+  if (i == 1 || i == 4){
+    MFPCA_climate$functions@.Data[[1]]@X = - MFPCA_climate$functions@.Data[[1]]@X
+    MFPCA_climate$scores = - MFPCA_climate$scores
+  }
+  assign(paste0("MFPCA_", names.dfs[i]), MFPCA_climate)
+  
+  
+  saveRDS(MFPCA_climate, paste0("Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/MFPCA_", names.dfs[i], ".rds"))
+  print(var)
+  print(round(MFPCA_climate$values[1:10]/sum(MFPCA_climate$values) *100,3))
+}
 
-d_climate_precip_wide <- d_climate %>%
-  distinct(Lon,Lat, age, pr_yearlysum, Scenario) %>%
-  pivot_wider(names_from = c(Lon,Lat,Scenario), values_from = pr_yearlysum) %>%
-  arrange(age) %>%
-  rename_with(~ gsub("_", "/", .), everything()) 
+for (i in 6:10) {
+  var <- names.vars[i]
 
-# Get funData objects
-funData_temp = funData(argvals = 1:100, X = t(d_climate_temp_wide[,-1]))
-funData_precip = funData(argvals = 1:100, X = t(d_climate_precip_wide[,-1]))
-funData_all = multiFunData(funData_temp, funData_precip)
+  d_nuptake_PFT <- t(d_nuptake_PFT_wide %>%
+                                distinct(Lon, Lat, age, !!sym(var), Scenario) %>%
+                                pivot_wider(names_from = c(Lon, Lat, Scenario), values_from = !!sym(var)) %>%
+                                arrange(age) %>%
+                                rename_with(~ gsub("_", "/", .), everything()) %>%
+                                select(-age))
+  
+  
+  assign(paste0("d_nuptake_", names.dfs[i], "_wide"), d_nuptake_PFT)
+  
+  # Get funData objects
+  funData_obj = funData(argvals = 1:100, X = d_nuptake_PFT)
+  assign(paste0("funData_", names.dfs[i]), funData_obj)
+  saveRDS(funData_obj, paste0("Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/funData_",names.dfs[i],".rds"))
+  
+  ## Run MFPCA
+  MFPCA_climate = MFPCA_2(multiFunData(funData_obj), M = 6, uniExpansions = list(list(type = "uFPCA", npc = 10)), fit = TRUE)
+  assign(paste0("MFPCA_", names.dfs[i]), MFPCA_climate)
+  
+  saveRDS(MFPCA_climate, paste0("Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/MFPCA_", names.dfs[i], ".rds"))
+  print(var)
+  print(round(MFPCA_climate$values[1:10]/sum(MFPCA_climate$values) *100,3))
+}
 
-saveRDS(funData_temp, "Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/funData_temp.rds")
-saveRDS(funData_precip, "Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/funData_precip.rds")
-saveRDS(funData_all, "Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/funData_all.rds")
+############# Plot the functional fits including mean functions ################
 
-## Run MFPCA
-uniExpansions <- list(list(type = "uFPCA", npc = 10),
-                      list(type = "uFPCA", npc = 10))
-
-MFPCA_climate = MFPCA_2(funData_all, M = 8, uniExpansions = uniExpansions, fit = TRUE, approx.eigen = FALSE)
-
-MFPCA_temp = MFPCA_2(multiFunData(funData_temp), M = 8, uniExpansions = list(list(type = "uFPCA", npc = 10)), fit = TRUE)
-MFPCA_precip = MFPCA_2(multiFunData(funData_precip), M = 8, uniExpansions = list(list(type = "uFPCA", npc = 10)), fit = TRUE)
-
-saveRDS(MFPCA_temp, "Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/MFPCA_temp.rds")
-saveRDS(MFPCA_precip, "Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/MFPCA_precip.rds")
-saveRDS(MFPCA_climate, "Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/MFPCA_climate.rds")
-
-# Variance which is accounted for:
-round(MFPCA_climate$values[1:10]/sum(MFPCA_climate$values) *100,3)
-round(MFPCA_temp$values[1:10]/sum(MFPCA_temp$values) *100,3)
-round(MFPCA_precip$values[1:10]/sum(MFPCA_precip$values) *100,3)
-
-## Plot the functional fits including mean functions
 bounds = t(matrix(c(1,434,435,876,877,1338,1339,1803), nrow = 2))
 
-# Precipitation
-pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/BasisRep/BasisRep_precip.pdf"), width = 8, height = 6.5)
-plot(funData_precip, col = pal(1803)[1:1803],
-     xlim = c(1,100), type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = bquote("Yearly precipitation in kg/m"^2), 
-     main = paste("Functional fit - Yearly precipitation") )
-lines(x=1:100, y = MFPCA_precip$meanFunction@.Data[[1]]@X, col = "black", lwd = 3)
-legend("topright", legend = "Mean Function", col = "black", lwd = 3)
-dev.off()
+ylabs = c("Yearly mean temperature in K", "Yearly minimum temperature in K", "Yearly maximum temperature in K",  
+          bquote("Yearly precipitation in kg/m"^2), bquote("Total nitrogen uptake per grid cell in g/m"^2),
+          bquote("Nitrogen uptake per grid cell in g/m"^2), bquote("Nitrogen uptake per grid cell in g/m"^2),
+          bquote("Nitrogen uptake per grid cell in g/m"^2), bquote("Nitrogen uptake per grid cell in g/m"^2),
+          bquote("Nitrogen uptake per grid cell in g/m"^2))
 
-# Per scenario
-pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/BasisRep/BasisRep_precip_scen.pdf"), width = 10, height = 11)
-par(mfrow =(c(2,2)))
-plot(funData_precip[1:434], col = pal(434)[1:434],
-     xlim = c(1,100), ylim = c(0,4000), type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = bquote("Yearly precipitation in kg/m"^2), 
-     main = paste("Control") )
+mains = c("Yearly average temperature", "Yearly minimum temperature", "Yearly maximum temperature",
+          "Yearly precipitation", "Total nitrogen uptake per grid cell", "Nitrogen uptake per grid cell - BNE",
+          "Nitrogen uptake per grid cell - IBS", "Nitrogen uptake per grid cell - otherC", "Nitrogen uptake per grid cell - TeBS",
+          "Nitrogen uptake per grid cell - Tundra")
 
-plot(funData_precip[bounds[2,1]:bounds[2,2]], col = pal(500)[1:500],
-     xlim = c(1,100), ylim = c(0,4000),type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = bquote("Yearly precipitation in kg/m"^2), 
-     main = paste("SSP1-RCP2.6") )
+ylims = t(matrix(c(263, 284, 210, 275, 284, 308, 0, 4000, 0, 120, 0, 45, 0, 100, 0, 42, 0, 110, 0, 68), nrow = 2))
 
-plot(funData_precip[bounds[3,1]:bounds[3,2]], col = pal(500)[1:500],
-     xlim = c(1,100), ylim = c(0,4000),type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = bquote("Yearly precipitation in kg/m"^2), 
-     main = paste("SSP3-RCP7.0") )
+for (i in seq_along(names.dfs)) {
+  var <- names.dfs[i]
+  funData_var = get(paste0("funData_", var))
+  MFPCA_var = get(paste0("MFPCA_", var))
+  
+  ## As pdf
+  pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/BasisRep/BasisRep_", var, ".pdf"), width = 8, height = 6.5)
+  par(mfrow=c(1,1))
+  plot(funData_var, col = pal(1803)[1:1803],
+       xlim = c(1,100), type = 'l',
+       cex.main = 1.5, cex = 1.3, 
+       xlab = "Year after Disturbance",
+       ylab = ylabs[i], 
+       main = paste("Functional fit -", mains[i]))
+  lines(x=1:100, y = MFPCA_var$meanFunction@.Data[[1]]@X, col = "black", lwd = 3)
+  legend("topright", legend = "Mean Function", col = "black", lwd = 3)
+  dev.off()
+  
+  pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/BasisRep/BasisRep_", var, "_scen.pdf"), width = 10, height = 11)
+  par(mfrow =(c(2,2)))
+  plot(funData_var[1:434], col = pal(434)[1:434],
+       xlim = c(1,100), ylim = c(ylims[i,1],ylims[i,2]),
+       type = 'l',
+       cex.main = 1.5, cex = 1.3, 
+       xlab = "Year after Disturbance",
+       ylab = ylabs[i], 
+       main = paste("Control") )
+  lines(x=1:100, y = colMeans(MFPCA_var$fit@.Data[[1]]@X[bounds[1,1]:bounds[1,2],]), col = "black", lwd = 3)
+  legend("topright", legend = "Mean Function", col = "black", lwd = 3)
+  
+  plot(funData_var[bounds[2,1]:bounds[2,2]], col = pal(500)[1:500],
+       xlim = c(1,100), ylim = c(ylims[i,1],ylims[i,2]),
+       type = 'l',
+       cex.main = 1.5, cex = 1.3, 
+       xlab = "Year after Disturbance",
+       ylab = ylabs[i], 
+       main = paste("SSP1-RCP2.6") )
+  lines(x=1:100, y = colMeans(MFPCA_var$fit@.Data[[1]]@X[bounds[2,1]:bounds[2,2],]), col = "black", lwd = 3)
+  legend("topright", legend = "Mean Function", col = "black", lwd = 3)
+  
+  plot(funData_var[bounds[3,1]:bounds[3,2]], col = pal(500)[1:500],
+       xlim = c(1,100), ylim = c(ylims[i,1],ylims[i,2]),
+       type = 'l',
+       cex.main = 1.5, cex = 1.3, 
+       xlab = "Year after Disturbance",
+       ylab = ylabs[i], 
+       main = paste("SSP3-RCP7.0") )
+  lines(x=1:100, y = colMeans(MFPCA_var$fit@.Data[[1]]@X[bounds[3,1]:bounds[3,2],]), col = "black", lwd = 3)
+  legend("topright", legend = "Mean Function", col = "black", lwd = 3)
+  
+  plot(funData_var[bounds[4,1]:bounds[4,2]], col = pal(500)[1:500],
+       xlim = c(1,100), ylim = c(ylims[i,1],ylims[i,2]),
+       type = 'l',
+       cex.main = 1.5, cex = 1.3, 
+       xlab = "Year after Disturbance",
+       ylab = ylabs[i], 
+       main = paste("SSP5-RCP8.5") )
+  lines(x=1:100, y = colMeans(MFPCA_var$fit@.Data[[1]]@X[bounds[4,1]:bounds[4,2],]), col = "black", lwd = 3)
+  legend("topright", legend = "Mean Function", col = "black", lwd = 3)
+  
+  mtext(paste("Functional fit -", mains[i]), side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1.5)
+  dev.off()
+  
+  ## As png
+  png(paste0("Scripts/Plots/Model/(M)FPCA/png/BasisRep/BasisRep_", var, ".png"), width = 800, height = 650)
+  par(mfrow=c(1,1))
+  plot(funData_var, col = pal(1803)[1:1803],
+       xlim = c(1,100), type = 'l',
+       cex.main = 1.5, cex = 1.3, 
+       xlab = "Year after Disturbance",
+       ylab = ylabs[i], 
+       main = paste("Functional fit -", mains[i]))
+  lines(x=1:100, y = MFPCA_var$meanFunction@.Data[[1]]@X, col = "black", lwd = 3)
+  legend("topright", legend = "Mean Function", col = "black", lwd = 3)
+  dev.off()
+  
+  png(paste0("Scripts/Plots/Model/(M)FPCA/png/BasisRep/BasisRep_", var, "_scen.png"), width = 1000, height = 1100)
+  par(mfrow =(c(2,2)))
+  plot(funData_var[1:434], col = pal(434)[1:434],
+       xlim = c(1,100), ylim = c(ylims[i,1],ylims[i,2]),
+       type = 'l',
+       cex.main = 1.5, cex = 1.3, 
+       xlab = "Year after Disturbance",
+       ylab = ylabs[i], 
+       main = paste("Control") )
+  lines(x=1:100, y = colMeans(MFPCA_var$fit@.Data[[1]]@X[bounds[1,1]:bounds[1,2],]), col = "black", lwd = 3)
+  legend("topright", legend = "Mean Function", col = "black", lwd = 3)
+  
+  plot(funData_var[bounds[2,1]:bounds[2,2]], col = pal(500)[1:500],
+       xlim = c(1,100), ylim = c(ylims[i,1],ylims[i,2]),
+       type = 'l',
+       cex.main = 1.5, cex = 1.3, 
+       xlab = "Year after Disturbance",
+       ylab = ylabs[i], 
+       main = paste("SSP1-RCP2.6") )
+  lines(x=1:100, y = colMeans(MFPCA_var$fit@.Data[[1]]@X[bounds[2,1]:bounds[2,2],]), col = "black", lwd = 3)
+  legend("topright", legend = "Mean Function", col = "black", lwd = 3)
+  
+  plot(funData_var[bounds[3,1]:bounds[3,2]], col = pal(500)[1:500],
+       xlim = c(1,100), ylim = c(ylims[i,1],ylims[i,2]),
+       type = 'l',
+       cex.main = 1.5, cex = 1.3, 
+       xlab = "Year after Disturbance",
+       ylab = ylabs[i], 
+       main = paste("SSP3-RCP7.0") )
+  lines(x=1:100, y = colMeans(MFPCA_var$fit@.Data[[1]]@X[bounds[3,1]:bounds[3,2],]), col = "black", lwd = 3)
+  legend("topright", legend = "Mean Function", col = "black", lwd = 3)
+  
+  plot(funData_var[bounds[4,1]:bounds[4,2]], col = pal(500)[1:500],
+       xlim = c(1,100), ylim = c(ylims[i,1],ylims[i,2]),
+       type = 'l',
+       cex.main = 1.5, cex = 1.3, 
+       xlab = "Year after Disturbance",
+       ylab = ylabs[i], 
+       main = paste("SSP5-RCP8.5") )
+  lines(x=1:100, y = colMeans(MFPCA_var$fit@.Data[[1]]@X[bounds[4,1]:bounds[4,2],]), col = "black", lwd = 3)
+  legend("topright", legend = "Mean Function", col = "black", lwd = 3)
+  
+  mtext(paste("Functional fit -", mains[i]), side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1.5)
+  dev.off()
+}
 
-plot(funData_precip[bounds[4,1]:bounds[4,2]], col = pal(500)[1:500],
-     xlim = c(1,100), ylim = c(0,4000),type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = bquote("Yearly precipitation in kg/m"^2), 
-     main = paste("SSP5-RCP8.5") )
-mtext("Functional fit - Yearly precipitation", side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1.5)
-dev.off()
-
-# Save as png as well
-png(paste0("Scripts/Plots/Model/(M)FPCA/png/BasisRep/BasisRep_precip.png"), width = 800, height = 650)
-plot(funData_precip, col = pal(1803)[1:1803],
-     xlim = c(1,100), type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = bquote("Yearly precipitation in kg/m"^2), 
-     main = paste("Functional fit - Yearly precipitation") )
-lines(x=1:100, y = MFPCA_precip$meanFunction@.Data[[1]]@X, col = "black", lwd = 3)
-legend("topright", legend = "Mean Function", col = "black", lwd = 3)
-dev.off()
-
-
-png(paste0("Scripts/Plots/Model/(M)FPCA/png/BasisRep/BasisRep_precip_scen.png"), width = 1000, height = 1100)
-par(mfrow =(c(2,2)))
-plot(funData_precip[1:434], col = pal(434)[1:434],
-     xlim = c(1,100), ylim = c(0,4000), type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = bquote("Yearly precipitation in kg/m"^2), 
-     main = paste("Control") )
-
-plot(funData_precip[bounds[2,1]:bounds[2,2]], col = pal(500)[1:500],
-     xlim = c(1,100), ylim = c(0,4000),type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = bquote("Yearly precipitation in kg/m"^2), 
-     main = paste("SSP1-RCP2.6") )
-
-plot(funData_precip[bounds[3,1]:bounds[3,2]], col = pal(500)[1:500],
-     xlim = c(1,100), ylim = c(0,4000),type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = bquote("Yearly precipitation in kg/m"^2), 
-     main = paste("SSP3-RCP7.0") )
-
-plot(funData_precip[bounds[4,1]:bounds[4,2]], col = pal(500)[1:500],
-     xlim = c(1,100), ylim = c(0,4000),type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = bquote("Yearly precipitation in kg/m"^2), 
-     main = paste("SSP5-RCP8.5") )
-mtext("Functional fit - Yearly precipitation", side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1.5)
-dev.off()
-
-# Mean temperature
-pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/BasisRep/BasisRep_mean_temp.pdf"), width = 8, height = 6.5)
-plot(funData_temp, col = pal(1803)[1:1803],
-     xlim = c(1,100), type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = "Yearly mean temperature in K", 
-     main = paste("Functional fit - Yearly average temperature") )
-lines(x=1:100, y = MFPCA_temp$meanFunction@.Data[[1]]@X, col = "black", lwd = 3)
-legend("topright", legend = "Mean Function", col = "black", lwd = 3)
-dev.off()
-
-pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/BasisRep/BasisRep_mean_temp_scen.pdf"), width = 10, height = 11)
-par(mfrow =(c(2,2)))
-plot(funData_temp[1:434], col = pal(434)[1:434],
-     xlim = c(1,100), ylim = c(263,284),
-     type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = "Yearly mean temperature in K", 
-     main = paste("Control") )
-
-plot(funData_temp[bounds[2,1]:bounds[2,2]], col = pal(500)[1:500],
-     xlim = c(1,100), ylim = c(263,284),
-     type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = "Yearly mean temperature in K", 
-     main = paste("SSP1-RCP2.6") )
-
-plot(funData_temp[bounds[3,1]:bounds[3,2]], col = pal(500)[1:500],
-     xlim = c(1,100), ylim = c(263,284),
-     type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = "Yearly mean temperature in K", 
-     main = paste("SSP3-RCP7.0") )
-
-plot(funData_temp[bounds[4,1]:bounds[4,2]], col = pal(500)[1:500],
-     xlim = c(1,100), ylim = c(263,284),
-     type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = "Yearly mean temperature in K", 
-     main = paste("SSP5-RCP8.5") )
-mtext("Functional fit - Yearly mean temperature", side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1.5)
-dev.off()
-
-
-# Save as png as well
-png(paste0("Scripts/Plots/Model/(M)FPCA/png/BasisRep/BasisRep_mean_temp.png"), width = 800, height = 650)
-plot(funData_temp, col = pal(1803)[1:1803],
-     xlim = c(1,100), type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = "Yearly mean temperature in K", 
-     main = paste("Functional fit - Yearly average temperature") )
-lines(x=1:100, y = MFPCA_temp$meanFunction@.Data[[1]]@X, col = "black", lwd = 3)
-legend("topright", legend = "Mean Function", col = "black", lwd = 3)
-dev.off()
-
-
-png(paste0("Scripts/Plots/Model/(M)FPCA/png/BasisRep/BasisRep_mean_temp_scen.png"), width = 1000, height = 1100)
-par(mfrow =(c(2,2)))
-plot(funData_temp[1:434], col = pal(434)[1:434],
-     xlim = c(1,100), ylim = c(263,284),
-     type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = "Yearly mean temperature in K", 
-     main = paste("Control") )
-
-plot(funData_temp[bounds[2,1]:bounds[2,2]], col = pal(500)[1:500],
-     xlim = c(1,100), ylim = c(263,284),
-     type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = "Yearly mean temperature in K", 
-     main = paste("SSP1-RCP2.6") )
-
-plot(funData_temp[bounds[3,1]:bounds[3,2]], col = pal(500)[1:500],
-     xlim = c(1,100), ylim = c(263,284),
-     type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = "Yearly mean temperature in K", 
-     main = paste("SSP3-RCP7.0") )
-
-plot(funData_temp[bounds[4,1]:bounds[4,2]], col = pal(500)[1:500],
-     xlim = c(1,100), ylim = c(263,284),
-     type = 'l',
-     cex.main = 1.5, cex = 1.3, 
-     xlab = "Year after Disturbance",
-     ylab = "Yearly mean temperature in K", 
-     main = paste("SSP5-RCP8.5") )
-mtext("Functional fit - Yearly mean temperature", side = 3, line = -1.5, outer = TRUE, font = 2, cex = 1.5)
-dev.off()
-
-
-## Plot the PCs
+################################ Plot the PCs ##################################
 # mean temperature
 # PC 1
-pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/PCs/PC1_mean_temp.pdf"), width = 6.5, height = 6.5)
-plot(MFPCA_temp, combined = TRUE, plotPCs = 1, xlim = c(1,100), 
-     xlab = "Year after Disturbance",
-     ylab = "Yearly mean temperature in K", 
-     cex.main = 1.5, cex = 1.3)
-dev.off()
 
-png(paste0("Scripts/Plots/Model/(M)FPCA/png/PCs/PC1_mean_temp.png"), width = 650, height = 650)
-plot(MFPCA_temp, combined = TRUE, plotPCs = 1, xlim = c(1,100), 
-     xlab = "Year after Disturbance",
-     ylab = "Yearly mean temperature in K", 
-     cex.main = 1.5, cex = 1.3)
-dev.off()
-
-# PC 2
-pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/PCs/PC2_mean_temp.pdf"), width = 6.5, height = 6.5)
-plot(MFPCA_temp, combined = TRUE, plotPCs = 2, xlim = c(1,100), 
-     xlab = "Year after Disturbance",
-     ylab = "Yearly mean temperature in K", 
-     cex.main = 1.5, cex = 1.3)
-dev.off()
-
-png(paste0("Scripts/Plots/Model/(M)FPCA/png/PCs/PC2_mean_temp.png"), width = 650, height = 650)
-plot(MFPCA_temp, combined = TRUE, plotPCs = 2, xlim = c(1,100), 
-     xlab = "Year after Disturbance",
-     ylab = "Yearly mean temperature in K", 
-     cex.main = 1.5, cex = 1.3)
-dev.off()
-
-# precipitation
-# PC 1
-pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/PCs/PC1_precip.pdf"), width = 6.5, height = 6.5)
-plot(MFPCA_precip, combined = TRUE, plotPCs = 1, xlim = c(1,100), 
-     xlab = "Year after Disturbance",
-     ylab = bquote("Yearly precipitation in kg/m"^2), 
-     cex.main = 1.5, cex = 1.3)
-dev.off()
-
-png(paste0("Scripts/Plots/Model/(M)FPCA/png/PCs/PC1_precip.png"), width = 650, height = 650)
-plot(MFPCA_precip, combined = TRUE, plotPCs = 1, xlim = c(1,100), 
-     xlab = "Year after Disturbance",
-     ylab = bquote("Yearly precipitation in kg/m"^2), 
-     cex.main = 1.5, cex = 1.3)
-dev.off()
-
-# PC 2
-pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/PCs/PC2_precip.pdf"), width = 6.5, height = 6.5)
-plot(MFPCA_precip, combined = TRUE, plotPCs = 2, xlim = c(1,100), 
-     xlab = "Year after Disturbance",
-     ylab = bquote("Yearly precipitation in kg/m"^2), 
-     cex.main = 1.5, cex = 1.3)
-dev.off()
-
-png(paste0("Scripts/Plots/Model/(M)FPCA/png/PCs/PC2_precip.png"), width = 650, height = 650)
-plot(MFPCA_precip, combined = TRUE, plotPCs = 2, xlim = c(1,100), 
-     xlab = "Year after Disturbance",
-     ylab = bquote("Yearly precipitation in kg/m"^2), 
-     cex.main = 1.5, cex = 1.3)
-dev.off()
-
-## Plot reconstructions
-# Save as pdf
-# precipitation
-pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/Reconstruction/FPCA_reconstruct_precip.pdf"), width = 8, height = 6.5)
-plot(MFPCA_precip$fit, col = pal(1803)[1:1803],
-     xlim = c(1,100), type = 'l',
-     cex.main = 1.8, cex = 1.5,
-     xlab = "Year after Disturbance",
-     ylab = "Yearly precipitation in kg/m^2", 
-     main = paste("Reconstructed fit using 8 PCs"))
-dev.off()
-
-iScen = 0
-for (scen in scenarios){
-  pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/Reconstruction/FPCA_reconstruct_", scen, "_precip.pdf"), width = 8, height = 6.5)
+for (i in seq_along(names.dfs)) {
+  var <- names.dfs[i]
+  MFPCA_var = get(paste0("MFPCA_", var))
   
-  iScen = iScen + 1
-  nOb = bounds[iScen,2] - bounds[iScen,1] + 1
-
-  plot(MFPCA_precip$fit, obs = c(bounds[iScen,1]: bounds[iScen,2]), col = pal(nOb)[1:nOb],
-       xlim = c(1,100), type = 'l',
-       cex.main = 1.8, cex = 1.5,
-       xlab = "Year after Disturbance",
-       ylab = "Yearly precipitation in kg/m^2", 
-       main = paste("Reconstructed fit using 8 PCs -", long_names_scenarios(scen)) )
-  dev.off()
+  for (iPC in c(1:5)){
+    pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/PCs/PC", iPC, "_", var, ".pdf"), width = 6.5, height = 6.5)
+    plot(MFPCA_var, combined = TRUE, plotPCs = iPC, xlim = c(1,100), 
+         xlab = "Year after Disturbance",
+         ylab = ylabs[i], 
+         cex.main = 1.5, cex = 1.3)
+    dev.off()
+    
+    png(paste0("Scripts/Plots/Model/(M)FPCA/png/PCs/PC", iPC, "_", var, ".png"), width = 650, height = 650)
+    plot(MFPCA_var, combined = TRUE, plotPCs = iPC, xlim = c(1,100), 
+         xlab = "Year after Disturbance",
+         ylab = ylabs[i], 
+         cex.main = 1.5, cex = 1.3)
+    dev.off()
+  }
   
 }
 
-# mean temperature
-pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/Reconstruction/FPCA_reconstruct_temp.pdf"), width = 8, height = 6.5)
-plot(MFPCA_temp$fit, col = pal(1803)[1:1803],
-     xlim = c(1,100), type = 'l',
-     cex.main = 1.8, cex = 1.5,
-     xlab = "Year after Disturbance",
-     ylab = "Yearly mean temperature in K", 
-     main = paste("Reconstructed fit using 8 PCs"))
-dev.off()
-
-iScen = 0
-for (scen in scenarios){
-  pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/Reconstruction/FPCA_reconstruct_", scen, "_temp.pdf"), width = 8, height = 6.5)
+############################ Plot reconstructions ##############################
+for (i in seq_along(names.dfs)) {
+  var <- names.dfs[i]
+  MFPCA_var = get(paste0("MFPCA_", var))
   
-  iScen = iScen + 1
-  nOb = bounds[iScen,2] - bounds[iScen,1] + 1
-  
-  plot(MFPCA_temp$fit, obs = c(bounds[iScen,1]: bounds[iScen,2]), col = pal(nOb)[1:nOb],
+  # As pdf
+  pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/Reconstruction/FPCA_reconstruct_", var, ".pdf"), width = 8, height = 6.5)
+  plot(MFPCA_var$fit, col = pal(1803)[1:1803],
        xlim = c(1,100), type = 'l',
        cex.main = 1.8, cex = 1.5,
        xlab = "Year after Disturbance",
-       ylab = "Yearly mean temperature in K", 
-       main = paste("Reconstructed fit using 8 PCs -", long_names_scenarios(scen)) )
+       ylab = ylabs[i], 
+       main = paste("Reconstructed fit using 6 PCs"))
   dev.off()
   
-}
-# Save as png
-png(paste0("Scripts/Plots/Model/(M)FPCA/png/Reconstruction/FPCA_reconstruct_precip.png"), width = 800, height = 650)
-plot(MFPCA_precip$fit, col = pal(1803)[1:1803],
-     xlim = c(1,100), type = 'l',
-     cex.main = 1.8, cex = 1.5,
-     xlab = "Year after Disturbance",
-     ylab = "Yearly precipitation in kg/m^2", 
-     main = paste("Reconstructed fit using 8 PCs"))
-dev.off()
-
-iScen = 0
-for (scen in scenarios){
-  png(paste0("Scripts/Plots/Model/(M)FPCA/png/Reconstruction/FPCA_reconstruct_", scen, "_precip.png"), width = 800, height = 650)
+  iScen = 0
+  for (scen in scenarios){
+    pdf(paste0("Scripts/Plots/Model/(M)FPCA/pdf/Reconstruction/FPCA_reconstruct_", scen, "_", var, ".pdf"), width = 8, height = 6.5)
+    
+    iScen = iScen + 1
+    nOb = bounds[iScen,2] - bounds[iScen,1] + 1
   
-  iScen = iScen + 1
-  nOb = bounds[iScen,2] - bounds[iScen,1] + 1
+    plot(MFPCA_var$fit, obs = c(bounds[iScen,1]: bounds[iScen,2]), col = pal(nOb)[1:nOb],
+         xlim = c(1,100), type = 'l',
+         cex.main = 1.8, cex = 1.5,
+         xlab = "Year after Disturbance",
+         ylab = ylabs[i], 
+         main = paste("Reconstructed fit using 6 PCs -", long_names_scenarios(scen)) )
+    dev.off()
+  }
   
-  plot(MFPCA_precip$fit, obs = c(bounds[iScen,1]: bounds[iScen,2]), col = pal(nOb)[1:nOb],
+  # As png
+  png(paste0("Scripts/Plots/Model/(M)FPCA/png/Reconstruction/FPCA_reconstruct_", var, ".png"), width = 800, height = 650)
+  plot(MFPCA_var$fit, col = pal(1803)[1:1803],
        xlim = c(1,100), type = 'l',
        cex.main = 1.8, cex = 1.5,
        xlab = "Year after Disturbance",
-       ylab = "Yearly precipitation in kg/m^2", 
-       main = paste("Reconstructed fit using 8 PCs -", long_names_scenarios(scen)) )
+       ylab = ylabs[i], 
+       main = paste("Reconstructed fit using 6 PCs"))
   dev.off()
   
-}
-# temperature
-png(paste0("Scripts/Plots/Model/(M)FPCA/png/Reconstruction/FPCA_reconstruct_temp.png"), width = 800, height = 650)
-plot(MFPCA_temp$fit, col = pal(1803)[1:1803],
-     xlim = c(1,100), type = 'l',
-     cex.main = 1.8, cex = 1.5,
-     xlab = "Year after Disturbance",
-     ylab = "Yearly mean temperature in K", 
-     main = paste("Reconstructed fit using 8 PCs"))
-dev.off()
-
-iScen = 0
-for (scen in scenarios){
-  png(paste0("Scripts/Plots/Model/(M)FPCA/png/Reconstruction/FPCA_reconstruct_", scen, "_temp.png"), width = 800, height = 650)
-  
-  iScen = iScen + 1
-  nOb = bounds[iScen,2] - bounds[iScen,1] + 1
-  
-  plot(MFPCA_temp$fit, obs = c(bounds[iScen,1]: bounds[iScen,2]), col = pal(nOb)[1:nOb],
-       xlim = c(1,100), type = 'l',
-       cex.main = 1.8, cex = 1.5,
-       xlab = "Year after Disturbance",
-       ylab = "Yearly mean temperature in K", 
-       main = paste("Reconstructed fit using 8 PCs -", long_names_scenarios(scen)) )
-  dev.off()
+  iScen = 0
+  for (scen in scenarios){
+    png(paste0("Scripts/Plots/Model/(M)FPCA/png/Reconstruction/FPCA_reconstruct_", scen, "_", var, ".png"), width = 800, height = 650)
+    
+    iScen = iScen + 1
+    nOb = bounds[iScen,2] - bounds[iScen,1] + 1
+    
+    plot(MFPCA_var$fit, obs = c(bounds[iScen,1]: bounds[iScen,2]), col = pal(nOb)[1:nOb],
+         xlim = c(1,100), type = 'l',
+         cex.main = 1.8, cex = 1.5,
+         xlab = "Year after Disturbance",
+         ylab = ylabs[i], 
+         main = paste("Reconstructed fit using 6 PCs -", long_names_scenarios(scen)) )
+    dev.off()
+  }
 }
 
-
-## Store scores
-
-scores_climate = as.data.frame(MFPCA_climate$scores)
-scores_temp = as.data.frame(MFPCA_temp$scores)
-scores_precip = as.data.frame(MFPCA_precip$scores)
-
+############################## Store scores ####################################
 # Reorder scores according to right order of locations
 locs_climate$key = paste(locs_climate$Lon, locs_climate$Lat, locs_climate$Scenario)
 locs_disturbed$key = paste(locs_disturbed$Lon, locs_disturbed$Lat, locs_disturbed$Scenario)
 
 index = match(locs_disturbed$key, locs_climate$key)
-scores_climate = scores_climate[index,]
-scores_temp = scores_temp[index,]
-scores_precip = scores_precip[index,]
 
-write.table(scores_climate, "Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/scores_climate.txt")
-write.table(scores_temp, "Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/scores_temp.txt")
-write.table(scores_precip, "Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/scores_precip.txt")
-
+for (i in seq_along(names.dfs)) {
+  var <- names.dfs[i]
+  MFPCA_var = get(paste0("MFPCA_", var))
+  
+  scores_var = as.data.frame(MFPCA_var$scores)
+  scores_var = scores_var[index,]
+  write.table(scores_var, paste0("Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/scores_",var, ".txt"))
+  
+}
 locs_climate$key = NULL
 
 

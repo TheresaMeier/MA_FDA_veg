@@ -98,3 +98,26 @@ get_data_fpca = function(scenario = "picontrol", start_year, end_year, pid = 1, 
 
   return(list(as.data.frame(pivot_data_pft), data_loc))
 }
+
+get_data_fpca_cmass = function(scenario = "picontrol", start_year, end_year, pid = 1, pft = "Tundra") {
+  
+  data <- get_data_scenario(scenario, start_year, end_year,'cmass',pid)
+  data = data[!duplicated(data),]
+  
+  data_pft <- data[data$PFT == pft, c("Lon", "Lat", "age", "cmass")] %>%
+    filter(age <= 100 & age >0) # Filter for 100 years of recovery
+  
+  data_loc = data_pft[,c(1,2)] %>%
+    distinct(Lon,Lat)
+  
+  pivot_data_pft <- data_pft %>%
+    pivot_wider(names_from = c(Lon,Lat), values_from = cmass) %>%
+    arrange(age) %>%
+    rename_with(~ gsub("_", "/", .), everything()) %>%
+    ungroup()
+  
+  # pivot_data_pft <- pivot_data_pft %>%
+  #   unnest_wider(everything(), names_sep = "/")
+  
+  return(list(as.data.frame(pivot_data_pft), data_loc))
+}

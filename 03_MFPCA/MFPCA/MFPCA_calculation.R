@@ -356,3 +356,86 @@ multivExpansion <- function(multiFuns, scores)
   # return as multiFunData object
   return(multiFunData(univExp))
 }
+
+
+plot.MFPCAfit_2 <- function(x, plotPCs = seq_len(nObs(x$functions)), stretchFactor = NULL, combined = FALSE, cols, main, cex.main, cex.lab, ...)
+{
+  if(!inherits(x, "MFPCAfit"))
+    stop("Argument is not of class 'MFPCAfit'.")
+  
+  if(!(is.numeric(plotPCs) & 0 < length(plotPCs) & length(plotPCs) <= length(x$values) & all(0 < plotPCs, plotPCs <= length(x$values))))
+    stop("Parameter 'plotPCs' must be a vector with values between 1 and ", length(x$values), ".")
+  
+  if(!(is.null(stretchFactor) | all(is.numeric(stretchFactor), length(stretchFactor) == 1, stretchFactor > 0)))
+    stop("Parameter 'stretchFactor' must be either NULL or a positive number.")
+  
+  if(!is.logical(combined))
+    stop("Parameter 'combined' must be passed as a logical.")
+  
+  # check dimensions
+  dims <- funData::dimSupp(x$functions)
+  
+  if(any(dims > 2))
+    stop("Cannot plot principal components having a 3- or higher dimensional domain.")
+  
+  # Wait for user input for each new eigenfunction
+  oldPar <- graphics::par(no.readonly = TRUE)
+  graphics::par(ask = TRUE)
+  
+  # set number of rows:
+  # 1: all dimensions from left to right, "+" and "-" in one plot
+  # 2: all dimensions from left to right, upper row for "+", lower for "-"
+  nRows <- if(combined == TRUE)
+  {
+    if(all(dims == 1)) {1} else {
+      warning("Cannot combine plots for two-dimensional elements. Will use separate plots (combined = FALSE)")
+      2
+    } 
+  } else{2}
+  
+  graphics::par(mfrow = c(nRows, length(x$functions)))
+  
+  
+  for(ord in plotPCs) # for each order
+  {
+    # calculate stretch factor if not given
+    if(is.null(stretchFactor))
+      stretchFactor <- stats::median(abs(x$scores[,ord]))
+    
+    PCplus <- x$meanFunction + stretchFactor * x$functions
+    PCminus <- x$meanFunction - stretchFactor * x$functions
+    
+    for(rows in seq_len(nRows))
+    {
+      for(i in seq_len(length(x$functions))) # for each element
+      {
+        yRange <- range(PCplus[[i]]@X, PCminus[[i]]@X)
+        #main <- paste("PC", ord, "(explains", round(x$values[ord]/sum(x$values)*100, 2), "% of total variability)")
+        
+        if(dims[i] == 1)
+        {
+          funData::plot(x$meanFunction[[i]], lwd = 2, col = "black", 
+                        main = main[i], ylim = yRange, cex.main = cex.main, cex.lab = cex.lab, ...)
+          if(rows == 1)
+            funData::plot(PCplus[[i]], obs = ord, cex = 2,
+                          add = TRUE, type = "p", pch = "+", col = "darkred", ...)
+          if(rows == 2 | combined == TRUE)
+            funData::plot( PCminus[[i]], obs = ord, cex = 2,
+                           add = TRUE, type = "p", pch = "-", col = "cornflowerblue", ...)
+        }  
+        else # dims[i] == 2 (higher dimensional domains are not supported)
+        {
+          if(rows == 1)
+            funData::plot(PCplus[[i]], obs = ord, main = main, ylim = yRange, ...)
+          else
+            funData::plot(PCminus[[i]], obs = ord, main = main, ylim = yRange, ...)
+          
+        }
+      }
+    }
+  }
+  
+  graphics::par(oldPar)
+  
+  invisible(NULL)
+}
