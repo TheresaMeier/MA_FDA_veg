@@ -85,12 +85,12 @@ ggplot(d_eco_mean_cluster) +
   ggtitle("Nitrogen uptake per PFT and scenario averaged over disturbed grid cells") +
   theme_bw() + 
   theme(
-    text = element_text(size = 8), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
-ggsave("Scripts/Plots/MFPCA/Clusters/pdf/nuptake_scen.pdf", width = 8, height = 5)
-ggsave("Scripts/Plots/MFPCA/Clusters/png/nuptake_scen.png", width = 8, height = 5)
+ggsave("Scripts/Plots/MFPCA/Clusters/pdf/nuptake_scen.pdf", width = 15, height = 10)
+ggsave("Scripts/Plots/MFPCA/Clusters/png/nuptake_scen.png", width = 15, height = 10)
 
 # # Cut y-axis
 # ggplot(d_all) + 
@@ -133,13 +133,13 @@ ggplot(d_eco_mean_cluster) +
   ggtitle("Total nitrogen uptake averaged over disturbed grid cell") +
   theme_bw() + 
   theme(
-    text = element_text(size = 8), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
-ggsave("Scripts/Plots/MFPCA/Clusters/pdf/nuptake_total_scen.pdf", width = 8, height = 5)
-ggsave("Scripts/Plots/MFPCA/Clusters/png/nuptake_total_scen.png", width = 8, height = 5)
+ggsave("Scripts/Plots/MFPCA/Clusters/pdf/nuptake_total_scen.pdf", width = 10, height = 5)
+ggsave("Scripts/Plots/MFPCA/Clusters/png/nuptake_total_scen.png", width = 10, height = 5)
 
 # Cut y-axis
 # ggplot(d_all) + 
@@ -190,13 +190,13 @@ ggplot(d_eco_mean) +
   ggtitle("Nitrogen uptake per cluster averaged over disturbed grid cells") +
   theme_bw() + 
   theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
-ggsave("Scripts/Plots/MFPCA/Clusters/pdf/nuptake.pdf", width = 8, height = 5)
-ggsave("Scripts/Plots/MFPCA/Clusters/png/nuptake.png", width = 8, height = 5)
+ggsave("Scripts/Plots/MFPCA/Clusters/pdf/nuptake.pdf", width = 10, height = 5)
+ggsave("Scripts/Plots/MFPCA/Clusters/png/nuptake.png", width = 10, height = 5)
 
 # # Cut y-axis
 # 
@@ -239,8 +239,8 @@ ggplot(d_eco_mean) +
   ggtitle("Total nitrogen uptake per cluster averaged over disturbed grid cells") +
   theme_bw() + 
   theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
@@ -296,8 +296,8 @@ ggplot(d_recruit, aes(x = initial_recruitment, y = Cluster, fill = Cluster)) +
     guide = "none"  # Remove legend
   ) +
   theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
   ggtitle("Number of new seedlings per PFT right after disturbance")
@@ -319,8 +319,8 @@ ggplot(d_recruit, aes(x = initial_recruitment, y = Cluster, fill = Cluster)) +
     guide = "none"  # Remove legend
   ) +
   theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
   ggtitle("Number of new seedlings per PFT right after disturbance")
@@ -340,8 +340,8 @@ ggplot(d_recruit, aes(x = initial_recruitment, y = Cluster, fill = Cluster)) +
     guide = "none"  # Remove legend
   ) +
   theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
   ggtitle("Number of new seedlings per cluster right after disturbance ")
@@ -361,14 +361,14 @@ ggplot(d_recruit, aes(x = initial_recruitment, y = Cluster, fill = Cluster)) +
     guide = "none"  # Remove legend
   ) +
   theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
   ggtitle("Number of new seedlings per cluster right after disturbance ")
 
-ggsave("Scripts/Plots/MFPCA/Clusters/pdf/initial_recruitment_cut.pdf", width = 10, height = 8)
-ggsave("Scripts/Plots/MFPCA/Clusters/png/initial_recruitment_cut.png", width = 10, height = 8)
+ggsave("Scripts/Plots/MFPCA/Clusters/pdf/initial_recruitment_cut.pdf", width = 8, height = 5)
+ggsave("Scripts/Plots/MFPCA/Clusters/png/initial_recruitment_cut.png", width = 8, height = 5)
 
 
 ############################# Recruitment 10 years #############################
@@ -385,8 +385,8 @@ ggplot(d_recruit, aes(x = recruitment_ten_years, y = Cluster, fill = Cluster)) +
     guide = "none"  # Remove legend
   ) +
   theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
   ggtitle("Number of new seedling per PFT in the ten years after disturbance (summed up)")
@@ -407,8 +407,8 @@ ggplot(d_recruit, aes(x = recruitment_ten_years, y = Cluster, fill = Cluster)) +
     guide = "none"  # Remove legend
   ) +
   theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
   ggtitle("Number of new seedling per PFT in the ten years after disturbance (summed up)")
@@ -429,14 +429,14 @@ ggplot(d_recruit, aes(x = recruitment_ten_years, y = Cluster, fill = Cluster)) +
     guide = "none"  # Remove legend
   ) +
   theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
   ggtitle("Number of new seedling per cluster in the ten years after disturbance (summed up)")
 
-ggsave("Scripts/Plots/MFPCA/Clusters/pdf/recruitment_10.pdf", width = 10, height = 8)
-ggsave("Scripts/Plots/MFPCA/Clusters/png/recruitment_10.png", width = 10, height = 8)
+ggsave("Scripts/Plots/MFPCA/Clusters/pdf/recruitment_10.pdf", width = 8, height = 5)
+ggsave("Scripts/Plots/MFPCA/Clusters/png/recruitment_10.png", width = 8, height = 5)
 
 # Cut x-axis
 ggplot(d_recruit, aes(x = recruitment_ten_years, y = Cluster, fill = Cluster)) + 
@@ -450,14 +450,14 @@ ggplot(d_recruit, aes(x = recruitment_ten_years, y = Cluster, fill = Cluster)) +
     guide = "none"  # Remove legend
   ) +
   theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
-  ggtitle("Number of new seedling per cluster in the ten years after disturbance (summed up)")
+  ggtitle("Number of new seedling per cluster in the ten years after disturbance")
 
-ggsave("Scripts/Plots/MFPCA/Clusters/pdf/recruitment_10_cut.pdf", width = 10, height = 8)
-ggsave("Scripts/Plots/MFPCA/Clusters/png/recruitment_10_cut.png", width = 10, height = 8)
+ggsave("Scripts/Plots/MFPCA/Clusters/pdf/recruitment_10_cut.pdf", width = 8, height = 5)
+ggsave("Scripts/Plots/MFPCA/Clusters/png/recruitment_10_cut.png", width = 8, height = 5)
 
 
 ############################## previous state ##################################
@@ -474,8 +474,8 @@ ggplot(d_recruit, aes(x = previous_state, y = Cluster, fill = Cluster)) +
     guide = "none"  # Remove legend
   ) +
   theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
   ggtitle("Vegetation composition before the disturbance")
@@ -496,8 +496,8 @@ ggplot(d_recruit, aes(x = previous_state, y = Cluster, fill = Cluster)) +
     guide = "none"  # Remove legend
   ) +
   theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
   ggtitle("Vegetation composition before the disturbance")
@@ -519,8 +519,8 @@ ggplot(d_recruit, aes(x = previous_state, y = Cluster, fill = Cluster)) +
     guide = "none"  # Remove legend
   ) +
   theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
   ggtitle("Vegetation composition per cluster before the disturbance")
@@ -540,11 +540,11 @@ ggplot(d_recruit, aes(x = previous_state, y = Cluster, fill = Cluster)) +
     guide = "none"  # Remove legend
   ) +
   theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
   ggtitle("Vegetation composition per cluster before the disturbance")
 
-ggsave("Scripts/Plots/MFPCA/Clusters/pdf/previous_state_cut.pdf", width = 10, height = 8)
-ggsave("Scripts/Plots/MFPCA/Clusters/png/previous_state_cut.png", width = 10, height = 8)
+ggsave("Scripts/Plots/MFPCA/Clusters/pdf/previous_state_cut.pdf", width = 8, height = 5)
+ggsave("Scripts/Plots/MFPCA/Clusters/png/previous_state_cut.png", width = 8, height = 5)

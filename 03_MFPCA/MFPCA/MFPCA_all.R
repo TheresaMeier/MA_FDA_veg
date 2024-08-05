@@ -236,9 +236,9 @@ g1 = ggplot(plot_data_all) +
   scale_x_continuous(name = "PC 1") + 
   scale_y_continuous(name = "PC 2") +
   scale_color_manual(name = "Cluster", values = c("1" = "#F8766D", "2" = "#7CAE00" , "3" = "#00BFC4", "4" = "#C77CFF", "5" = "darkgrey"), labels = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5")) +
-  ggtitle(paste("Principal Component Scores for one Patch - MFPCA")) +
+  ggtitle(paste("PC Scores derived by MFPCA")) +
   theme_bw() +
-  theme(text = element_text(size = 10),plot.title = element_text(size = 15, face = "bold",hjust = 0.5))
+  theme(text = element_text(size = 15), plot.title = element_text(size = 20, face = "bold",hjust = 0.5))
 
 ggsave(paste0("Scripts/Plots/MFPCA/PC1vsPC2/pdf/PC1_vs_PC2_",pid,"_clustered_all.pdf"), plot = g1, width = 7, height = 4.5)
 ggsave(paste0("Scripts/Plots/MFPCA/PC1vsPC2/png/PC1_vs_PC2_",pid,"_clustered_all.png"), plot = g1, width = 7, height = 4.5)
@@ -249,9 +249,9 @@ g2 = ggplot(plot_data_all) +
   scale_x_continuous(name = "PC 1") + 
   scale_y_continuous(name = "PC 2") +
   scale_color_manual(name = "Scenario", values = c("Control" = "#F8766D", "SSP1-RCP2.6" = "#7CAE00" , "SSP3-RCP7.0" = "#00BFC4", "SSP5-RCP8.5" = "#C77CFF", "5" = "darkgrey")) +
-  ggtitle(paste("Principal Component Scores for one Patch - MFPCA")) +
+  ggtitle(paste("PC Scores derived by MFPCA")) +
   theme_bw() +
-  theme(text = element_text(size = 10),plot.title = element_text(size = 15, face = "bold",hjust = 0.5))
+  theme(text = element_text(size = 15), plot.title = element_text(size = 20, face = "bold",hjust = 0.5))
 
 ggsave(paste0("Scripts/Plots/MFPCA/PC1vsPC2/pdf/PC1_vs_PC2_",pid,"_scenarios.pdf"), plot = g2, width = 7, height = 4.5)
 ggsave(paste0("Scripts/Plots/MFPCA/PC1vsPC2/png/PC1_vs_PC2_",pid,"_scenarios.png"), plot = g2, width = 7, height = 4.5)
@@ -264,10 +264,10 @@ ggsave(paste0("Scripts/Plots/MFPCA/PC1vsPC2/png/PC1_vs_PC2_",pid,"_scenarios_clu
 ######################### Plot principal components ############################
 
 # Plot 10 first PCs
-for (iPC in (1:2)){
+for (iPC in (1:10)){
   pdf(paste0("Scripts/Plots/MFPCA/PCs/pdf/PCs_PC", iPC, "_Presentation.pdf"), width = 15, height = 5)
   plot.MFPCAfit_2(MFPCA_all, plotPCs = iPC, combined = TRUE, xlab = paste("Year after Disturbance"), 
-                  xlim = c(1,100), ylab = "Share of aboveground carbon", cex.main = 2, cex.lab = 1.5,
+                  xlim = c(1,100), ylab = "Share of aboveground carbon", cex.main = 2.3, cex.lab = 1.6,
                   cols = c("#0072B2", "#E69F00", "#56B4E9",  "#D55E00", "#009E73"),
                   main = long_names_pfts(tolower(pfts)))
   

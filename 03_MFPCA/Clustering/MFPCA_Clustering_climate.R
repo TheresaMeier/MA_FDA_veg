@@ -82,15 +82,15 @@ ggplot(d_climate_mean_cluster) +
   scale_x_continuous(name = "Year", expand = c(0,0), breaks = seq(2020,2140, by = 20)) +
   scale_y_continuous(name = "Yearly mean temperature in °C", expand = c(0,0)) +
   scale_color_manual(name = "Cluster", values = c("1" = "#F8766D", "2" = "#7CAE00" , "3" = "#00BFC4", "4" = "#C77CFF", "5" = "darkgrey"), labels = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5")) +
-  ggtitle("Yearly mean temperature averaged over disturbed grid cells") +
+  ggtitle("Yearly mean temperature for each cluster") +
   theme_bw() + theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
     axis.text.x = element_text(angle = 30,hjust=1)
   )
 
-ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_mean_scen.pdf", width = 8, height = 5)
-ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_mean_scen.png", width = 8, height = 5)
+ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_mean_scen.pdf", width = 10, height = 8)
+ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_mean_scen.png", width = 10, height = 8)
 
 # # Cut y-axis
 # ggplot(d_all) + 
@@ -112,8 +112,8 @@ ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_mean_scen.png", width = 8, height 
 #     plot.title = element_text(size = 15, face = "bold", hjust = 0.5)
 #   )
 # 
-# ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_mean_scen_cut.pdf", width = 8, height = 5)
-# ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_mean_scen_cut.png", width = 8, height = 5)
+# ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_mean_scen_cut.pdf", width = 10, height = 8)
+# ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_mean_scen_cut.png", width = 10, height = 8)
 
 
 # Yearly min temperature
@@ -130,16 +130,16 @@ ggplot(d_climate_mean_cluster) +
   scale_x_continuous(name = "Year", expand = c(0,0), breaks = seq(2020,2140, by = 20)) +
   scale_y_continuous(name = "Yearly minimum temperature in °C", expand = c(0,0)) +
   scale_color_manual(name = "Cluster", values = c("1" = "#F8766D", "2" = "#7CAE00" , "3" = "#00BFC4", "4" = "#C77CFF", "5" = "darkgrey"), labels = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5")) +
-  ggtitle("Daily minimum temperature per year averaged over disturbed grid cells") +
+  ggtitle("Daily minimum temperature per year for each cluster") +
   theme_bw() + theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
     axis.text.x = element_text(angle = 30,hjust=1)
   )
 
 
-ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_min_scen.pdf", width = 8, height = 5)
-ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_min_scen.png", width = 8, height = 5)
+ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_min_scen.pdf", width = 10, height = 8)
+ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_min_scen.png", width = 10, height = 8)
 
 # # Cut y-axis
 # ggplot(d_all) + 
@@ -160,8 +160,8 @@ ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_min_scen.png", width = 8, height =
 #     plot.title = element_text(size = 15, face = "bold", hjust = 0.5)
 #   )
 # 
-# ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_min_scen_cut.pdf", width = 8, height = 5)
-# ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_min_scen_cut.png", width = 8, height = 5)
+# ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_min_scen_cut.pdf", width = 10, height = 8)
+# ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_min_scen_cut.png", width = 10, height = 8)
 
 # Yearly max temperature
 ggplot(d_climate_mean_cluster) + 
@@ -177,15 +177,15 @@ ggplot(d_climate_mean_cluster) +
   scale_x_continuous(name = "Year", expand = c(0,0), breaks = seq(2020,2140, by = 20)) +
   scale_y_continuous(name = "Yearly maximum temperature in °C", expand = c(0,0)) +
   scale_color_manual(name = "Cluster", values = c("1" = "#F8766D", "2" = "#7CAE00" , "3" = "#00BFC4", "4" = "#C77CFF", "5" = "darkgrey"), labels = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5")) +
-  ggtitle("Daily maximum temperature per year averaged over disturbed grid cells") +
+  ggtitle("Daily maximum temperature per year for each cluster") +
   theme_bw() + theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
     axis.text.x = element_text(angle = 30,hjust=1)
   )
 
-ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_max_scen.pdf", width = 8, height = 5)
-ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_max_scen.png", width = 8, height = 5)
+ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_max_scen.pdf", width = 10, height = 8)
+ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_max_scen.png", width = 10, height = 8)
 
 # # Cut y-axis
 # ggplot(d_all) + 
@@ -206,8 +206,8 @@ ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_max_scen.png", width = 8, height =
 #     plot.title = element_text(size = 15, face = "bold", hjust = 0.5)
 #   )
 # 
-# ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_max_scen_cut.pdf", width = 8, height = 5)
-# ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_max_scen_cut.png", width = 8, height = 5)
+# ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_max_scen_cut.pdf", width = 10, height = 8)
+# ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_max_scen_cut.png", width = 10, height = 8)
 # 
 
 # Precipitation
@@ -223,15 +223,15 @@ ggplot(d_climate_mean_cluster) +
   scale_x_continuous(name = "Year", expand = c(0,0), breaks = seq(2020,2140, by = 20)) +
   scale_y_continuous(name = bquote("Yearly precipitation in kg/m"^2), expand = c(0, 0)) +
   scale_color_manual(name = "Cluster", values = c("1" = "#F8766D", "2" = "#7CAE00" , "3" = "#00BFC4", "4" = "#C77CFF", "5" = "darkgrey"), labels = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5")) +
-  ggtitle("Yearly precipitation averaged over disturbed grid cells") +
+  ggtitle("Yearly precipitation for each cluster") +
   theme_bw() + theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
-    axis.text.x = element_text(angle = 30, hjust=1)
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+    axis.text.x = element_text(angle = 30,hjust=1)
   )
 
-ggsave("Scripts/Plots/MFPCA/Clusters/pdf/precip_scen.pdf", width = 8, height = 5)
-ggsave("Scripts/Plots/MFPCA/Clusters/png/precip_scen.png", width = 8, height = 5)
+ggsave("Scripts/Plots/MFPCA/Clusters/pdf/precip_scen.pdf", width = 10, height = 8)
+ggsave("Scripts/Plots/MFPCA/Clusters/png/precip_scen.png", width = 10, height = 8)
 
 # # Cut y-axis
 # ggplot(d_all) + 
@@ -250,8 +250,8 @@ ggsave("Scripts/Plots/MFPCA/Clusters/png/precip_scen.png", width = 8, height = 5
 #     plot.title = element_text(size = 15, face = "bold", hjust = 0.5)
 #   )
 # 
-# ggsave("Scripts/Plots/MFPCA/Clusters/pdf/precip_scen_cut.pdf", width = 8, height = 5)
-# ggsave("Scripts/Plots/MFPCA/Clusters/png/precip_scen_cut.png", width = 8, height = 5)
+# ggsave("Scripts/Plots/MFPCA/Clusters/pdf/precip_scen_cut.pdf", width = 10, height = 8)
+# ggsave("Scripts/Plots/MFPCA/Clusters/png/precip_scen_cut.png", width = 10, height = 8)
 # 
 
 ################################ Clusters only  ################################
@@ -280,10 +280,10 @@ ggplot(d_climate_mean_clusterOnly) +
   scale_x_continuous(name = "Year", expand = c(0,0), breaks = seq(2020,2140, by = 20)) +
   scale_y_continuous(name = "Yearly mean temperature in °C", expand = c(0,0)) +
   scale_color_manual(name = "Cluster", values = c("1" = "#F8766D", "2" = "#7CAE00" , "3" = "#00BFC4", "4" = "#C77CFF", "5" = "darkgrey"), labels = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5")) +
-  ggtitle("Yearly mean temperature averaged over disturbed grid cells") +
+  ggtitle("Yearly mean temperature for each cluster") +
   theme_bw() + theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
     axis.text.x = element_text(angle = 30,hjust=1)
   )
 
@@ -310,8 +310,8 @@ ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_mean.png", width = 8, height = 5)
 #     plot.title = element_text(size = 15, face = "bold", hjust = 0.5)
 #   )
 # 
-# ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_mean_cut.pdf", width = 8, height = 5)
-# ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_mean_cut.png", width = 8, height = 5)
+# ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_mean_cut.pdf", width = 10, height = 8)
+# ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_mean_cut.png", width = 10, height = 8)
 
 
 # Yearly min temperature
@@ -327,13 +327,12 @@ ggplot(d_climate_mean_clusterOnly) +
   scale_x_continuous(name = "Year", expand = c(0,0), breaks = seq(2020,2140, by = 20)) +
   scale_y_continuous(name = "Yearly minimum temperature in °C", expand = c(0,0)) +
   scale_color_manual(name = "Cluster", values = c("1" = "#F8766D", "2" = "#7CAE00" , "3" = "#00BFC4", "4" = "#C77CFF", "5" = "darkgrey"), labels = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5")) +
-  ggtitle("Daily minimum temperature per year averaged over disturbed grid cells") +
+  ggtitle("Yearly minimum temperature for each cluster") +
   theme_bw() + theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
     axis.text.x = element_text(angle = 30,hjust=1)
   )
-
 
 ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_min.pdf", width = 8, height = 5)
 ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_min.png", width = 8, height = 5)
@@ -357,8 +356,8 @@ ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_min.png", width = 8, height = 5)
 #     plot.title = element_text(size = 15, face = "bold", hjust = 0.5)
 #   )
 # 
-# ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_min_cut.pdf", width = 8, height = 5)
-# ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_min_cut.png", width = 8, height = 5)
+# ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_min_cut.pdf", width = 10, height = 8)
+# ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_min_cut.png", width = 10, height = 8)
 
 # Yearly max temperature
 ggplot(d_climate_mean_clusterOnly) + 
@@ -373,10 +372,10 @@ ggplot(d_climate_mean_clusterOnly) +
   scale_x_continuous(name = "Year", expand = c(0,0), breaks = seq(2020,2140, by = 20)) +
   scale_y_continuous(name = "Yearly maximum temperature in °C", expand = c(0,0)) +
   scale_color_manual(name = "Cluster", values = c("1" = "#F8766D", "2" = "#7CAE00" , "3" = "#00BFC4", "4" = "#C77CFF", "5" = "darkgrey"), labels = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5")) +
-  ggtitle("Daily maximum temperature per year averaged over disturbed grid cells") +
+  ggtitle("Yearly maximum temperature for each cluster") +
   theme_bw() + theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
     axis.text.x = element_text(angle = 30,hjust=1)
   )
 
@@ -402,8 +401,8 @@ ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_max.png", width = 8, height = 5)
 #     plot.title = element_text(size = 15, face = "bold", hjust = 0.5)
 #   )
 # 
-# ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_max_cut.pdf", width = 8, height = 5)
-# ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_max_cut.png", width = 8, height = 5)
+# ggsave("Scripts/Plots/MFPCA/Clusters/pdf/temp_max_cut.pdf", width = 10, height = 8)
+# ggsave("Scripts/Plots/MFPCA/Clusters/png/temp_max_cut.png", width = 10, height = 8)
 
 # Precipitation
 
@@ -417,10 +416,10 @@ ggplot(d_climate_mean_clusterOnly) +
   scale_x_continuous(name = "Year", expand = c(0,0), breaks = seq(2020,2140, by = 20)) +
   scale_y_continuous(name = bquote("Yearly precipitation in kg/m"^2), expand = c(0, 0)) +
   scale_color_manual(name = "Cluster", values = c("1" = "#F8766D", "2" = "#7CAE00" , "3" = "#00BFC4", "4" = "#C77CFF", "5" = "darkgrey"), labels = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5")) +
-  ggtitle("Yearly precipitation averaged over disturbed grid cells") +
+  ggtitle("Yearly precipitation for each cluster") +
   theme_bw() + theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+    text = element_text(size = 15), 
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
     axis.text.x = element_text(angle = 30,hjust=1)
   )
 
@@ -444,7 +443,7 @@ ggsave("Scripts/Plots/MFPCA/Clusters/png/precip.png", width = 8, height = 5)
 #     plot.title = element_text(size = 15, face = "bold", hjust = 0.5)
 #   )
 # 
-# ggsave("Scripts/Plots/MFPCA/Clusters/pdf/precip_cut.pdf", width = 8, height = 5)
-# ggsave("Scripts/Plots/MFPCA/Clusters/png/precip_cut.png", width = 8, height = 5)
+# ggsave("Scripts/Plots/MFPCA/Clusters/pdf/precip_cut.pdf", width = 10, height = 8)
+# ggsave("Scripts/Plots/MFPCA/Clusters/png/precip_cut.png", width = 10, height = 8)
 
 
