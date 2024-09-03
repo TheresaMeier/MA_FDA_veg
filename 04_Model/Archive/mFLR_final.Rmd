@@ -1,0 +1,316 @@
+---
+title: "Analyzing the effects of climate change on vegetation dynamics using functional data analysis"
+author: "Theresa Meier, 10.07.2024"
+output: html_document
+---
+
+***
+
+## Functional Linear Regression - Final Model (?)
+As discussed in the last meeting, the final model comprises linear effects for all covariates but `Longitude` and `Latitude` which are included as a two-dimensional additive effect. This setup leads to the following model output:
+
+***
+
+```{r echo=FALSE}
+setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
+gam_final = readRDS("Scripts/MA_FDA_veg/04_Model/ModelRDS/gam_final.rds")
+summary(gam_final)
+```
+
+***
+
+The effective degree of freedom (edf) of the smooth effects clearly indicates a non-linear relationship, which is confirmed by the visualization of the effects in Figure 1:
+
+***
+
+![**Figure 1:** Smooth effects of the interaction of `Longitude` and `Latitude` for PC 1 (left) and PC 2 (right). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/gam_final_smooth_effect.png)
+
+***
+
+As before, looking at the residuals in Figure 2 reveals a structure in the first PC which results from the input data being bounded to the interval $[0,1]$. 
+
+***
+
+![**Figure 2:** Model residuals and Q-Q plots for both predicted PCs (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/residuals_gam_final.png)
+
+***
+
+This structure also becomes apparent when considering the true PC scores and the predicted ones in Figure 3:
+
+***
+
+![**Figure 3:** True PC scores vs. predicted ones (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/True_vs_fitted_train_gam_final.png)
+
+***
+
+### Data transformation
+In order to address the structure visible in Figure 3, the input data, i.e., the PC scores need to be transformed. Note that since the second PC does not show any structure, this transformation is only performed for the first PC. The overall shape of the transformation function in Figure 3 resembles to a generalized logistic function:
+
+***
+
+![**Figure 4:** Generalized logistic function. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/generalized_logistic.png)
+
+***
+
+The formula of this function is given by:
+
+<center>
+$\text{glf}(x) = \frac{A}{1+e^{-k\cdot\left(x-x_0\right)}} + C$
+</center>
+
+Therefore, the parameters $A,k,x_0$ and $C$ need to be set or derived. Figure 5 shows the function with manually derived parameters on the left side. These values were used as starting parameters to determine non-linear least-squares estimates of $\text{fitted PC 1 scores} \sim \text{glf}(\text{PC 1})$. The resulting curve is shown on the right side of Figure 5.
+
+***
+
+![**Figure 5:** Fitting a generalized logistic function manually (left) and by estimation (right). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/Parameters_gam_final_trafo.png)
+
+***
+
+
+With that, and the inverse of the generalized logistic function given by
+
+<center>
+$\text{glf}^{-1}(y) = x_0 - \frac{1}{k}\log\left(\frac{A}{y-C} -1\right)$,
+</center>
+
+the PC 1 scores are transformed to $\text{PC1 _trafo} = \text{gls}^{-1}(\text{PC 1})$
+
+Refitting the previous model with the transformed response yields the following model summary:
+
+***
+
+```{r echo=FALSE}
+setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
+gam_trafo = readRDS("Scripts/MA_FDA_veg/04_Model/ModelRDS/gam_final_trafo.rds")
+summary(gam_trafo)
+```
+
+***
+
+The structure has almost disappeared when looking at the transformed residuals in Figure 6. In particular, it is still present at the limit ($x=5$), indicating that the fit of the generalized logistic function is not optimal there.
+
+***
+
+![**Figure 6:** Model residuals and Q-Q plots for both predicted PCs for the transformed data (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/residuals_gam_final_trafo.png)
+
+***
+
+Looking at the equivalent plot to Figure 5, i.e., true vs. fitted PC scores, confirms that the structure is no longer present.
+
+***
+
+![**Figure 7:** True PC scores vs. fitted ones on the training data set. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/True_vs_fitted_train_gam_final_trafo.png)
+
+***
+
+In order to get an impression of the goodness of fit when considering unseen data, Figure 8 shows the true PC scores plotted against the predicted ones. As in Figure 7, the structure is now no longer present.
+
+***
+
+![**Figure 8:** True PC scores vs. fitted ones on the training data set. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/True_vs_fitted_test_gam_final_trafo.png)
+
+***
+
+In order to get an impression, how the model performs in detail, Figure 9 shows the true functional fit and the predicted one from the model for four randomly picked disturbed grid cells, one for each scenario.
+
+***
+
+![**Figure 9:** Model residuals and Q-Q plots for both predicted PCs for the transformed data (on train data set). ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/True_vs_fitted_examples_gam_final_trafo.png)
+
+***
+
+Figure 10 shows the smooth effect of `Longitude` and `Latitude`:
+
+***
+
+![**Figure 10:** Smooth effects of the interaction of `Longitude` and `Latitude` for PC 1 (left) and PC 2 (right) for the model with transformed PC 1. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/gam_trafo_smooth_effect.png)
+
+***
+
+### Interpretation of the model
+
+The interpretation of the model output comprises two steps which need to be kept in mind:
+
+1. Transformation of the response variable PC 1. 
+2. Interpreting the PCs correctly according to all five PFTs.
+
+Let's start with an example. Suppose there is only variable `sand_fraction` included in the model and its parameter estimate is $\beta_{sand\_fraction} \approx 14.65$, just as for the actual fitted model. The model could then be rewritten as
+
+<center>
+$\text{PC 1} = \text{glf}(\beta_0 + \beta_{sand\_fraction} \cdot x_{sand\_fraction}) = \frac{A}{1+e^{-k\left (\beta_0 + \beta_{sand\_fraction} \cdot x_{sand\_fraction} - x_0 \right )}} + C$,
+</center>
+
+with $\text{glf}()$ being the generalized logistic function. Since this data transformation is non-linear, the interpretation of the parameters is not as straightforward as for a linear model.
+
+
+
+<center>
+$\beta_{sand\_fraction} > 0 \Rightarrow \beta_0 + \beta_{sand\_fraction} \cdot x_{sand\_fraction} \text{ increases } \Rightarrow 1+e^{-k\left (\beta_0 + \beta_{sand\_fraction} \cdot x_{sand\_fraction} - x_0 \right )} \text{ decreases} \Rightarrow \hat{\text{PC }} 1  \text{ increases}$
+</center>
+
+This leads to the conclusion that parameter estimates above 0 generally increase the estimated PC 1 scores, while parameter estimates below 0 decrease them.
+
+Considering the whole model output, the derived coefficients can now be classified into different groups for PC 1. Note that significance here means significance on the $5\%$-level.
+
+***
+
+![](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Parameters_PC1.png)
+
+***
+
+Note that significance here is just based on the model output and does not consider uncertainty in the PC scores.
+
+Figure 11 shows a visualization of the parameter estimates and their confidence intervals:
+
+***
+
+![**Figure 11:** Estimated linear coefficients for the first PC. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/Effectplot_PC1.png)
+
+***
+
+Since many of the estimates are close to zero, Figure 12 shows the smallest coefficients for a better interpretation:
+
+***
+
+![**Figure 12:** Estimated linear regression coefficients for the first PC - zoomed in. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/Effectplot_PC1_zoom.png)
+
+***
+
+In order to now draw conclusion on which PFT is mainly influenced by which covariate, Figure 13 shows (again) the first PC:
+
+***
+
+![**Figure 13:** First PC of target variable: BNE, IBS, otherC, TeBS, Tundra. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/PCs/png/PCs_PC1.png)
+
+***
+
+Let's go back to the previous example and take a closer look at $\beta_{sand\_fraction} = 14.65$. Since it is larger than 0, increasing the sand fraction by one unit leads to a higher estimated PC 1 score. Regarding Figure 12, this in turn indicates more *Needleleaf evergreen* (1), less *Pioneering broadleaf* (2) as well as more of *Conifers (other)* (3) and *Tundra* (5). This PC hardly affects *Temperate broadleaf* (4) which is covered by the second one.
+
+The interpretation of the other covariates is analogous. 
+
+***
+
+The interpretation of the second PC is less complicated since no transformation of the response is applied. This means in particular, in our example with only one covariate, the model facilitates to 
+
+<center>
+$\text{PC 2} =\beta_0 + \beta_{sand\_fraction} \cdot x_{sand\_fraction}$
+</center>
+
+For $\beta_{sand\_fraction} \approx 0.57$, this means that increasing the sand fraction by one unit increases the predicted PC 2 scores by $0.57$ on average. 
+
+Figure 14 shows a visualization of the estimated coefficients:
+
+***
+
+![**Figure 14:** Estimated linear regression coefficients for the second PC. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/Effectplot_PC2.png)
+
+***
+
+Again, Figure 15 shows the smallest effects for a better interpretation:
+
+***
+
+![**Figure 15:** Estimated linear regression coefficients for the second PC - zoomed in. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/Effectplot_PC2_zoom.png)
+
+***
+
+All coefficient estimates are provided in the following table:
+
+***
+
+![](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Parameters_PC2.png)
+
+***
+For a valid interpretation of the second PC, Figure 16 shows the second PC for all five PFTS. Again, for variables with estimated parameter values larger than 0, increasing the respective variable by one unit leads to increased PC 2 scores, which in turn indicate a higher share of *Needleleaf evergreen* (1), *Pioneering broadleaf* (2) and *Conifers (other)* (3) in the last six decades of recovery. The second PC especially portrays *Temperate broadleaf* (4). A unit increase in positive parameter estimates leads to a lower proportion of *Temperate broadleaf* than on average. For *Tundra* (5) the effects are only marginal.
+
+***
+
+![**Figure 16:** Second PC of target variable: BNE, IBS, otherC, TeBS, Tundra. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/MFPCA/PCs/png/PCs_PC2.png)
+
+***
+
+**Questions here:**
+
+- Is there any possibility to be "clearer" in terms of interpretation, especially for the first PC?
+- How is the smooth effect interpreted for the first transformed PC?
+
+***
+
+### Possible model improvements: adding more covariates
+
+So far, four available covariates have not been considered in the model: `tas_yearlymin`, `tas_yearlymax`, `Nuptake` and `Nuptake_total`. All these variables are functional, and for `Nuptake`, that is, the nitrogen uptake per PFT and grid cell, there is even one trajectory for each PFT. Converting these variables into the required format includes FPCAs for each of the 5 PFTs. Details on the FPCAs (e.g., plots of the functional fits, PCs, reconstructions, numbers like accounted variance) are left out here, but can be presented if needed. 
+
+Similar as for `tas_yearlymean` and `pr_yearly_sum`, the first PC resulting of each of the seven conducted FPCAs are examined in more detail. Note that especially for the PFT-wise nitrogen uptakes, the first PC accounts for 70-85% of the variability, so including more PCs might improve the model fit. This is left out here to not overcomplicate the model.
+
+Figure 17 shows the correlations between all available covariates and the response variable PC 1 and PC 2:
+
+***
+
+![**Figure 17:** Correlation matrix for all possible covariates and the response variables. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/Correlations.png)
+
+***
+
+It becomes clear that both PCs are in parts strongly correlated with the PFT-wise nitrogen uptakes. This result is not surprising, since the amount of nitrogen that a PFT is taking is a clear indicator of the share of that PFT. 
+
+**Question here:** It clearly feels like 'cheating' using the PFT-wise nitrogen uptake. Should it be removed? Is the correct direction of the causality given here?
+
+The following model output is from a model including only the PFT-wise nitrogen uptakes. The value of deviance explained is already at $77.5\%$ (!):
+
+***
+
+```{r echo=FALSE}
+setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
+gam_nuptake_only = readRDS("Scripts/MA_FDA_veg/04_Model/ModelRDS/gam_final_trafo_nuptake_PFT_only.rds")
+summary(gam_nuptake_only)
+```
+
+***
+
+Removing the PFT-wise nitrogen uptake and taking the total one instead and all the variables in the initial model with transformed responses also clearly improves the model fit:
+
+***
+
+```{r echo=FALSE}
+setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
+gam_nuptake_total = readRDS("Scripts/MA_FDA_veg/04_Model/ModelRDS/gam_final_trafo_nuptake_total.rds")
+summary(gam_nuptake_total)
+```
+
+***
+
+Now, let's take a look at the two additional climate covariates, namely the first PCs of the minimum and maximum annual temperature. Including these variables (and excluding all nitrogen related ones) leads to the following model fit:
+
+***
+
+```{r echo=FALSE}
+setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
+gam_all_temps = readRDS("Scripts/MA_FDA_veg/04_Model/ModelRDS/gam_final_trafo_all_temps.rds")
+summary(gam_all_temps)
+```
+
+***
+
+So including these variables does not lead to substantial differences.
+
+As a final attempt, all new variables are included in the model:
+
+***
+
+```{r echo=FALSE}
+setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
+gam_all= readRDS("Scripts/MA_FDA_veg/04_Model/ModelRDS/gam_final_trafo_all.rds")
+summary(gam_all)
+```
+
+***
+
+Clearly, according to the deviance explained ($85.4\%$) this is the best model, but still, there is the problem with the nitrogen uptake.
+
+**Possible next steps:**
+
+- Include radiation (new variable, needs to be pre-processed) and maybe ndist?
+- PFT-wise models to confirm hypotheses like 'A higher sand fraction leads to more BNE'
+- Derive appropriate confidence intervals/bands
+
+***
+

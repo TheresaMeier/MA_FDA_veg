@@ -1,0 +1,173 @@
+---
+title: "Analyzing the effects of climate change on vegetation dynamics using functional data analysis"
+author: "Theresa Meier, 22.08.2024"
+output: html_document
+---
+
+***
+
+## Functional Linear Regression - Scenario-wise models and confidence intervals
+In order to finalize the modelling approach, three final ideas are discussed in this document:
+
+1. **Scenario-wise models:** The model (for one patch) is refitted to each scenario separately to infer separate effects of the predictors.
+2. **Deriving confidence intervals using all 25 patches:** The model is refitted to the remaining 24 patches separately in order to deduce appropriate confidence intervals for all linear predictors using the obtained 25 parameter estimates.
+3. **Modelling functional climate covariates as MFPCA:** In order to model the three temperature related covariates (mean, minimum and maximum annual temperature) and the annual summed precipitation together, a MFPCA is performed and the resulting first PC is included in the model (for one patch).
+
+***
+
+### 1. Separate models for each scenario
+
+To compare the effects between different climate scenarios, the model introduced earlier is fitted to each scenario separately, excluding the effect of the covariate `Scenario`. Note that the data sets per scenario still contain about 350 observations each, indicating a valid modelling setup. Figure 1 shows the corresponding t-values for response `PC1_trafo`. On the left are the t-values of the previous model fitted to all scenarios combined, but without `Scenario`. On the right, the scenario-wise t-values are visualised. Horizontal lines at $-2$ and $2$ indicate significance.
+
+***
+
+![**Figure 1:** T-values of the model fitted to all scenarios together (left) and to each scenario separately (right) for PC 1. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/SeparateModels/png/t-values_PC1_all.png)
+
+***
+
+First, its important to note that the estimated parameters in the full model without covariate `Scenario` only slightly change in comparison to the model with `Scenario` included for the first PC scores. For the scenario-based models, most of the effects keep their direction and importance, but major differences between the scenarios become apparent. 
+
+- **Soil covariates:** While the soil composition, i.e., covariates `sand_fraction` and `silt_fraction`, as well as `bulkdensity_soil` and `soilcarbon` all show (significant) effects in the same direction in all scenarios, the effect of `ph_soil` is negative in the control scenario and SSP1-RCP2.6, while it is positive for the more extreme climate scenarios. However, this result should not be overrated, since only the effect in SSP1-RCP2.6 is considered significant.
+- **Ecological covariates:** Covariate `time_since_dist` is positive for all scenarios but SSP5-RCP8.5, but it has only a significant effect on grid cells disturbed in the control scenario, so this result should not be overrated. The effects of the number of new seedlings right after disturbance differs strongly between the scenarios and PFTs. Interestingly, for *needleleaf evergreen* (BNE), the effect is significantly positive when all scenarios are combined, but none of the scenario-wise parameters is significant. For *pioneering broadleaf* (IBS), a development over radial forcing is visible: while in scenario control, the effect is non-significantly negative, it turns positive in SSP1-RCP2.6 and gains in importance in the two more extreme scenarios, where it has a significant positive effect on the response variable. The dynamics in *conifers (others)* (otherC) is less straightforward: while the initial number of seedlings has a negative effect on all four scenarios, its t-value is below -2 only for grid cells disturbed in scenarios control and SSP3-RCP7.0. The same patterns are visible for PFTs *temperate broadleaf* (TeBS) and *tundra* (Tundra), but none of the effects is significant at the $5\%$-level.
+- **Climate covariates:** The effects of the first PC scores of annual precipitation are positive and significant for each scenario, and negative and significant for the first PC scores of annual mean temperature. The latter effect seems to increase with increasing radial forcing.
+
+Figure 2 shows the equivalent plot for the second response variable `PC2`:
+
+***
+
+![**Figure 2:** T-values of the model fitted to all scenarios together (left) and to each scenario separately (right) for PC 2. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/SeparateModels/png/t-values_PC1_all.png)
+
+***
+
+Again, some differences between the scenarios are present:
+
+- **Soil covariates:** The sign of the effects of soil composition (`sand_fraction` and `silt_fraction`) remains the same for all scenarios, but unlike the model on all scenarios, no effect is significant at $5\%$. `Soilcarbon` and `bulkdensity_soil` have small non-significant negative effects in all scenarios but scenario SSP1-RCP2.6, where the respective effects are positive (and non-significant). Interestingly, the effect of `ph_soil` shows a dynamic with radial forcing, that is, the more extreme the scenario, the more positive (and significant) the effect. 
+- **Ecological covariates:** Covariate `time_since_dist` has a non-significant negative effect on the second PC scores for all scenarios combined, and so does it for scenarios SSP3-RCP7.0 and SSP5-RCP8.5. The parameters of the other two scenarios are slightly positive, but not significant. The effects of the number of new seedlings partly differs heavily between the scenarios. For instance, PFT *needleleaf evergreen* (BNE) shows to have a significant positive effect on grid cells disturbed in SSP5-RCP8.5, while the effect of the other three scenarios is not significant and even changes the sign in SSP1-RCP2.6. The effect of *pioneering broadleaf* (IBS) seems to vary a lot with changes in climate conditions. While for scenarios control and SSP1-RCP2.6, the effect is significantly negative, it turn to positive in the two most extreme scenarios and is significant for SSP5-RCP8.5. For *conifers (other)* (otherC) the effect is negative and significant for the combined model as well as for scenarios control and SSP5-RCP8.5, but non-significant for the other two scenarios. The effect of *temperate broadleaf* (TeBS) right after the disturbance is large and significant in scenarios Control, SSP1-RCP2.6 and SSP5-RCP8.5, but has a non-significant effect in SSP3-RCP7.0. The very same pattern applies to PFT *tundra* (Tundra).
+- **Climate covariates:** Similar as for the first PC scores, the effect of `PC1_temp` increases (here in absolute terms) with increasing radial forcing, that is, the effect becomes more negative implying higher shares of *temperate broadleaf* (TeBS). Interestingly, the effect of the first PC scores of annual mean temperature is slightly (non-significantly) positive for all scenarios combined, but when looking at the scenarios separately, it has a negative effect on grid cells disturbed in the three warming scenarios, for SSP5-RCP8.5 even significantly negative. This induces the result, that more radial forcing leads to an increased importance of precipitation for *temperate broadleaf* (TeBS). 
+
+To summarise, it can be said that the scenario-based models show a certain difference between the effects, but do not lead to any fundamentally new findings.
+
+### 2. Deriving confidence intervals
+
+Recall that the significance considered before does not include the uncertainty introduced by modelling PC scores derived by previously performing an MFPCA. In order to infer appropriate confidence intervals for the estimated parameters, one approach is to use all 25 available patches for modelling. Note that, as expected, the PCs for all patches capture very similar dynamics in vegetation recovery, as do the climate covariate curves. Since the patches represent 25 realizations of each grid cell, the previously derived model can be refitted to each patch. This yields 25 parameter estimates for each linear predictor in the model, which serve as the basis for estimating $95\%$ confidence intervals. Figures 3 and 4 show the resulting mean effect estimates together with the confidence intervals for PC 1 scores and PC 2 scores, respectively. Effects in red (positive) and blue (negative) indicate significant effects, while non-significant effects are shown in grey.
+
+***
+
+**Question here:** I used the parameters of the first patch considered before for all generalized logistic function fits. Is this a valid approach? For some patches, the least-squares estimation did not work because of the chosen starting parameters, and so far I could not find a starting parameter configuration that suits to all 25 patches.
+
+***
+
+![**Figure 3:** Estimated mean parameters and 95% confidence intervals for response variable PC1 and all linear predictors. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/AllPatches/png/CIs_patches_PC1.png)
+
+***
+
+Despite the approach before (see Figure 10 in the appendix), only one covariate shows a non-significant effect on PC 1 scores (`initial_recruitment_Tundra`). Other than that, the effects are pretty much in line with those obtained by fitting the model to one patch only. Note that for the first PC, the confidence intervals are very small, indicating robustness in terms of patch choice.
+
+This robustness is less pronounced for some of the estimates of PC 2 scores as Figure 4 shows. Again, more effects than before are considered significant. Interestingly, only three covariates lead to a decrease of *temperate broadleaf* (TeBS), that is `sand_fraction`, `ph_soil` and `time_since_dist`. The effect of the number of new seedlings right after disturbance of *temperate broadleaf* is only marginally larger (in absolute terms) than those of the other PFTs.
+
+***
+
+![**Figure 4:** Estimated mean parameters and 95% confidence intervals for response variable PC2 and all linear predictors. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/AllPatches/png/CIs_patches_PC2.png)
+
+***
+
+In order to compare the t-values of the previously fitted model to one patch to those of the25 patches combined, the t-values are estimated by
+
+<center>
+$\hat{t_i} = \frac{\frac{\sqrt{25}}{25} \sum_i \beta_i}{\sqrt{\frac{1}{24} (\beta_i - \bar{\beta})}}$,
+</center>
+
+where $\bar{\beta}$ is the sample mean of the respective coefficient.
+
+**Question here:** I am calculating the standard error here, but the values are very very high. What is wrong here? Is it even possible to derive the t-values like this?
+
+Figures 5 and 6 show the obtained t-values for PC 1 and PC 2 scores, respectively, with vertical lines at $\pm 1.96$ for indicating significance at $5\%$.
+
+***
+
+![**Figure 5:** Estimated t-values for response variable PC1 and all linear predictors. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/AllPatches/png/t-values_patches_PC1.png)
+
+***
+
+The effects for the first PC scores are very similar to the one obtained for one patch only (see Figure 10). Besides `ph_soil` whose effect becomes negative and significant, all other variables show similar effect importance and same signs.
+
+In contrast, some of the effects on the second PC scores change. The effects of `time_since_dist` and `ScenarioSSP1-RCP2.6` flip, and the former shows even a significant effect now. Other than that, the effects of the temperature and the scenarios increased in comparison to the model based on patch 1.
+
+***
+
+![**Figure 6:** Estimated t-values for response variable PC2 and all linear predictors. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/AllPatches/png/t-values_patches_PC2.png)
+
+***
+
+Altogether, this approach to derive confidence intervals shows the robustness of most of the previously estimated coefficients on one patch, but especially for the second response variable, some effects change.
+
+***
+
+### 3. MFPCA for all climate covariates
+
+So far in this modelling approach, only two of the available four climate covariates are taken into account: the annual mean temperature and the annual summed precipitation, whereas the minimum and maximum annual temperature have been excluded. For both mean temperature and precipitation a separate FPCA has been performed so far, which neglects the dependency between both covariates. In order to account for this dependence, an MFPCA is performed on all four available climate covariates. Figure 7 shows the first PC, which already accounts for $98.56\%$ of the variation in the data. For all four variables, higher PC 1 scores indicate an upward shift of the mean function. Deviating dynamics are captured only by higher PCs, but since they do not account for a substantial amount of variation in the data, they are left out at that point. 
+
+***
+
+![**Figure 7:** First PC accounting for 98.56% of the variation in the data derived by an MFPCA on all four functional climate covariates. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/(M)FPCA/png/PCs/PCs_climate_PC1.png)
+
+***
+
+Refitting the model with the first PC scores of this climate MFPCA (and of course excluding the first PC scores for annual mean temperature and precipitation derived by separate FPCAs) leads to the t-values visualized in Figure 8 for the first PC scores:
+
+<!-- *** -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit") -->
+<!-- gam_MFPCA = readRDS("Scripts/MA_FDA_veg/04_Model/ModelRDS/gam_trafo_climateMFPCA.rds") -->
+<!-- summary(gam_MFPCA) -->
+<!-- ``` -->
+
+<!-- *** -->
+
+***
+
+![**Figure 8:** Estimated t-values of the linear predictors for the first PC scores of the model with MFPCA scores as predictors. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/t-values_PC1_climateMFPCA.png)
+
+***
+
+Interestingly, the effect of `PC1_climate` is non-significant. Overall, excluding the separate PC scores and including the MFPCA scores has a major impact on the estimation of the covariate `Scenario`: now, all climate scenarios have a negative effect on PC scores, which in turn indicates higher shares of *pioneering broadleaf* and lower shares of needleleafed trees. This matches the expectation, since the descriptive analysis showed that higher radial forcing leads to more broadleafed trees.
+
+Figure 9 shows the equivalent plot for the response variable `PC2`:
+
+***
+
+![**Figure 9:** Estimated t-values of the linear predictors for the second PC scores of the model with MFPCA scores as predictors. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/t-values_PC2_climateMFPCA.png)
+
+***
+
+Again, the effect of `PC1_climate` is not significant. Its positive direction indicates less *temperate broadleaf* for increasing temperature and precipitation, which is not confirmed by the results of the descriptive analysis. However, the effect of covariate `Scenario` is now significant for the two most extreme climate scenarios, which is an indicator for more *temperate broadleaf* for increasing radial forcing. The other predictors are (as expected) not affected.
+
+**Questions here**: The effect of the scenario does now match the expectations and is no longer counterintuitive, which is good. But now, the effect of `PC1_climate` is far from being significant for both PC 1 and PC 2 scores. So how should I include the climate covariates in the final model? Or should I, as proposed before, just insert this MFPCA approach in the discussion? 
+
+***
+
+**Generelle Fragen:**
+
+1. Welche Plots für CIs? Estimates und/oder t-values?
+2. Anhang: Was soll am Ende wirklich rein? (Karten der Deskription, Details zu den Clustern, etc.)
+3. Soll der Intercept mit rein in den Plots 10 und 11?
+4. Soll ich direkt im Modell Part die Konfidenzintervalle über die Patches angeben, oder wie gehabt erstmal bei $t= \pm 2$ lassen?
+
+***
+
+### Appendix
+
+***
+
+#### Original t-values of the model's predictors
+
+***
+
+![**Figure 10:** Estimated t-values of the linear predictors for the first PC scores. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/t-values_PC1.png)
+
+***
+
+![**Figure 11:** Estimated t-values of the linear predictors for the second PC scores. ](/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit/Scripts/Plots/Model/Evaluation/png/t-values_PC2.png)
+
+***

@@ -1,4 +1,8 @@
-# Functions for uniform plotting and naming (implemented by Lucia)
+################################################################################
+############################ Master's Thesis ###################################
+################################################################################
+
+############ Functions for uniform plotting and naming (by Lucia) ##############
 
 long_names_pfts = function(x) {
   x = gsub("ibs", "Pioneering broadleaf", x)

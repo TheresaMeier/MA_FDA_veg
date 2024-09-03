@@ -53,6 +53,7 @@ for (scen in scenarios){
   assign(paste0("d_", scen, "_all"), d_scen_all)
 }
 
+
 # Merge data sets for all scenarios
 d_all = rbind(d_picontrol_all, d_ssp126_all, d_ssp370_all, d_ssp585_all) %>%
   mutate(Cluster = factor(Cluster, levels = c("1", "2", "3", "4"), labels = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4")),
@@ -80,14 +81,14 @@ ggplot(d_all_long_fraction, aes(x = value, y = Cluster, fill = Cluster)) +
     guide = "none"  # Remove legend
   ) +
   theme(
-    text = element_text(size = 15), 
+    text = element_text(size = 20), 
     plot.title = element_text(size = 20, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
-  ggtitle("Soil composition for each cluster")
+  ggtitle("Soil composition")
 
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/soil_composition.pdf"), width = 8, height = 5)
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/soil_composition.png"), width = 8, height = 5)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/soil_composition.pdf"), width = 6, height = 3.5)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/soil_composition.png"), width = 6, height = 3.5)
 
 ggplot(d_all, aes(x = bulkdensity_soil, y = Cluster, fill = Cluster)) + 
   geom_density_ridges(aes(height = after_stat(density)), stat = "density", scale = 1) + 
@@ -100,14 +101,14 @@ ggplot(d_all, aes(x = bulkdensity_soil, y = Cluster, fill = Cluster)) +
     guide = "none"  # Remove legend
   ) +
   theme(
-    text = element_text(size = 15), 
+    text = element_text(size = 20), 
     plot.title = element_text(size = 20, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
-  ggtitle("Bulk density for each cluster")
+  ggtitle("Bulk density")
 
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/bulk_density.pdf"), width = 8, height = 5)
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/bulk_density.png"), width = 8, height = 5)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/bulk_density.pdf"), width = 6, height = 3.5)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/bulk_density.png"), width = 6, height = 3.5)
 
 ggplot(d_all, aes(x = ph_soil, y = Cluster, fill = Cluster)) + 
   geom_density_ridges(aes(height = after_stat(density)), stat = "density", scale = 1) + 
@@ -120,14 +121,14 @@ ggplot(d_all, aes(x = ph_soil, y = Cluster, fill = Cluster)) +
     guide = "none"  # Remove legend
   ) +
   theme(
-    text = element_text(size = 15), 
+    text = element_text(size = 20), 
     plot.title = element_text(size = 20, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
-  ggtitle("pH in water for each cluster")
+  ggtitle("pH in water")
 
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/ph_soil.pdf"), width = 8, height = 5)
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/ph_soil.png"), width = 8, height = 5)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/ph_soil.pdf"), width = 6, height = 3.5)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/ph_soil.png"), width = 6, height = 3.5)
 
 ggplot(d_all, aes(x = soilcarbon, y = Cluster, fill = Cluster)) + 
   geom_density_ridges(aes(height = after_stat(density)), stat = "density", scale = 1) + 
@@ -140,12 +141,12 @@ ggplot(d_all, aes(x = soilcarbon, y = Cluster, fill = Cluster)) +
     guide = "none"  # Remove legend
   ) +
   theme(
-    text = element_text(size = 15), 
+    text = element_text(size = 20), 
     plot.title = element_text(size = 20, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) +
-  ggtitle("Organic carbon content for each cluster")
+  ggtitle("Organic carbon content")
 
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/soilcarbon.pdf"), width = 8, height = 5)
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/soilcarbon.png"), width = 8, height = 5)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/soilcarbon.pdf"), width = 6, height = 3.5)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/soilcarbon.png"), width = 6, height = 3.5)
 

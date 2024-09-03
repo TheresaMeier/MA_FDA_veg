@@ -2,7 +2,7 @@
 ############################ Master's Thesis ###################################
 ################################################################################
 
-############################## Ecological data #################################
+######################## Description: Ecological data ##########################
 
 ## Set working directory and get plotting functions
 setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
@@ -54,13 +54,6 @@ d_eco_mean = d_eco %>%
 # Nuptake
 ggplot(d_eco_mean) + 
   geom_line(data = d_eco_mean, linewidth = 1, aes(x = Year, y = mean_nuptake, color = PFT)) +
-  # geom_line(data = d_eco, linewidth = .05, alpha = .25,
-  #           aes(x = Year, y = Nuptake, color = PFT, group = interaction(Lon, Lat, PFT))) +
-  # geom_line(data = d_eco_mean, aes(x = Year, y = mean_nuptake, color = PFT, group = PFT), linewidth = 2) +
-  # geom_smooth(data = d_eco_mean, aes(x = Year, y = mean_nuptake, color = PFT, group = PFT),
-  #             method = "loess", se = FALSE, linewidth = 2.5, color = "black", show.legend = FALSE) +
-  # geom_smooth(data = d_eco_mean, aes(x = Year, y = mean_nuptake, color = PFT, group = PFT), 
-  #             method = "loess", se = FALSE, linewidth = 1.5) +  
   facet_grid(rows = vars(Scenario)) +
   scale_x_continuous(name = "Year", expand = c(0,0), 
                      breaks = seq(2020, 2140, by = 10)) +
@@ -71,61 +64,29 @@ ggplot(d_eco_mean) +
                                 "Conifers (other)" = "#56B4E9", "Tundra" = "#009E73")) +
   ggtitle("Nitrogen uptake per PFT") +
   theme_bw() + theme(
-    text = element_text(size = 15), 
-    plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
-    axis.text.x = element_text(angle = 30,hjust=1)
+    text = element_text(size = 11), 
+    plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.text.x = element_text(angle = 30, hjust=1)
   )
-ggsave("Scripts/Plots/Descriptive/Eco/pdf/nuptake.pdf", width = 10, height = 8)
-ggsave("Scripts/Plots/Descriptive/Eco/png/nuptake.png", width = 10, height = 8)
-
-# cut plot
-ggplot(d_eco) + 
-  geom_line(data = d_eco, linewidth = .05, alpha = .25,
-            aes(x = Year, y = Nuptake, color = PFT, group = interaction(Lon, Lat, PFT))) +
-  # geom_line(data = d_eco_mean, aes(x = Year, y = mean_nuptake, color = PFT, group = PFT), linewidth = 2) +
-  geom_smooth(data = d_eco_mean, aes(x = Year, y = mean_nuptake, color = PFT, group = PFT),
-              method = "loess", se = FALSE, linewidth = 2.5, color = "black", show.legend = FALSE) +
-  geom_smooth(data = d_eco_mean, aes(x = Year, y = mean_nuptake, color = PFT, group = PFT), 
-              method = "loess", se = FALSE, linewidth = 1.5) +  
-  facet_grid(rows = vars(Scenario)) +
-  scale_x_continuous(name = "Year", expand = c(0,0), 
-                     breaks = seq(2020, 2140, by = 10)) +
-  scale_y_continuous(name = "Nitrogen uptake per PFT on the grid cell level", 
-                     expand = c(0,0), limits = c(0,25)) +
-  scale_color_manual(name = "Dominant vegetation", drop = TRUE,
-                     values = c("Temperate broadleaf" = "#D55E00", "Pioneering broadleaf" = "#E69F00",  "Needleleaf evergreen" = "#0072B2",   
-                                "Conifers (other)" = "#56B4E9", "Tundra" = "#009E73")) +
-  ggtitle("Nitrogen uptake per PFT for each disturbed grid cell and scenario") +
-  theme_bw() + 
-  theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5)
-  )
-ggsave("Scripts/Plots/Descriptive/Eco/pdf/nuptake_cut.pdf", width = 10, height = 8)
-ggsave("Scripts/Plots/Descriptive/Eco/png/nuptake_cut.png", width = 10, height = 8)
+ggsave("Scripts/Plots/Descriptive/Eco/pdf/nuptake.pdf", width = 8, height = 5)
+ggsave("Scripts/Plots/Descriptive/Eco/png/nuptake.png", width = 8, height = 5)
 
 # Nuptake total
 ggplot(d_eco_mean) + 
   geom_line(data = d_eco_mean, linewidth = 1,
             aes(x = Year, y = mean_nuptake_total, col = Scenario)) +
-  # geom_smooth(data = d_eco_mean, aes(x = Year, y = mean_nuptake_total, group = Scenario), 
-  #             method = "loess", se = FALSE, linewidth = 2.5, color = "black", show.legend = FALSE) +
-  # geom_smooth(data = d_eco_mean, aes(x = Year, y = mean_nuptake_total, color = Scenario), 
-  #             method = "loess", se = FALSE, linewidth = 1.5) +  
-  # # geom_hline(yintercept = 20, color = "black", size = 0.25, alpha = .75, lty = "dashed") +
-  # geom_hline(yintercept = 30, color = "black", size = 0.25, alpha = .75, lty = "dashed") +
   scale_x_continuous(name = "Year", expand = c(0, 0), breaks = seq(2020, 2140, by = 10)) +
   scale_y_continuous(name = "Total nitrogen uptake of the grid cell", expand = c(0, 0), limits = c(27,52)) +
   scale_color_manual(name = "Scenario", drop = TRUE,
                      values = c("Control" = "darkorange", "SSP1-RCP2.6" = "green", "SSP3-RCP7.0" = "turquoise", "SSP5-RCP8.5" = "magenta3")) +
   ggtitle("Total nitrogen uptake of the grid cell") +
   theme_bw() + theme(
-    text = element_text(size = 15), 
-    plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
-    axis.text.x = element_text(angle = 30,hjust=1)
+    text = element_text(size = 11), 
+    plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.text.x = element_text(angle = 30, hjust=1)
   )
-ggsave("Scripts/Plots/Descriptive/Eco/pdf/nuptake_total.pdf", width = 10, height = 8)
-ggsave("Scripts/Plots/Descriptive/Eco/png/nuptake_total.png", width = 10, height = 8)
+ggsave("Scripts/Plots/Descriptive/Eco/pdf/nuptake_total.pdf", width = 8, height = 5)
+ggsave("Scripts/Plots/Descriptive/Eco/png/nuptake_total.png", width = 8, height = 5)
 
 d_recruit = d_eco %>%
   distinct(Lon,Lat,PFT,initial_recruitment, recruitment_ten_years, previous_state, relative_previous, time_since_dist, Scenario) %>%
@@ -134,25 +95,6 @@ d_recruit = d_eco %>%
 ## Initial recruitment
 d_recruit <- d_recruit %>%
   mutate(Scenario = fct_rev(Scenario))
-
-ggplot(d_recruit, aes(x = initial_recruitment, y = Scenario, fill = PFT)) + 
-  geom_density_ridges(aes(height = after_stat(density)), stat = "density", scale = 0.75) + 
-  theme_bw() + 
-  ylab("Scenario") + xlab("Number of new seedlings") + 
-  #xlim(0, 120) +
-  facet_grid(~PFT, scales = "free_x") + 
-  scale_fill_manual(name = "Dominant vegetation", drop = TRUE,
-                    values = c("Temperate broadleaf" = "#D55E00", "Pioneering broadleaf" = "#E69F00",  "Needleleaf evergreen" = "#0072B2",   
-                               "Conifers (other)" = "#56B4E9", "Tundra" = "#009E73")) +
-  theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
-    axis.text.x = element_text(angle = 30, hjust = 1)
-  ) +
-  ggtitle("Number of new seedlings per PFT right after disturbance")
-
-ggsave("Scripts/Plots/Descriptive/Eco/pdf/initial_recruitment.pdf", width = 10, height = 8)
-ggsave("Scripts/Plots/Descriptive/Eco/png/initial_recruitment.png", width = 10, height = 8)
 
 # cut plot
 ggplot(d_recruit, aes(x = initial_recruitment, y = Scenario, fill = PFT)) + 
@@ -166,41 +108,23 @@ ggplot(d_recruit, aes(x = initial_recruitment, y = Scenario, fill = PFT)) +
                                "Conifers (other)" = "#56B4E9", "Tundra" = "#009E73")) +
   theme(
     text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
-    axis.text.x = element_text(angle = 30, hjust = 1)
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
+    axis.text.x = element_text(angle = 30, hjust = 1),
+    strip.text = element_text(size = 8),
+    legend.position = "none"
   ) +
   ggtitle("Number of new seedlings per PFT right after disturbance")
 
-ggsave("Scripts/Plots/Descriptive/Eco/pdf/initial_recruitment_cut.pdf", width = 10, height = 8)
-ggsave("Scripts/Plots/Descriptive/Eco/png/initial_recruitment_cut.png", width = 10, height = 8)
+ggsave("Scripts/Plots/Descriptive/Eco/pdf/initial_recruitment_cut.pdf", width = 7, height = 6)
+ggsave("Scripts/Plots/Descriptive/Eco/png/initial_recruitment_cut.png", width = 7, height = 6)
 
 
 ## Recruitment 10 years
-
-ggplot(d_recruit, aes(x = recruitment_ten_years, y = Scenario, fill = PFT)) + 
-  geom_density_ridges(aes(height = after_stat(density)), stat = "density", scale = 0.75) + 
-  theme_bw() + 
-  ylab("Scenario") + xlab("Number of new seedlings") + 
-  #xlim(0, 800) +
-  facet_grid(~PFT, scales = "free_x") + 
-  scale_fill_manual(name = "Dominant vegetation", drop = TRUE,
-                    values = c("Temperate broadleaf" = "#D55E00", "Pioneering broadleaf" = "#E69F00",  "Needleleaf evergreen" = "#0072B2",   
-                               "Conifers (other)" = "#56B4E9", "Tundra" = "#009E73")) +
-  theme(
-    text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
-    axis.text.x = element_text(angle = 30, hjust = 1)
-  ) +
-  ggtitle("Number of new seedling per PFT in the ten years after disturbance (summed up)")
-
-ggsave("Scripts/Plots/Descriptive/Eco/pdf/recruitment_ten_years.pdf", width = 10, height = 8)
-ggsave("Scripts/Plots/Descriptive/Eco/png/recruitment_ten_years.png", width = 10, height = 8)
-
 # cut plot
 ggplot(d_recruit, aes(x = recruitment_ten_years, y = Scenario, fill = PFT)) + 
   geom_density_ridges(aes(height = after_stat(density)), stat = "density", scale = 0.75) + 
   theme_bw() + 
-  ylab("Scenario") + xlab("Number of new seedlings") + 
+  ylab("Scenario") + xlab("Number of new seedlings (summed up)") + 
   xlim(0, 800) +
   facet_grid(~PFT, scales = "free_x") + 
   scale_fill_manual(name = "Dominant vegetation", drop = TRUE,
@@ -208,13 +132,15 @@ ggplot(d_recruit, aes(x = recruitment_ten_years, y = Scenario, fill = PFT)) +
                                "Conifers (other)" = "#56B4E9", "Tundra" = "#009E73")) +
   theme(
     text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
-    axis.text.x = element_text(angle = 30, hjust = 1)
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
+    axis.text.x = element_text(angle = 30, hjust = 1),
+    strip.text = element_text(size = 8),
+    legend.position = "none"
   ) +
-  ggtitle("Number of new seedling per PFT in the ten years after disturbance (summed up)")
+  ggtitle("Number of new seedling per PFT ten years after disturbance")
 
-ggsave("Scripts/Plots/Descriptive/Eco/pdf/recruitment_ten_years_cut.pdf", width = 10, height = 8)
-ggsave("Scripts/Plots/Descriptive/Eco/png/recruitment_ten_years_cut.png", width = 10, height = 8)
+ggsave("Scripts/Plots/Descriptive/Eco/pdf/recruitment_ten_years_cut.pdf", width = 7, height = 6)
+ggsave("Scripts/Plots/Descriptive/Eco/png/recruitment_ten_years_cut.png", width = 7, height = 6)
 
 
 ## previous state
@@ -230,78 +156,124 @@ ggplot(d_recruit, aes(x = relative_previous, y = Scenario, fill = PFT)) +
                                "Conifers (other)" = "#56B4E9", "Tundra" = "#009E73")) +
   theme(
     text = element_text(size = 10), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
-    axis.text.x = element_text(angle = 30, hjust = 1)
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
+    axis.text.x = element_text(angle = 30, hjust = 1),
+    strip.text = element_text(size = 8),
+    legend.position = "none"
   ) +
   ggtitle("Vegetation composition before the disturbance")
 
-ggsave("Scripts/Plots/Descriptive/Eco/pdf/previous_state.pdf", width = 10, height = 8)
-ggsave("Scripts/Plots/Descriptive/Eco/png/previous_state.png", width = 10, height = 8)
+ggsave("Scripts/Plots/Descriptive/Eco/pdf/previous_state.pdf", width = 7, height = 6)
+ggsave("Scripts/Plots/Descriptive/Eco/png/previous_state.png", width = 7, height = 6)
 
 ############################## Spatial Distribution ############################
 
-register_google(key = "AIzaSyATIWAZ4gtgJhdH6GP_E8iSubdFh6XQ32Y")
+register_google(key = "AIzaSyA_eUpOhj7hoPyzyynWvyMqcGEA1Z_SZVY")
 
 # Get map
 worldmap <- get_map(location = c(lon = -4.068561, lat = 58.87355), zoom = 1)
 
-ggmap(worldmap) +
-  geom_point(data = d_recruit, 
-             aes(x = Lon, y = Lat, color = initial_recruitment), 
-             size = 1) +
-  facet_grid(Scenario ~ PFT) +
-  xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
-  ylab("Latitude") + theme_bw() + ggtitle("Number of new seedlings per PFT right after disturbance") +
-  theme(text = element_text(size = 15),
-        plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
-        strip.text.x = element_text(size = 15, face = "bold", angle = 0, hjust = 0.5),
-        strip.text.y = element_text(size = 15, face = "bold", angle = 0, hjust = 0.5)) +
-  labs(color = "Number of new seedlings") +
-  theme(legend.position = "right",
-        legend.title = element_text(size = 15, face = "bold"),
-        legend.text = element_text(size = 12)) +
-  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 50, limits = c(0, 100))
+# Initial recruitment
+d_initial_recruitment <- d_recruit %>%
+  group_by(Lon, Lat, Scenario) %>%
+  filter(initial_recruitment == max(initial_recruitment)) %>%
+  ungroup()
 
-ggsave("Scripts/Plots/Descriptive/Eco/pdf/initial_recruitment_map.pdf", width = 25, height = 10)
-ggsave("Scripts/Plots/Descriptive/Eco/png/initial_recruitment_map.png", width = 25, height = 10)
+d_initial_recruitment$Scenario <- factor(d_initial_recruitment$Scenario, levels = c("Control", "SSP1-RCP2.6", "SSP3-RCP7.0", "SSP5-RCP8.5"))
 
 ggmap(worldmap) +
-  geom_point(data = d_recruit, 
-             aes(x = Lon, y = Lat, color = recruitment_ten_years), 
-             size = 1) +
-  facet_grid(Scenario ~ PFT) +
+  geom_point(data = d_initial_recruitment, 
+             aes(x = Lon, y = Lat, color = PFT), 
+             size = 2) +
+  facet_grid(rows = vars(Scenario)) +
   xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
-  ylab("Latitude") + theme_bw() + ggtitle("Number of new seedling per PFT in the ten years after disturbance (summed up)") +
+  ylab("Latitude") +
+  scale_color_manual(name = "Dominant vegetation", drop = TRUE,
+                     values = c("Temperate broadleaf" = "#D55E00", "Pioneering broadleaf" = "#E69F00",  
+                                "Needleleaf evergreen" = "#0072B2", "Conifers (other)" = "#56B4E9", 
+                                "Tundra" = "#009E73"),
+                     labels = c("Temperate broadleaf", "Pioneering broadleaf", "Needleleaf evergreen",   
+                                "Conifers (other)", "Tundra")) +
+  theme_bw() + ggtitle("New seedlings right after disturbance") +
   theme(text = element_text(size = 15),
         plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
-        strip.text.x = element_text(size = 15, face = "bold", angle = 0, hjust = 0.5),
-        strip.text.y = element_text(size = 15, face = "bold", angle = 0, hjust = 0.5)) +
-  labs(color = "Number of new seedlings") +
-  theme(legend.position = "right",
+        strip.text.x = element_text(size = 15, angle = 0, hjust = 0.5),
+        strip.text.y = element_text(size = 15, angle = 0, hjust = 0.5),
+        legend.position = "right",
         legend.title = element_text(size = 15, face = "bold"),
         legend.text = element_text(size = 12)) +
-  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 500, limits = c(0, 1000))
+  labs(color = "Dominant vegetation")
 
-ggsave("Scripts/Plots/Descriptive/Eco/pdf/recruitment_ten_years_map.pdf", width = 25, height = 10)
-ggsave("Scripts/Plots/Descriptive/Eco/png/recruitment_ten_years_map.png", width = 25, height = 10)
+ggsave("Scripts/Plots/Descriptive/Eco/pdf/initial_recruitment_map.pdf", width = 10, height = 7.5)
+ggsave("Scripts/Plots/Descriptive/Eco/png/initial_recruitment_map.png", width = 10, height = 7.5)
+
+
+# Recruitment ten years
+d_recruitment_ten_years <- d_recruit %>%
+  group_by(Lon, Lat, Scenario) %>%
+  filter(recruitment_ten_years == max(recruitment_ten_years)) %>%
+  ungroup()
+
+d_recruitment_ten_years$Scenario <- factor(d_recruitment_ten_years$Scenario, levels = c("Control", "SSP1-RCP2.6", "SSP3-RCP7.0", "SSP5-RCP8.5"))
 
 ggmap(worldmap) +
-  geom_point(data = d_recruit, 
-             aes(x = Lon, y = Lat, color = previous_state), 
-             size = 1) +
-  facet_grid(Scenario ~ PFT) +
+  geom_point(data = d_recruitment_ten_years, 
+             aes(x = Lon, y = Lat, color = PFT), 
+             size = 2) +
+  facet_grid(rows = vars(Scenario)) +
   xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
-  ylab("Latitude") + theme_bw() + ggtitle("Vegetation composition before the disturbance") +
+  ylab("Latitude") +
+  scale_color_manual(name = "Dominant vegetation", drop = TRUE,
+                     values = c("Temperate broadleaf" = "#D55E00", "Pioneering broadleaf" = "#E69F00",  
+                                "Needleleaf evergreen" = "#0072B2", "Conifers (other)" = "#56B4E9", 
+                                "Tundra" = "#009E73"),
+                     labels = c("Temperate broadleaf", "Pioneering broadleaf", "Needleleaf evergreen",   
+                                "Conifers (other)", "Tundra")) +
+  theme_bw() + ggtitle("New seedling ten years after disturbance") +
   theme(text = element_text(size = 15),
         plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
-        strip.text.x = element_text(size = 15, face = "bold", angle = 0, hjust = 0.5),
-        strip.text.y = element_text(size = 15, face = "bold", angle = 0, hjust = 0.5)) +
-  labs(color = bquote("Aboveground carbon in kg/m"^2)) +
-  theme(legend.position = "right",
+        strip.text.x = element_text(size = 15, angle = 0, hjust = 0.5),
+        strip.text.y = element_text(size = 15, angle = 0, hjust = 0.5),
+        legend.position = "right",
         legend.title = element_text(size = 15, face = "bold"),
         legend.text = element_text(size = 12)) +
-  scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 5, limits = c(0, 10))
+  labs(color = "Dominant vegetation")
 
-ggsave("Scripts/Plots/Descriptive/Eco/pdf/previous_state_map.pdf", width = 25, height = 10)
-ggsave("Scripts/Plots/Descriptive/Eco/png/previous_state_map.png", width = 25, height = 10)
+ggsave("Scripts/Plots/Descriptive/Eco/pdf/recruitment_ten_years_map.pdf", width = 10, height = 7.5)
+ggsave("Scripts/Plots/Descriptive/Eco/png/recruitment_ten_years_map.png", width = 10, height = 7.5)
+
+
+# Previous State
+d_previous_state <- d_recruit %>%
+  group_by(Lon, Lat, Scenario) %>%
+  filter(previous_state  == max(previous_state )) %>%
+  ungroup()
+
+d_previous_state $Scenario <- factor(d_previous_state$Scenario, levels = c("Control", "SSP1-RCP2.6", "SSP3-RCP7.0", "SSP5-RCP8.5"))
+
+ggmap(worldmap) +
+  geom_point(data = d_previous_state, 
+             aes(x = Lon, y = Lat, color = PFT), 
+             size = 2) +
+  facet_grid(rows = vars(Scenario)) +
+  xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
+  ylab("Latitude") +
+  scale_color_manual(name = "Dominant vegetation", drop = TRUE,
+                     values = c("Temperate broadleaf" = "#D55E00", "Pioneering broadleaf" = "#E69F00",  
+                                "Needleleaf evergreen" = "#0072B2", "Conifers (other)" = "#56B4E9", 
+                                "Tundra" = "#009E73"),
+                     labels = c("Temperate broadleaf", "Pioneering broadleaf", "Needleleaf evergreen",   
+                                "Conifers (other)", "Tundra")) +
+  theme_bw() + ggtitle("Dominant vegetation before the disturbance") +
+  theme(text = element_text(size = 15),
+        plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+        strip.text.x = element_text(size = 15, angle = 0, hjust = 0.5),
+        strip.text.y = element_text(size = 15, angle = 0, hjust = 0.5),
+        legend.position = "right",
+        legend.title = element_text(size = 15, face = "bold"),
+        legend.text = element_text(size = 12)) +
+  labs(color = "Dominant vegetation")
+
+ggsave("Scripts/Plots/Descriptive/Eco/pdf/previous_state_map.pdf", width = 10, height = 7.5)
+ggsave("Scripts/Plots/Descriptive/Eco/png/previous_state_map.png", width = 10, height = 7.5)
 

@@ -67,8 +67,8 @@ ggmap(worldmap) +
   scale_color_manual(name = "Cluster", drop = TRUE, values = c("Cluster 1" = "#F8766D", "Cluster 2" = "#7CAE00" , "Cluster 3" = "#00BFC4", "Cluster 4" = "#C77CFF"),
                      labels = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4")) +
   theme_bw() + ggtitle("Spatial distribution of the clusters") +
-  theme(text = element_text(size = 15), plot.title = element_text(size = 20, face = "bold",hjust = 0.5))
-
+  theme(text = element_text(size = 20), plot.title = element_text(size = 25, face = "bold",hjust = 0.5),
+        strip.text = element_text(size = 12))
 
 ggsave("Scripts/Plots/MFPCA/Clusters/pdf/Map_clusters.pdf", width = 12, height = 8)
 ggsave("Scripts/Plots/MFPCA/Clusters/png/Map_clusters.png", width = 12, height = 8)

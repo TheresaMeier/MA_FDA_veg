@@ -2,7 +2,7 @@
 ############################ Master's Thesis ###################################
 ################################################################################
 
-########################### Climate and Soil data ##############################
+########################### Description: Soil data #############################
 
 ## Set working directory and get plotting functions
 setwd("/home/theresa/Schreibtisch/Theresa/STUDIUM/Master Statistics and Data Science/Masterarbeit")
@@ -42,7 +42,7 @@ d_soil_long$property = gsub("sand", "Sand ", d_soil_long$property)
 d_soil_long$property = gsub("clay", "Clay ", d_soil_long$property)
 d_soil_long$property = gsub("silt", "Silt ", d_soil_long$property)
 
-register_google(key = "AIzaSyATIWAZ4gtgJhdH6GP_E8iSubdFh6XQ32Y")
+register_google(key = "AIzaSyA_eUpOhj7hoPyzyynWvyMqcGEA1Z_SZVY")
 
 # Get map
 worldmap <- get_map(location = c(lon =-4.068561, lat = 58.87355), zoom = 1)
@@ -65,8 +65,8 @@ ggmap(worldmap) +
         legend.text = element_text(size = 12)) +
   scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 0.5, limits = c(0, 1))
 
-ggsave("Scripts/Plots/Descriptive/Soil/pdf/soil_map.pdf", width = 20, height = 15)
-ggsave("Scripts/Plots/Descriptive/Soil/png/soil_map.png", width = 20, height = 15)
+ggsave("Scripts/Plots/Descriptive/Soil/pdf/soil_map.pdf", width = 9, height = 6)
+ggsave("Scripts/Plots/Descriptive/Soil/png/soil_map.png", width = 9, height = 6)
 
 # As ridge plot
 ggplot(d_soil_long, aes(x = value)) + 
@@ -74,13 +74,13 @@ ggplot(d_soil_long, aes(x = value)) +
   theme_bw() +  facet_wrap(~property) +
   ylab("Density") + xlab("Fraction") + 
    theme(
-    text = element_text(size = 18), 
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), 
+    text = element_text(size = 20), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
     axis.text.x = element_text(angle = 30, hjust = 1)
   )
 
-ggsave("Scripts/Plots/Descriptive/Soil/pdf/soil_ridgeplot.pdf", width = 8, height = 6)
-ggsave("Scripts/Plots/Descriptive/Soil/png/soil_ridgeplot.png", width = 8, height = 6)
+ggsave("Scripts/Plots/Descriptive/Soil/pdf/soil_ridgeplot.pdf", width = 8, height = 5)
+ggsave("Scripts/Plots/Descriptive/Soil/png/soil_ridgeplot.png", width = 8, height = 5)
 
 
 ################################# Bulkdensity ##################################
@@ -99,8 +99,8 @@ ggmap(worldmap) +
         legend.text = element_text(size = 12)) +
   scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 0.85, limits = c(0.1, 1.7))
 
-ggsave("Scripts/Plots/Descriptive/Soil/pdf/bulk_map.pdf", width = 20, height = 15)
-ggsave("Scripts/Plots/Descriptive/Soil/png/bulk_map.png", width = 20, height = 15)
+ggsave("Scripts/Plots/Descriptive/Soil/pdf/bulk_map.pdf", width = 9, height = 6)
+ggsave("Scripts/Plots/Descriptive/Soil/png/bulk_map.png", width = 9, height = 6)
 
 ################################## PH value ####################################
 
@@ -118,8 +118,8 @@ ggmap(worldmap) +
         legend.text = element_text(size = 12)) +
   scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 6.4, limits = c(4.5, 8.2))
 
-ggsave("Scripts/Plots/Descriptive/Soil/pdf/ph_map.pdf", width = 20, height = 15)
-ggsave("Scripts/Plots/Descriptive/Soil/png/ph_map.png", width = 20, height = 15)
+ggsave("Scripts/Plots/Descriptive/Soil/pdf/ph_map.pdf", width = 9, height = 6)
+ggsave("Scripts/Plots/Descriptive/Soil/png/ph_map.png", width = 9, height = 6)
 
 ################################# Soil carbon ##################################
 
@@ -137,8 +137,8 @@ ggmap(worldmap) +
         legend.text = element_text(size = 12)) +
   scale_color_gradient2(low = "slateblue4", mid = "floralwhite", high = "firebrick1", midpoint = 9.4, limits = c(0.5, 17.3))
 
-ggsave("Scripts/Plots/Descriptive/Soil/pdf/soilcarbon_map.pdf", width = 20, height = 15)
-ggsave("Scripts/Plots/Descriptive/Soil/png/soilcarbon_map.png", width = 20, height = 15)
+ggsave("Scripts/Plots/Descriptive/Soil/pdf/soilcarbon_map.pdf", width = 9, height = 6)
+ggsave("Scripts/Plots/Descriptive/Soil/png/soilcarbon_map.png", width = 9, height = 6)
 
 # As ridge plots
 
@@ -157,5 +157,5 @@ ggplot(d_soil_long_2, aes(x = value)) +
     axis.text.x = element_text(angle = 30, hjust = 1)
   )
 
-ggsave("Scripts/Plots/Descriptive/Soil/pdf/soil_attributes_ridgeplot.pdf", width = 8, height = 6)
-ggsave("Scripts/Plots/Descriptive/Soil/png/soil_attributes_ridgeplot.png", width = 8, height = 6)
+ggsave("Scripts/Plots/Descriptive/Soil/pdf/soil_attributes_ridgeplot.pdf", width = 8, height = 5)
+ggsave("Scripts/Plots/Descriptive/Soil/png/soil_attributes_ridgeplot.png", width = 8, height = 5)

@@ -43,7 +43,8 @@ for (iPFT in 1:5){
 }
 
 ################# Calculate and cluster temporal scores ########################
-
+# Cluster assignment of previous clustering for consistency
+right_order_all = c(4,1,3,2)  # for control only: c(1,4,2,3)
 for (iYear in c(seq(10,100,by=10))){
   # Calculate scores manually
   scores_manual = funData_centered@.Data[[1]]@X[,iYear] %*% t(MFPCA_all$functions[[1]]@X[,iYear]) +
@@ -66,9 +67,9 @@ for (iYear in c(seq(10,100,by=10))){
   
   plot_data_iYear = as.data.frame(scores) %>% 
     mutate(Cluster = as.factor(Cluster),
-           # scenario = c(rep("Control", dim(d_picontrol)[1]),rep("SSP1-RCP2.6", dim(d_ssp126)[1]),rep("SSP3-RCP7.0", dim(d_ssp370)[1]),rep("SSP5-RCP8.5", dim(d_ssp585)[1])))
            scenario = c(rep("Control", 434),rep("SSP1-RCP2.6", 442),rep("SSP3-RCP7.0", 462),rep("SSP5-RCP8.5", 465)))
   
+  plot_data_iYear$Cluster = right_order_all[plot_data_iYear$Cluster]
   assign(paste0("plot_data_", iYear), plot_data_iYear)  
 }
 
@@ -110,7 +111,6 @@ for (scen in scenarios){
   }
   
   sankey_data_scen = as.data.frame(do.call(cbind,cluster_list))
-  #rownames(sankey_data_scen) = rownames(d_picontrol)
   colnames(sankey_data_scen) = paste0("y", c(seq(10,100,by=10))) 
   assign(paste0("sankey_data_", scen), sankey_data_scen)
   
@@ -122,28 +122,26 @@ for (scen in scenarios){
                                        node = node, 
                                        next_node = next_node,
                                        fill = factor(node)))  +
-    labs(x = "Years after disturbance",
+    labs(x = "Year after disturbance",
          y = NULL,
          fill = "Cluster",
          color = NULL) +
     geom_sankey(flow.alpha = .6,
                 node.color = "gray30") +
     #geom_sankey_label(size = 3, color = "white", fill = "gray40") +
-    scale_fill_discrete(drop=FALSE) + ggtitle(long_names_scenarios(scen)) +
+    scale_fill_discrete(drop=FALSE) + ggtitle(paste(long_names_scenarios(scen))) +
     theme_bw() +
-    theme(plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
-          text = element_text(size = 15),
+    theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+          text = element_text(size = 14),
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
     scale_x_discrete(labels = c(seq(10,100,by=10)))
   
   assign(paste0("sankey_plot_", scen, "_sorted"),g)
+  ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/clusters_with_years_",pid,"_single_", scen, ".pdf"), g, width = 5, height = 3)
+  ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/clusters_with_years_",pid,"_single_", scen, ".png"), g, width = 5, height = 3)
+  
 }
-
-plot_grid(sankey_plot_picontrol_sorted, sankey_plot_ssp126_sorted, sankey_plot_ssp370_sorted, sankey_plot_ssp585_sorted, nrow = 2)
-
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/clusters_with_years_",pid,"_single.pdf"), width = 15, height = 10)
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/clusters_with_years_",pid,"_single.png"), width = 15, height = 10)
 
 # For all scenarios together
 cluster_list = list()
@@ -163,23 +161,23 @@ ggplot(sankey_data_tmp, aes(x = x,
                                      node = node, 
                                      next_node = next_node,
                                      fill = factor(node)))  +
-  labs(x = "Years after disturbance",
+  labs(x = "Year after disturbance",
        y = NULL,
        fill = "Cluster",
        color = NULL) +
   geom_sankey(flow.alpha = .6,
               node.color = "gray30") +
   #geom_sankey_label(size = 3, color = "white", fill = "gray40") +
-  scale_fill_discrete(drop=FALSE) + ggtitle("Cluster development over time for all scenarios combined") +
+  scale_fill_discrete(drop=FALSE) + ggtitle("All scenarios combined") +
   theme_bw() +
-  theme(plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
-        text = element_text(size = 15),
+  theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+        text = element_text(size = 14),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank()) +
   scale_x_discrete(labels = c(seq(10,100,by=10)))
 
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/clusters_with_years_",pid,"_single_combined.pdf"), width = 15, height = 10)
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/clusters_with_years_",pid,"_single_combined.png"), width = 15, height = 10)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/clusters_with_years_",pid,"_single_combined.pdf"), width = 5, height = 3)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/clusters_with_years_",pid,"_single_combined.png"), width = 5, height = 3)
 
 
 # Check Adjusted Rand Index (ARI) for Cluster consistency:
@@ -219,9 +217,9 @@ ggplot(ari_values, aes(x = Year, y = ARI, color = Scenario)) +
   geom_line(aes(linewidth = ifelse(Scenario == "Combined", 2, 1))) +  # Adjust linewidth based on Scenario
   geom_point(size = 2) +
   geom_hline(yintercept = 1, color = "darkgrey", size = 0.5) +
-  labs(title = "Adjusted Rand Index (ARI) Over Time for Different Scenarios",
-       x = "Years after disturbance",
-       y = "Adjusted Rand Index (ARI)",
+  labs(title = "ARI over time for different scenarios",
+       x = "Year after disturbance",
+       y = "ARI",
        color = "Scenario") +
   theme_bw() +
   theme(
@@ -232,5 +230,5 @@ ggplot(ari_values, aes(x = Year, y = ARI, color = Scenario)) +
   scale_linewidth_identity() +
   scale_color_manual(values = pastel_colors)
 
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/ARI_clusters_with_years_",pid,"_single.pdf"), width = 15, height = 10)
-ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/ARI_clusters_with_years_",pid,"_single.png"), width = 15, height = 10)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/pdf/ARI_clusters_with_years_",pid,"_single.pdf"), width = 10, height = 6)
+ggsave(paste0("Scripts/Plots/MFPCA/Clusters/png/ARI_clusters_with_years_",pid,"_single.png"), width = 10, height = 6)
