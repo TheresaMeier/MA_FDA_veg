@@ -189,16 +189,15 @@ ggmap(worldmap) +
   xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
   ylab("Latitude") +
   scale_color_manual(name = "Dominant vegetation", drop = TRUE,
-                     values = c("Temperate broadleaf" = "#D55E00", "Pioneering broadleaf" = "#E69F00",  
-                                "Needleleaf evergreen" = "#0072B2", "Conifers (other)" = "#56B4E9", 
-                                "Tundra" = "#009E73"),
-                     labels = c("Temperate broadleaf", "Pioneering broadleaf", "Needleleaf evergreen",   
-                                "Conifers (other)", "Tundra")) +
+                     values = c("Needleleaf evergreen" = "#0072B2", "Pioneering broadleaf" = "#E69F00", "Conifers (other)" = "#56B4E9",
+                                "Temperate broadleaf" = "#D55E00", "Tundra" = "#009E73"),
+                     labels = c("Needleleaf evergreen","Pioneering broadleaf", "Conifers (other)",
+                                "Temperate broadleaf","Tundra")) +
   theme_bw() + ggtitle("New seedlings right after disturbance") +
-  theme(text = element_text(size = 15),
+  theme(text = element_text(size = 12),
         plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
-        strip.text.x = element_text(size = 15, angle = 0, hjust = 0.5),
-        strip.text.y = element_text(size = 15, angle = 0, hjust = 0.5),
+        strip.text.x = element_text(size = 12, angle = 0, hjust = 0.5),
+        strip.text.y = element_text(size = 12, angle = 0, hjust = 0.5),
         legend.position = "right",
         legend.title = element_text(size = 15, face = "bold"),
         legend.text = element_text(size = 12)) +
@@ -224,16 +223,15 @@ ggmap(worldmap) +
   xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
   ylab("Latitude") +
   scale_color_manual(name = "Dominant vegetation", drop = TRUE,
-                     values = c("Temperate broadleaf" = "#D55E00", "Pioneering broadleaf" = "#E69F00",  
-                                "Needleleaf evergreen" = "#0072B2", "Conifers (other)" = "#56B4E9", 
-                                "Tundra" = "#009E73"),
-                     labels = c("Temperate broadleaf", "Pioneering broadleaf", "Needleleaf evergreen",   
-                                "Conifers (other)", "Tundra")) +
-  theme_bw() + ggtitle("New seedling ten years after disturbance") +
-  theme(text = element_text(size = 15),
+                     values = c("Needleleaf evergreen" = "#0072B2", "Pioneering broadleaf" = "#E69F00", "Conifers (other)" = "#56B4E9",
+                                "Temperate broadleaf" = "#D55E00", "Tundra" = "#009E73"),
+                     labels = c("Needleleaf evergreen","Pioneering broadleaf", "Conifers (other)",
+                                "Temperate broadleaf","Tundra")) +
+  theme_bw() + ggtitle("New seedlings right after disturbance") +
+  theme(text = element_text(size = 12),
         plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
-        strip.text.x = element_text(size = 15, angle = 0, hjust = 0.5),
-        strip.text.y = element_text(size = 15, angle = 0, hjust = 0.5),
+        strip.text.x = element_text(size = 12, angle = 0, hjust = 0.5),
+        strip.text.y = element_text(size = 12, angle = 0, hjust = 0.5),
         legend.position = "right",
         legend.title = element_text(size = 15, face = "bold"),
         legend.text = element_text(size = 12)) +
@@ -259,16 +257,15 @@ ggmap(worldmap) +
   xlab("Longitude") + ylim(45,70) + xlim(-200,200) +
   ylab("Latitude") +
   scale_color_manual(name = "Dominant vegetation", drop = TRUE,
-                     values = c("Temperate broadleaf" = "#D55E00", "Pioneering broadleaf" = "#E69F00",  
-                                "Needleleaf evergreen" = "#0072B2", "Conifers (other)" = "#56B4E9", 
-                                "Tundra" = "#009E73"),
-                     labels = c("Temperate broadleaf", "Pioneering broadleaf", "Needleleaf evergreen",   
-                                "Conifers (other)", "Tundra")) +
-  theme_bw() + ggtitle("Dominant vegetation before the disturbance") +
-  theme(text = element_text(size = 15),
+                     values = c("Needleleaf evergreen" = "#0072B2", "Pioneering broadleaf" = "#E69F00", "Conifers (other)" = "#56B4E9",
+                                "Temperate broadleaf" = "#D55E00", "Tundra" = "#009E73"),
+                     labels = c("Needleleaf evergreen","Pioneering broadleaf", "Conifers (other)",
+                                "Temperate broadleaf","Tundra")) +
+  theme_bw() + ggtitle("Dominant vegetation prio to the disturbance") +
+  theme(text = element_text(size = 12),
         plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
-        strip.text.x = element_text(size = 15, angle = 0, hjust = 0.5),
-        strip.text.y = element_text(size = 15, angle = 0, hjust = 0.5),
+        strip.text.x = element_text(size = 12, angle = 0, hjust = 0.5),
+        strip.text.y = element_text(size = 12, angle = 0, hjust = 0.5),
         legend.position = "right",
         legend.title = element_text(size = 15, face = "bold"),
         legend.text = element_text(size = 12)) +
