@@ -395,7 +395,7 @@ locs_climate$key = NULL
 ################################################################################
 ############################# Run MFPCA for climate data #######################
 ################################################################################
-# Create multiFunData object
+# For all scenarios together
 multiFun_climate = multiFunData(funData_temp, funData_temp_min, funData_temp_max, funData_precip)
 saveRDS(multiFun_climate, "Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/multiFun_climate.rds")
 
@@ -405,8 +405,40 @@ uniExpansions <- list(list(type = "uFPCA", npc = 5),
                       list(type = "uFPCA", npc = 5))
 
 MFPCA_climate <- MFPCA_2(multiFun_climate, M = 3, fit = TRUE, uniExpansions = uniExpansions)
+assign(paste0("MFPCA_climate"), MFPCA_climate)
+saveRDS(MFPCA_climate, paste0("Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/MFPCA_climate.rds"))
 
-saveRDS(MFPCA_climate,"Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/MFPCA_climate.rds")
+# For each scenario separately
+i = 0
+for (scen in scenarios){
+  set.seed(1)
+  multiFun_climate = multiFunData(funData_temp, funData_temp_min, funData_temp_max, funData_precip)
+  i = i+1
+  for (iClimate in 1:4){
+    multiFun_climate@.Data[[iClimate]]@X = multiFun_climate@.Data[[iClimate]]@X[bounds[i,1]:bounds[i,2],]
+    dimnames(multiFun_climate@.Data[[iClimate]]@X) = dimnames(multiFun_climate@.Data[[iClimate]]@X[bounds[i,1]:bounds[i,2]])
+  }
+  uniExpansions <- list(list(type = "uFPCA", npc = 5),
+                        list(type = "uFPCA", npc = 5),
+                        list(type = "uFPCA", npc = 5),
+                        list(type = "uFPCA", npc = 5))
+  
+  MFPCA_climate <- MFPCA_2(multiFun_climate, M = 3, fit = TRUE, uniExpansions = uniExpansions)
+  
+  # Flip the sign for control and SSP1-RCP2.6 for consistency
+  if (scen == "picontrol" | scen == "ssp126"){
+    MFPCA_climate$scores = - MFPCA_climate$scores
+    for (iClimate in 1:4){
+      MFPCA_climate$functions@.Data[[iClimate]]@X = - MFPCA_climate$functions@.Data[[iClimate]]@X
+    }
+  }
+  assign(paste0("MFPCA_climate_", scen), MFPCA_climate)
+  saveRDS(MFPCA_climate,paste0("Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/MFPCA_climate_", scen, ".rds"))
+  
+  # Save the scores
+  scores = MFPCA_climate$scores
+  write.table(scores, paste0("Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/scores_climate_", scen, ".txt"))
+}
 
 ################################ Plot the PCs ##################################
 for (iPC in 1:3){

@@ -46,6 +46,10 @@ d_eco_wide = read.table("Scripts/MA_FDA_veg/04_Model/Data/d_eco_wide.txt")
 
 # Get MFPCA results for temp (min, max, mean) and precip
 scores_climate = read.table("Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/scores_climate.txt")
+scores_climate_picontrol = read.table("Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/scores_climate_picontrol.txt")
+scores_climate_ssp126 = read.table("Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/scores_climate_ssp126.txt")
+scores_climate_ssp370 = read.table("Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/scores_climate_ssp370.txt")
+scores_climate_ssp585 = read.table("Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/scores_climate_ssp585.txt")
 
 # Get FPCA results for temp, precip and nuptake_total
 scores_temp = read.table("Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/scores_temp.txt")
@@ -335,52 +339,9 @@ plot(fitted(gam_final)[, 1], d_train$PC1,
 
 curve(generalized_logistic(x, A = params["A"], k = params["k"], x0 = params["x0"], C = params["C"]), 
       from = -10, to = 10, add = TRUE, col = "red", lwd = 3)
-
 legend(4, -2, leg.text, cex = 0.7)
-
 dev.off()
 
-# Save as png as well
-png(paste0("Scripts/Plots/Model/Evaluation/png/Parameters", run, ".png"), width = 1000, height = 500)
-leg.text = c(
-  expression(A == 12),
-  expression(k == 1 ),
-  expression(x[0] == 0 ),
-  expression(C == -6 )
-)
-par(mfrow = c(1, 2))
-
-plot(fitted(gam_final)[, 1], d_train$PC1, 
-     pch = 16,
-     xlab = "Predicted PC 1 scores",
-     ylab = "True PC 1 scores",
-     main = "Manual Parameter Setting", 
-     ylim = c(-6, 6.1))
-
-curve(generalized_logistic(x, A = 11.8, k = 0.8, x0 = 0, C = -6), 
-      from = -10, to = 10, add = TRUE, col = "red", lwd = 3)
-legend(5, -2, leg.text, cex = 0.8)
-
-# Construct the legend text using expression
-leg.text = c(
-  expression(A == 12.21),
-  expression(k == 0.72),
-  expression(x[0] == 0.30),
-  expression(C == -6.03)
-)
-
-plot(fitted(gam_final)[, 1], d_train$PC1, 
-     pch = 16,
-     xlab = "Predicted PC 1 scores",
-     ylab = "True PC 1 scores",
-     main = "Estimated Parameter Setting", 
-     ylim = c(-6, 6.1))
-
-curve(generalized_logistic(x,  A = params["A"], k = params["k"], x0 = params["x0"], C = params["C"]), 
-      from = -10, to = 10, add = TRUE, col = "red", lwd = 3)
-
-legend(5, -2, leg.text, cex = 0.8)
-dev.off()
 
 ### Use this data transformation on the model:
 d_train_trafo = d_train %>%
@@ -388,12 +349,14 @@ d_train_trafo = d_train %>%
 
 gam_trafo = gam(list(PC1_trafo ~ s(Lon,Lat) +
                                    sand_fraction + silt_fraction + bulkdensity_soil + ph_soil + soilcarbon +
-                                   Scenario + time_since_dist +
+                                   Scenario + Scenario:PC1_climate + 
+                                   time_since_dist +
                                    initial_recruitment_BNE +  initial_recruitment_IBS + initial_recruitment_otherC + initial_recruitment_TeBS + initial_recruitment_Tundra +
                                    PC1_climate, 
                       PC2 ~ s(Lon,Lat) +
                                    sand_fraction + silt_fraction + bulkdensity_soil + ph_soil + soilcarbon +
-                                   Scenario + time_since_dist +
+                                   Scenario + Scenario:PC1_climate +
+                                   time_since_dist +
                                    initial_recruitment_BNE +  initial_recruitment_IBS + initial_recruitment_otherC + initial_recruitment_TeBS + initial_recruitment_Tundra +
                                    PC1_climate), 
                   data = d_train_trafo,
@@ -613,11 +576,11 @@ ggsave(paste0("Scripts/Plots/Model/Evaluation/png/Correlations.png"), width = 15
 
 ################################## Plot T values #############################
 summary_gam_trafo = summary(gam_trafo)
-t_values_PC1 = data.frame(var = attr(summary_gam_trafo$p.t, "names")[1:16], p.t = summary_gam_trafo$p.t[1:16])
+t_values_PC1 = data.frame(var = attr(summary_gam_trafo$p.t, "names")[1:19], p.t = summary_gam_trafo$p.t[1:19])
 t_values_PC1$var <- factor(t_values_PC1$var, levels = t_values_PC1$var)
 
 ## PC 1
-ggplot(t_values_PC1[c(1:16),], aes(x = p.t, y = var)) +
+ggplot(t_values_PC1, aes(x = p.t, y = var)) +
   geom_bar(stat = "identity", aes(fill = p.t > 0)) +
   scale_fill_manual(values = c("TRUE" = "darkred", "FALSE" = "cornflowerblue")) +
   theme_bw() + theme(legend.position = "none",
@@ -631,10 +594,10 @@ ggsave(paste0("Scripts/Plots/Model/Evaluation/png/t-values_PC1.png"), width = 10
 
 ## PC 2
 
-t_values_PC2 = data.frame(var = attr(summary_gam_trafo$p.t, "names")[1:16], p.t = summary_gam_trafo$p.t[17:32])
+t_values_PC2 = data.frame(var = attr(summary_gam_trafo$p.t, "names")[1:19], p.t = summary_gam_trafo$p.t[20:38])
 t_values_PC2$var <- factor(t_values_PC2$var, levels = t_values_PC2$var)
 
-ggplot(t_values_PC2[c(1:16),], aes(x = p.t, y = var)) +
+ggplot(t_values_PC2, aes(x = p.t, y = var)) +
   geom_bar(stat = "identity", aes(fill = p.t > 0)) +
   scale_fill_manual(values = c("TRUE" = "darkred", "FALSE" = "cornflowerblue")) +
   theme_bw() + theme(legend.position = "none",

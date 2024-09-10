@@ -38,13 +38,9 @@ set.seed(1)
 ## Choose parameters:
 start_year = 2015
 end_year = 2040
-pid = 1           # Choose pid (int) or 'all'
-k = 4             # Number of clusters for kmeans algorithm
-M = 10            # Number of PCs
-doCreate = FALSE
-doPrepare = FALSE
-whichScen = "all"   # Choose from "Control", "SSP1-RCP2.6", "SSP3-RCP7.0", "SSP5-RCP8.5" and "all"
-covScen = FALSE       # Always equal to FALSE if whichScen != "all"
+doCreate = FALSE  # TRUE if response variables for each PID should be created
+doPrepare = FALSE # TRUE if predictors for each PID should be created
+covScen = TRUE   # TRUE if covariate 'scenario' should be included in the model
 row_nr = 0
 
 ######################### Create funData and run MFPCA ########################
@@ -96,12 +92,6 @@ if (doCreate){
     saveRDS(MFPCA_all, paste0("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/AllPatches/AllPatches/MFPCA_PID", pid, ".rds"))
   }
 }
-
-
-############################### Examine PCs ####################################
-
-# MFPCA_0 = readRDS("Scripts/MA_FDA_veg/03_MFPCA/FdObjects/AllPatches/MFPCA_PID24.rds")
-# plot(MFPCA_0, plotPC = 1:2, combined = TRUE)
 
 ########################### Prepare data for modelling #########################
 if (doPrepare){
@@ -241,6 +231,45 @@ if (doPrepare){
     scores_climate = scores_climate[index,]
     locs_climate$key = NULL
     
+    ### Run climate MFPCAs per scenario
+    # For each scenario separately
+    counts = table(locs_disturbed_pid$scenario)
+    starts <- c(1, cumsum(counts) + 1)  
+    ends <- cumsum(counts)  
+    # Combine starts and ends into a matrix
+    bounds <- cbind(starts[-length(starts)], ends)    
+    
+    i = 0
+    for (scen in scenarios){
+      set.seed(1)
+      multiFun_climate = multiFunData(funData_temp, funData_temp_min, funData_temp_max, funData_precip)
+      i = i+1
+      for (iClimate in 1:4){
+        multiFun_climate@.Data[[iClimate]]@X = multiFun_climate@.Data[[iClimate]]@X[bounds[i,1]:bounds[i,2],]
+        dimnames(multiFun_climate@.Data[[iClimate]]@X) = dimnames(multiFun_climate@.Data[[iClimate]]@X[bounds[i,1]:bounds[i,2]])
+      }
+      uniExpansions <- list(list(type = "uFPCA", npc = 5),
+                            list(type = "uFPCA", npc = 5),
+                            list(type = "uFPCA", npc = 5),
+                            list(type = "uFPCA", npc = 5))
+      
+      MFPCA_climate <- MFPCA_2(multiFun_climate, M = 3, fit = TRUE, uniExpansions = uniExpansions)
+      
+      # Flip the sign if roles of plus and minus are reversed
+      if (mean(MFPCA_climate$functions@.Data[[1]]@X[1,]) < 0){
+        MFPCA_climate$scores = - MFPCA_climate$scores
+        for (iClimate in 1:4){
+          MFPCA_climate$functions@.Data[[iClimate]]@X = - MFPCA_climate$functions@.Data[[iClimate]]@X
+        }
+      }
+      saveRDS(MFPCA_climate, paste0("Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/AllPatches/MFPCA_climate_", scen, "_PID", pid, ".rds"))
+      plot.MFPCAfit_2(MFPCA_climate, plotPCs = 1, combined = TRUE, main = paste0(" PID ", pid, " - Scenario ", scen), cex.lab = 1.5, cex.main = 2)
+      
+      # Save the scores
+      scores = MFPCA_climate$scores
+      write.table(scores, paste0("Scripts/MA_FDA_veg/04_Model/(M)FPCA_climate/AllPatches/scores_climate_", scen, "_PID", pid, ".txt"))
+    }
+    
     ### Get full data set
     write.table(d_soil, paste0("Scripts/MA_FDA_veg/04_Model/Data/AllPatches/d_soil_PID", pid, ".txt"))
     write.table(d_eco_wide, paste0("Scripts/MA_FDA_veg/04_Model/Data/AllPatches/d_eco_wide_PID", pid, ".txt"))
@@ -251,22 +280,15 @@ if (doPrepare){
 
 ############################### Models for each PID ############################
 
-# Define the generalized logistic function
-generalized_logistic <- function(x, A, k, x0, C) {
-  A / (1 + exp(-k * (x - x0))) + C
-}
+# Define the generalized logistic function and its inverse
+generalized_logistic <- function(x, A, k, x0, C)  A / (1 + exp(-k * (x - x0))) + C
+inverse_generalized_logistic <- function(y, A, k, x0, C)  x0 - (1 / k) * log((A / (y - C)) - 1)
 
-# Inverse of the generalized logistic function
-inverse_generalized_logistic <- function(y, A, k, x0, C) {
-  x0 - (1 / k) * log((A / (y - C)) - 1)
-}
-
-# Create df for storing the coefficients
-if (whichScen != "all" || !covScen) row_nr = 3
+# Create matrix for storing the coefficients
+if (!covScen) row_nr = 3
 df_beta = as.data.frame(matrix(0, nrow = (16-row_nr)*2, ncol = 25))
-colnames(df_beta) = 0:24
 
-for (pid in c(0:24)){#c(0:6, 9, 11:13, 15, 18:21, 23:24)){
+for (pid in c(0:24)){
   print(paste0("Start with PID ", pid))
   
   # Get target variable: MFPCA scores
@@ -288,22 +310,17 @@ for (pid in c(0:24)){#c(0:6, 9, 11:13, 15, 18:21, 23:24)){
   
   colnames(combined_d)[c(1:2,28)] = c("PC1", "PC2", "PC1_climate")
   
-  if(whichScen != "all") {
-    combined_d = combined_d[combined_d$Scenario == whichScen,]
-    covScen = FALSE
-  }
   ################################### Model ######################################
-  
-  # Produce train-/test- split
+
   set.seed(1)
   index = sample.int(nrow(combined_d), size = ceiling(0.8 * nrow(combined_d)))
   d_train = combined_d[index,]
   d_test = combined_d[-index,]
-                    
+  
   ### Estimate the parameters of the generalized logistic function on the whole data set
   
   params = c("A" = 12.21, "k" = 0.72, "x0" = 0.3, "C" = -6.03)
-
+  
   d_train_trafo = d_train %>%
     mutate(PC1_trafo = inverse_generalized_logistic(PC1, A = params["A"], k = params["k"], x0 = params["x0"], C = params["C"]))
   
@@ -329,10 +346,14 @@ for (pid in c(0:24)){#c(0:6, 9, 11:13, 15, 18:21, 23:24)){
   gam_trafo <- gam(list(formula_PC1, formula_PC2), 
                    data = d_train_trafo, 
                    family = mvn(d = 2))
- 
+  
   df_beta[,pid+1] = gam_trafo$coefficients[c(1:(16-row_nr),(46-row_nr):(61 - 2*row_nr))]
 }
+
 rownames(df_beta) = names(gam_trafo$coefficients[c(1:(16-row_nr),(46-row_nr):(61 - 2*row_nr))])
+
+
+################################ Plot t-values #################################
 
 ## Calculate CIs
 calculate_ci <- function(x) {
@@ -349,12 +370,14 @@ calculate_ci <- function(x) {
 ci_data <- as.data.frame(t(apply(df_beta, 1, calculate_ci)))
 
 # Create a confidence interval plot for both PC scores
-ci_data$Effects <- ifelse((ci_data$lower > 0 & ci_data$upper > 0), "Positive",
-                               ifelse((ci_data$lower < 0 & ci_data$upper < 0), "Negative","Non-significant"))
-ci_data$Effects <- factor(ci_data$Effects, levels = c("Positive", "Negative", "Non-significant"))
-ci_data$parameter <- factor(rownames(df_beta), levels = rownames(df_beta))
+ci_data = ci_data %>%
+  mutate(Effects = if_else(lower > 0 & upper > 0, "Positive",
+                           if_else((lower < 0 & upper < 0), "Negative","Non-significant")),
+         Effects = factor(Effects, levels = c("Positive", "Negative", "Non-significant")),
+         parameter = factor(rownames(df_beta), levels = rownames(df_beta)),
+         t = apply(df_beta, 1, function(x)  sqrt(length(x)) * mean(as.numeric(x)) / sd(as.numeric(x))))
 
-g = ggplot(ci_data[c(1:(16-row_nr)),], aes(y = parameter, x = mean)) +
+ggplot(ci_data[c(1:(16-row_nr)),], aes(y = parameter, x = mean)) +
   geom_point(aes(color = Effects), size = 3) +
   geom_errorbarh(aes(xmin = lower, xmax = upper, color = Effects), height = 0.2) +  # Horizontal error bars
   scale_color_manual(values = c("Positive" = "darkred", "Negative" = "cornflowerblue", "Non-significant" = "grey")) +  
@@ -365,16 +388,13 @@ g = ggplot(ci_data[c(1:(16-row_nr)),], aes(y = parameter, x = mean)) +
         plot.title = element_text(size = 20, face = "bold", hjust = 0.5)) +
   geom_vline(xintercept = 0, linetype = "dotted", color = "black")
 
-if (!covScen) g = g + ggtitle(paste0("95% Confidence intervals - PC 1 - " , whichScen))
-g
-
-ggsave(paste0("Scripts/Plots/Model/AllPatches/pdf/CIs_patches_PC1_", whichScen, covScen, ".pdf"), g, width = 7, height = 4.3)
-ggsave(paste0("Scripts/Plots/Model/AllPatches/png/CIs_patches_PC1_", whichScen, covScen, ".png"), g, width = 7, height = 4.3)
+ggsave(paste0("Scripts/Plots/Model/AllPatches/pdf/CIs_patches_PC1_", covScen, ".pdf"), width = 7, height = 4.3)
+ggsave(paste0("Scripts/Plots/Model/AllPatches/png/CIs_patches_PC1_", covScen, ".png"), width = 7, height = 4.3)
 
 ci_data_PC2 = ci_data[(17-row_nr):(32-2*row_nr),]
 ci_data_PC2$parameter <- factor(rownames(df_beta)[1:(16-row_nr)], levels = rownames(df_beta)[1:(16-row_nr)])
 
-g = ggplot(ci_data_PC2, aes(y = parameter, x = mean)) +
+ggplot(ci_data_PC2, aes(y = parameter, x = mean)) +
   geom_point(aes(color = Effects), size = 3) +
   geom_errorbarh(aes(xmin = lower, xmax = upper, color = Effects), height = 0.2) +  # Horizontal error bars
   scale_color_manual(values = c("Positive" = "darkred", "Negative" = "cornflowerblue", "Non-significant" = "grey")) +  
@@ -385,11 +405,8 @@ g = ggplot(ci_data_PC2, aes(y = parameter, x = mean)) +
         plot.title = element_text(size = 20, face = "bold", hjust = 0.5)) +
   geom_vline(xintercept = 0, linetype = "dotted", color = "black")
 
-if (!covScen) g = g + ggtitle(paste0("95% Confidence intervals - PC 2 - " , whichScen))
-g
-
-ggsave(paste0("Scripts/Plots/Model/AllPatches/pdf/CIs_patches_PC2_", whichScen, covScen,  ".pdf"), g, width = 7, height = 4.3)
-ggsave(paste0("Scripts/Plots/Model/AllPatches/png/CIs_patches_PC2_", whichScen, covScen,  ".png"), g, width = 7, height = 4.3)
+ggsave(paste0("Scripts/Plots/Model/AllPatches/pdf/CIs_patches_PC2_", covScen,  ".pdf"), width = 7, height = 4.3)
+ggsave(paste0("Scripts/Plots/Model/AllPatches/png/CIs_patches_PC2_", covScen,  ".png"), width = 7, height = 4.3)
 
 ### Calculate estimated t-values from df_beta
 ci_data$t = apply(df_beta, 1, function(x)  sqrt(length(x)) * mean(as.numeric(x)) / sd(as.numeric(x)))
@@ -404,11 +421,10 @@ g = ggplot(ci_data[c(1:(16-row_nr)),], aes(x = t, y = parameter)) +
   ggtitle("t-Values of PC 1 using all patches") +
   geom_vline(xintercept = c(-1.96, 1.96), linetype = "dashed", color = "black")
 
-if (!covScen) g = g + ggtitle(paste0("t-Values of PC 1 - ", whichScen)) + xlim(-28,75)
-g
+if (!covScen) g = g + xlim(-28,75) + ggtitle("t-Values of PC 1 - all")
 
-ggsave(paste0("Scripts/Plots/Model/AllPatches/pdf/t-values_patches_PC1_", whichScen, covScen,  ".pdf"), g, width = 7, height = 4.3)
-ggsave(paste0("Scripts/Plots/Model/AllPatches/png/t-values_patches_PC1_", whichScen, covScen,  ".png"), g, width = 7, height = 4.3)
+ggsave(paste0("Scripts/Plots/Model/AllPatches/pdf/t-values_patches_PC1_", covScen, ".pdf"), g, width = 7, height = 4.3)
+ggsave(paste0("Scripts/Plots/Model/AllPatches/png/t-values_patches_PC1_", covScen, ".png"), g, width = 7, height = 4.3)
 
 ci_data_PC2 = ci_data[(17-row_nr):(32-2*row_nr),]
 ci_data_PC2$parameter <- factor(rownames(df_beta)[1:(16-row_nr)], levels = rownames(df_beta)[1:(16-row_nr)])
@@ -423,9 +439,8 @@ g = ggplot(ci_data_PC2, aes(x = t, y = parameter)) +
   ggtitle("t-Values of PC 2 using all patches") +
   geom_vline(xintercept = c(-1.96, 1.96), linetype = "dashed", color = "black") 
 
-if (!covScen) g = g + ggtitle(paste0("t-Values of PC 2 - ", whichScen)) + xlim(-12.5,12.5)
-g
+if (!covScen) g = g + xlim(-16,15) + ggtitle("t-Values of PC 2 - all")
 
-ggsave(paste0("Scripts/Plots/Model/AllPatches/pdf/t-values_patches_PC2_", whichScen, covScen, ".pdf"), g, width = 7, height = 4.3)
-ggsave(paste0("Scripts/Plots/Model/AllPatches/png/t-values_patches_PC2_", whichScen, covScen, ".png"), g, width = 7, height = 4.3)
+ggsave(paste0("Scripts/Plots/Model/AllPatches/pdf/t-values_patches_PC2_", covScen, ".pdf"), g, width = 7, height = 4.3)
+ggsave(paste0("Scripts/Plots/Model/AllPatches/png/t-values_patches_PC2_", covScen, ".png"), g, width = 7, height = 4.3)
 

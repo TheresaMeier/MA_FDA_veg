@@ -277,6 +277,8 @@ for(pft in pfts){
 
 ######################### Plot Cluster Assignments #############################
 ## Import fd objects
+cl_assignment = table(plot_data_all$Cluster, plot_data_all$scenario)
+
 for (scen in scenarios){
   for (pft in pfts){
     fit.scen_pft = readRDS(paste0("Scripts/MA_FDA_veg/02_FPCA/FdObjects/Wfdobj_", scen, "_", pft, ".rds"))
@@ -310,19 +312,19 @@ for (scen in scenarios){
     # Save as pdf
     pdf(paste0("Scripts/Plots/MFPCA/Clusters/pdf/Cluster_", k,"-means_",scen, "_",pft, "_",pid, ".pdf"),width = 8, height = 8)
     par(mfrow = c(2,2))
-    plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey", main = paste("Cluster 1 -", sum(cluster1), "of", sum(scores[,M+1] == 1), "grid cells"), lty = 1, xlim = c(0,100), cex.main = 1.7, cex.lab = 1.5)
+    plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey", main = paste("Cluster 1 -", cl_assignment[1,long_names_scenarios(scen)], "of", sum(scores[,M+1] == 1), "grid cells"), lty = 1, xlim = c(0,100), cex.main = 1.7, cex.lab = 1.5)
     lines(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster1_", scen,"_", pft))], col = "#F8766D", lwd = 3, lty = 1)
     lines(mean.fd(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster1_", scen,"_", pft))]), col = "darkred", lwd = 4, lty = 1)
     
-    plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey", main = paste("Cluster 2 -", sum(cluster2), "of", sum(scores[,M+1] == 2), "grid cells"), lty = 1, xlim = c(0,100), cex.main = 1.7, cex.lab = 1.5)
+    plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey", main = paste("Cluster 2 -", cl_assignment[2,long_names_scenarios(scen)], "of", sum(scores[,M+1] == 2), "grid cells"), lty = 1, xlim = c(0,100), cex.main = 1.7, cex.lab = 1.5)
     lines(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster2_", scen,"_", pft))], col = "#7CAE00", lwd = 3, lty = 1)
     lines(mean.fd(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster2_", scen,"_", pft))]), col = "darkgreen", lwd = 4, lty = 1)
     
-    plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey", main = paste("Cluster 3 -", sum(cluster3), "of", sum(scores[,M+1] == 3), "grid cells"), lty = 1, xlim = c(0,100), cex.main = 1.7, cex.lab = 1.5)
+    plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey", main = paste("Cluster 3 -", cl_assignment[3,long_names_scenarios(scen)], "of", sum(scores[,M+1] == 3), "grid cells"), lty = 1, xlim = c(0,100), cex.main = 1.7, cex.lab = 1.5)
     lines(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster3_", scen,"_", pft))], col = "#00BFC4", lwd = 3, lty = 1)
     lines(mean.fd(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster3_", scen,"_", pft))]), col = "darkblue", lwd = 4, lty = 1)
     
-    plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey",  main = paste("Cluster 4 -", sum(cluster4), "of", sum(scores[,M+1] == 4), "grid cells"), lty = 1, xlim = c(0,100), cex.main = 1.7, cex.lab = 1.5)
+    plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey",  main = paste("Cluster 4 -", cl_assignment[4,long_names_scenarios(scen)], "of", sum(scores[,M+1] == 4), "grid cells"), lty = 1, xlim = c(0,100), cex.main = 1.7, cex.lab = 1.5)
     lines(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster4_", scen,"_", pft))], col = "#C77CFF", lwd = 3, lty = 1)
     lines(mean.fd(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster4_", scen,"_", pft))]), col = "purple4", lwd = 4, lty = 1)
     
@@ -332,19 +334,19 @@ for (scen in scenarios){
     # Save as png
     png(paste0("Scripts/Plots/MFPCA/Clusters/png/Cluster_", k,"-means_",scen, "_",pft, "_",pid, ".png"),width = 700, height = 700)
     par(mfrow = c(2,2))
-    plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey", main = paste("Cluster 1 -", sum(cluster1), "of", sum(scores[,M+1] == 1), "grid cells"), lty = 1, xlim = c(0,100), cex.main = 1.7, cex.lab = 1.5)
+    plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey", main = paste("Cluster 1 -", cl_assignment[1,long_names_scenarios(scen)], "of", sum(scores[,M+1] == 1), "grid cells"), lty = 1, xlim = c(0,100), cex.main = 1.7, cex.lab = 1.5)
     lines(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster1_", scen,"_", pft))], col = "#F8766D", lwd = 3, lty = 1)
     lines(mean.fd(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster1_", scen,"_", pft))]), col = "darkred", lwd = 4, lty = 1)
     
-    plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey", main = paste("Cluster 2 -", sum(cluster2), "of", sum(scores[,M+1] == 2), "grid cells"), lty = 1, xlim = c(0,100), cex.main = 1.7, cex.lab = 1.5)
+    plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey", main = paste("Cluster 2 -", cl_assignment[2,long_names_scenarios(scen)], "of", sum(scores[,M+1] == 2), "grid cells"), lty = 1, xlim = c(0,100), cex.main = 1.7, cex.lab = 1.5)
     lines(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster2_", scen,"_", pft))], col = "#7CAE00", lwd = 3, lty = 1)
     lines(mean.fd(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster2_", scen,"_", pft))]), col = "darkgreen", lwd = 4, lty = 1)
     
-    plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey", main = paste("Cluster 3 -", sum(cluster3), "of", sum(scores[,M+1] == 3), "grid cells"), lty = 1, xlim = c(0,100), cex.main = 1.7, cex.lab = 1.5)
+    plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey", main = paste("Cluster 3 -", cl_assignment[3,long_names_scenarios(scen)], "of", sum(scores[,M+1] == 3), "grid cells"), lty = 1, xlim = c(0,100), cex.main = 1.7, cex.lab = 1.5)
     lines(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster3_", scen,"_", pft))], col = "#00BFC4", lwd = 3, lty = 1)
     lines(mean.fd(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster3_", scen,"_", pft))]), col = "darkblue", lwd = 4, lty = 1)
     
-    plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey",  main = paste("Cluster 4 -", sum(cluster4), "of", sum(scores[,M+1] == 4), "grid cells"), lty = 1, xlim = c(0,100), cex.main = 1.7, cex.lab = 1.5)
+    plot(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj, col = "grey",  main = paste("Cluster 4 -", cl_assignment[4,long_names_scenarios(scen)], "of", sum(scores[,M+1] == 4), "grid cells"), lty = 1, xlim = c(0,100), cex.main = 1.7, cex.lab = 1.5)
     lines(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster4_", scen,"_", pft))], col = "#C77CFF", lwd = 3, lty = 1)
     lines(mean.fd(get(paste0("fit.", scen, "_", pft, "_exp"))$Wfdobj[get(paste0("cluster4_", scen,"_", pft))]), col = "purple4", lwd = 4, lty = 1)
     
