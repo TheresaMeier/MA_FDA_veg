@@ -199,8 +199,8 @@ for (i in 1:4){
     geom_vline(xintercept = c(-1.96, 1.96), linetype = "dashed", color = "black") +
     ggtitle(paste0("t-Values of PC 2 - ", long_names_scenarios(scenarios[i]))) + xlim(-16,15)
   
-  ggsave(paste0("Scripts/Plots/Model/SeparateModels/pdf/t-values_patches_PC2_", scenarios[i],  ".pdf"), g_PC1_scen, width = 7, height = 4.3)
-  ggsave(paste0("Scripts/Plots/Model/SeparateModels/png/t-values_patches_PC2_", scenarios[i],  ".png"), g_PC1_scen, width = 7, height = 4.3)
+  ggsave(paste0("Scripts/Plots/Model/SeparateModels/pdf/t-values_patches_PC2_", scenarios[i],  ".pdf"), g_PC2_scen, width = 7, height = 4.3)
+  ggsave(paste0("Scripts/Plots/Model/SeparateModels/png/t-values_patches_PC2_", scenarios[i],  ".png"), g_PC2_scen, width = 7, height = 4.3)
   
   assign(paste0("g_PC2_", scenarios[i]), g_PC2_scen)
 }
