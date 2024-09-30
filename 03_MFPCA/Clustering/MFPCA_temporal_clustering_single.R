@@ -191,10 +191,10 @@ adjusted_rand_for_consecutive_columns <- function(df) {
   return(results)
 }
 
-pastel_colors <- c("Control" = "skyblue2",  # Light blue
-                   "SSP1-RCP2.6" = "#77DD77",    # Light green
-                   "SSP3-RCP7.0" = "#FFB347",    # Light orange
-                   "SSP5-RCP8.5" = "plum2",    # Light purple
+pastel_colors <- c("Control" = "darkorange",  # Light blue
+                   "SSP1-RCP2.6" = "green",    # Light green
+                   "SSP3-RCP7.0" = "turquoise",    # Light orange
+                   "SSP5-RCP8.5" = "magenta3",    # Light purple
                    "Combined" = "grey30")  # Light red
 
 ari_values <- data.frame(
